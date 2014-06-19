@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'south',
 
     'warrant',  # ордера
     'currency', # валюта
@@ -68,6 +69,15 @@ DATABASES = {
 }
 
 DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': "bitextrade",                      # Or path to database file if using sqlite3.
+        'USER': 'bitextrade',                      # Not used with sqlite3.
+        'PASSWORD': 'GhotEgfi',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'OPTIONS': { 'init_command': 'SET storage_engine=INNODB;' }
+    },
     'innodb': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': "bitextrade",                      # Or path to database file if using sqlite3.
