@@ -4,12 +4,11 @@ from common.numeric import normalize
 from datetime import datetime
 from django.db.models import Sum, Count, F, Q
 from django.utils.html import format_html
-from decimal import Decimal as D
+from decimal import Decimal as D, _Zero
+from django.core.cache import cache
+from common.lib import strmd5sum
 
 # Create your models here.
-
-ZERO=D(0)
-
 
 class Orders(models.Model):
     created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
@@ -22,8 +21,8 @@ class Orders(models.Model):
     cancel = models.BooleanField(u"отменен", default=False)
     completed = models.BooleanField(u"Завершен", default=False)
     def __unicode__(self):
+        return u"%(commission) d".format(*self.__delattr__)
         return u"%s %s %s %s %s %s" % (self.pk, self.pair, self.amount, self.amo_sum, self.rate, self.ret_amount)
-
     @property
     def amo_sum(self):
         return self._amo_sum
@@ -51,7 +50,11 @@ class Orders(models.Model):
         abstract = True
 
 class Buy(Orders):
-    sale = models.ForeignKey("warrant.Sale", verbose_name="Продажа", blank=True, null=True, related_name="sale_sale")
+    sale = models.ForeignKey("warrant.Sale", verbose_name=u"Продажа", blank=True, null=True, related_name="sale_sale")
+    @property
+    def _md5key_subtotal(self):
+        s = "Buy" + str(self.pk) + str(self.pair)
+        return strmd5sum(s)
     def save(self, *args, **kwargs):
         if not self.commission: self.commission = self.pair.commission
         super(Buy, self).save(*args, **kwargs)
@@ -63,15 +66,15 @@ class Buy(Orders):
         if self.buy_buy:
             s=[]
             for l in self.buy_buy.all():
-                s.append("<a style='white-space:pre;' href=\"%s\">%s</a>" % (l.get_absolute_url_admin_change(), l))
-            return ",<br>".join(s)
+                s.append(u"<a style='white-space:pre;' href=\"%s\">%s</a>" % (l.get_absolute_url_admin_change(), l))
+            return u",<br>".join(s)
     _pir.allow_tags = True
     _pir.short_description="пир"
     @property
     def _commission_debit(self):
         if self._completed:
             return self.amount * self.commission / D(100)
-        return self._amo_sum * self.commission / D(100) or D(0)
+        return self._amo_sum * self.commission / D(100) or _Zero
     @property
     def _total(self):
         if self._completed:
@@ -88,40 +91,23 @@ class Buy(Orders):
     @property
     def _amo_sum(self):
         return self._subtotal
-        a=D(0)
-        """
-        if not self.sale:
-            for c in self.buy_buy.all():
-                print "\nsssc r:", c.id, c._ret_amount, "e\n"
-                a += c._ret_amount
-        if not a:
-            #a=self.buy_buy.aggregate(amount_sum=Sum('amount')).get('amount_sum') or D(0)
-        """
-        if not self.sale:
-            for c in self.buy_buy.all():
-                if c.buy:
-                    a += c.amount
-                else:
-                    a += c._ret_amount
-        else:
-            a = self.amount
-        return a
     # buy
     @property
     def _subtotal(self):
-        a=self.buy_buy.exclude(sale_sale__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or D(0)
-        for c in self.buy_buy.filter(sale_sale__gte=0).distinct():
-            a += c.amount - c._subtotal
-        if bool(self.sale) and not a:
-            a += self.amount
-        if bool(self.sale) and a:
-            pass
-            #a = self.amount
+        md5key = self._md5key_subtotal
+        a = cache.get(md5key)
+        if a is None:
+            a=self.buy_buy.exclude(sale_sale__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or _Zero
+            for c in self.buy_buy.filter(sale_sale__gte=0).distinct():
+                a += c.amount - c._subtotal
+            if bool(self.sale) and not a:
+                a += self.amount
+            cache.set(md5key, a)
         return a
     @property
     def _ret_amount(self):
         if bool(self.sale):
-            return D(0)
+            return _Zero
         return self.amount - self._subtotal
     @property
     def _completed(self):
@@ -139,48 +125,23 @@ class Buy(Orders):
         _amo_buy = self._ret_amount
         for r in s:
             _amo_sale = r._ret_amount
-            #print "_amo_sale, _amo_buy: ", _amo_sale, _amo_buy
             if _amo_sale == _amo_buy:
                 self.buy_buy.add(r)
                 continue
-                #return True
             if _amo_sale <= _amo_buy:
                 self.buy_buy.add(r)
                 continue
-                #return True
             if _amo_sale >= _amo_buy:
                 r._exchange()
                 continue
-                #return True
             return True
 
-
-        """
-        r = s.filter(amount = self._ret_amount)
-        if r.exists():
-            if r[0]._ret_amount == self._ret_amount:
-                self.buy_buy.add(r[0])
-                return True
-        r = s.filter(amount__gt=self._ret_amount)
-        if r.exists():
-                for e in r:
-                    e._exchange()
-                    break
-        r = s.filter(amount__lt=self._ret_amount)
-        if r.exists():
-            _amo_max = self._ret_amount
-            c=0
-            for e in r:
-                c += e._ret_amount
-                if c <= _amo_max and c > 0:
-                    self.buy_buy.add(e)
-                else:
-                    e._exchange()
-                    break
-        """
-
 class Sale(Orders):
-    buy = models.ForeignKey("warrant.Buy", verbose_name="Покупка", blank=True, null=True, related_name="buy_buy")
+    buy = models.ForeignKey("warrant.Buy", verbose_name=u"Покупка", blank=True, null=True, related_name="buy_buy")
+    @property
+    def _md5key_subtotal(self):
+        s = "Sale" + str(self.pk) + str(self.pair)
+        return strmd5sum(s)
     def save(self, *args, **kwargs):
         if not self.commission: self.commission = self.pair.commission
         super(Sale, self).save(*args, **kwargs)
@@ -192,10 +153,10 @@ class Sale(Orders):
         if self.sale_sale:
             s=[]
             for l in self.sale_sale.all():
-                s.append("<a style='white-space:pre;' href=\"%s\">%s</a>" % (l.get_absolute_url_admin_change(), l))
+                s.append(u"<a style='white-space:pre;' href=\"%s\">%s</a>" % (l.get_absolute_url_admin_change(), l))
             return format_html(",<br>".join(s))
     _pir.allow_tags = True
-    _pir.short_description="пир"
+    _pir.short_description=u"пир"
     @property
     def _commission_debit(self):
         return self._total * self.commission / D(100)
@@ -215,39 +176,23 @@ class Sale(Orders):
     @property
     def _amo_sum(self):
         return self._subtotal
-        a=D(0)
-        """
-        if not self.buy:
-            for c in self.sale_sale.all():
-                a += c._ret_amount
-        if not a:
-            #a=self.sale_sale.aggregate(amount_sum=Sum('amount')).get('amount_sum') or D(0)
-        """
-        if not self.buy:
-            for c in self.sale_sale.all():
-                if c.sale:
-                    a += c.amount
-                else:
-                    a += c._ret_amount
-        else:
-            a = self.amount
-        return a
     # sale
     @property
     def _subtotal(self):
-        a=self.sale_sale.exclude(buy_buy__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or D(0)
-        for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
-            a += c.amount - c._subtotal
-        if bool(self.buy) and not a:
-            a += self.amount
-        if bool(self.buy) and a:
-            pass
-            #a = self.amount
+        md5key = self._md5key_subtotal
+        a = cache.get(md5key)
+        if a is None:
+            a=self.sale_sale.exclude(buy_buy__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or _Zero
+            for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
+                a += c.amount - c._subtotal
+            if bool(self.buy) and not a:
+                a += self.amount
+            cache.set(md5key, a)
         return a
     @property
     def _ret_amount(self):
         if bool(self.buy):
-            return D(0)
+            return _Zero
         return self.amount - self._subtotal
     @property
     def _completed(self):
@@ -265,54 +210,13 @@ class Sale(Orders):
         _amo_sale = self._ret_amount
         for r in s:
             _amo_buy = r._ret_amount
-            print "_amo_buy, _amo_sale: ", _amo_buy, _amo_sale
             if _amo_buy == _amo_sale:
                 self.sale_sale.add(r)
-                #return True
                 continue
             if _amo_buy <= _amo_sale:
                 self.sale_sale.add(r)
                 continue
-                #return True
             if _amo_buy >= _amo_sale:
                 r._exchange()
                 continue
-                #return True
             return True
-
-        """
-
-
-        r = s.filter(amount = self._ret_amount)
-        if r.exists():
-            if self._ret_amount == r[0]._ret_amount:
-                self.sale_sale.add(r[0])
-                return True
-        r = s.filter(amount__lt=self._ret_amount)
-        if r.exists():
-                for e in r:
-                    if e._ret_amount <= self._ret_amount:
-                        e.sale=self
-                        e.save()
-                    return True
-        r = s.filter(amount__gt=self._ret_amount)
-        if r.exists():
-            _amo_max = self._ret_amount
-            c=0
-            for e in r:
-                c += e._ret_amount
-                if c <= _amo_max and c > 0:
-                    self.sale_sale.add(e)
-                else:
-                    e._exchange()
-                    return True
-        """
-
-#class TransactionAbstract(models.Model):
-#class History(TransactionAbstract):
-#    pass
-
-#class Purchase(TransactionAbstract):
-#    pass
-#class Sale(TransactionAbstract):
-#    pass

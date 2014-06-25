@@ -90,6 +90,16 @@ DATABASES = {
     }
 }
 
+USE_CACHE = True
+TIMEOUT = 3600
+if not DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(BASE_DIR, "cache/"),
+        }
+    }
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
