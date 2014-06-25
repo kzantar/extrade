@@ -21,7 +21,6 @@ class Orders(models.Model):
     cancel = models.BooleanField(u"отменен", default=False)
     completed = models.BooleanField(u"Завершен", default=False)
     def __unicode__(self):
-        return u"%(commission) d".format(*self.__delattr__)
         return u"%s %s %s %s %s %s" % (self.pk, self.pair, self.amount, self.amo_sum, self.rate, self.ret_amount)
     @property
     def amo_sum(self):
