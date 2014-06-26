@@ -90,7 +90,7 @@ DATABASES = {
     }
 }
 
-USE_CACHE = True
+USE_CACHE = not DEBUG
 TIMEOUT = 3600
 if not DEBUG:
     CACHES = {

@@ -1,25 +1,17 @@
 #-*- coding:utf-8 -*-
 from django.db import models
-from common.numeric import normalize
+from common.numeric import normalized
 from datetime import datetime
 from django.db.models import Sum, Count, F, Q
 from django.utils.html import format_html
 from decimal import Decimal as D, _Zero
 from django.core.cache import cache
 from common.lib import strmd5sum
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator, MinValueValidator
 
 # Create your models here.
-
-class Orders(models.Model):
-    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
-    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
-    #user = models.ForeignKey('users.Profile', related_name="%(app_label)s_%(class)s_related", editable=False, default=1)
-    commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00)
-    pair = models.ForeignKey("currency.TypePair", related_name="%(app_label)s_%(class)s_related")
-    amount = models.DecimalField(u"Количество", max_digits=14, decimal_places=8)
-    rate = models.DecimalField(u"Стоимость", max_digits=14, decimal_places=8)
-    cancel = models.BooleanField(u"отменен", default=False)
-    completed = models.BooleanField(u"Завершен", default=False)
+class Prop:
     def __unicode__(self):
         return u"%s %s %s %s %s %s" % (self.pk, self.pair, self.amount, self.amo_sum, self.rate, self.ret_amount)
     @property
@@ -33,31 +25,50 @@ class Orders(models.Model):
         return self.completed or self._completed
     @property
     def commiss(self):
-        return normalize(self._commission_debit, where="UP")
+        return normalized(self._commission_debit)
     @property
     def adeudo(self):
         return u"-%s%s" % (float(self._adeudo), self._pos)
     @property
     def total(self):
-        return normalize(self._total - self._commission_debit, where="DOWN")
+        return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def part(self):
         return self._part
     def exchange(self):
         return self._exchange()
-    class Meta:
-        abstract = True
 
-class Buy(Orders):
+class Orders(models.Model):
+    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
+    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
+    #user = models.ForeignKey('users.Profile', related_name="%(app_label)s_%(class)s_related", editable=False)
+    commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)])
+    pair = models.ForeignKey("currency.TypePair", related_name="%(app_label)s_%(class)s_related")
+    amount = models.DecimalField(u"Количество", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -8)])
+    rate = models.DecimalField(u"Стоимость", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -8)])
+    cancel = models.BooleanField(u"отменен", default=False)
+    completed = models.BooleanField(u"Завершен", default=False)
+
+#    class Meta:
+#        abstract = True
+
+
+class Buy(Orders, Prop):
     sale = models.ForeignKey("warrant.Sale", verbose_name=u"Продажа", blank=True, null=True, related_name="sale_sale")
     @property
     def _md5key_subtotal(self):
         s = "Buy" + str(self.pk) + str(self.pair)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
+        print "Buy save"
+        e=Buy.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
+        #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         if not self.commission: self.commission = self.pair.commission
+        if self._completed and not self.completed:
+            self.completed = True
         super(Buy, self).save(*args, **kwargs)
-        self.exchange()
+        if not (self.completed or self.cancel): self.exchange()
+ 
     @models.permalink
     def get_absolute_url_admin_change(self):
         return ('admin:warrant_buy_change', [str(self.id)])
@@ -95,7 +106,7 @@ class Buy(Orders):
     def _subtotal(self):
         md5key = self._md5key_subtotal
         a = cache.get(md5key)
-        if a is None:
+        if a is None or not a > _Zero:
             a=self.buy_buy.exclude(sale_sale__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or _Zero
             for c in self.buy_buy.filter(sale_sale__gte=0).distinct():
                 a += c.amount - c._subtotal
@@ -110,7 +121,7 @@ class Buy(Orders):
         return self.amount - self._subtotal
     @property
     def _completed(self):
-        return bool(self.sale or self._amo_sum == self.amount)
+        return bool(self.sale) or self._amo_sum == self.amount
     @property
     def _part(self):
         return not self._completed
@@ -135,16 +146,22 @@ class Buy(Orders):
                 continue
             return True
 
-class Sale(Orders):
+class Sale(Orders, Prop):
     buy = models.ForeignKey("warrant.Buy", verbose_name=u"Покупка", blank=True, null=True, related_name="buy_buy")
     @property
     def _md5key_subtotal(self):
         s = "Sale" + str(self.pk) + str(self.pair)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
+        print "Sale save"
+        e=Sale.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
+        #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         if not self.commission: self.commission = self.pair.commission
+        if self._completed and not self.completed:
+            self.completed = True
         super(Sale, self).save(*args, **kwargs)
-        self.exchange()
+        if not (self.completed or self.cancel): self.exchange()
+
     @models.permalink
     def get_absolute_url_admin_change(self):
         return ('admin:warrant_sale_change', [str(self.id)])
@@ -180,7 +197,7 @@ class Sale(Orders):
     def _subtotal(self):
         md5key = self._md5key_subtotal
         a = cache.get(md5key)
-        if a is None:
+        if a is None or not a > _Zero:
             a=self.sale_sale.exclude(buy_buy__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or _Zero
             for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
                 a += c.amount - c._subtotal
@@ -219,3 +236,4 @@ class Sale(Orders):
                 r._exchange()
                 continue
             return True
+
