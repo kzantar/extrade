@@ -10,6 +10,8 @@ from common.lib import strmd5sum
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinValueValidator
 
+from time import sleep
+
 # Create your models here.
 class Prop:
     def __unicode__(self):
@@ -42,7 +44,7 @@ class Orders(models.Model):
     created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
     updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
     #user = models.ForeignKey('users.Profile', related_name="%(app_label)s_%(class)s_related", editable=False)
-    commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)])
+    commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
     pair = models.ForeignKey("currency.TypePair", related_name="%(app_label)s_%(class)s_related")
     amount = models.DecimalField(u"Количество", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -8)])
     rate = models.DecimalField(u"Стоимость", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -8)])
@@ -57,7 +59,7 @@ class Buy(Orders, Prop):
     sale = models.ForeignKey("warrant.Sale", verbose_name=u"Продажа", blank=True, null=True, related_name="sale_sale")
     @property
     def _md5key_subtotal(self):
-        s = "Buy" + str(self.pk) + str(self.pair)
+        s = "Buy" + str(self.pk) + str(self.pair) + str(self.updated)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
         print "Buy save"
@@ -66,6 +68,8 @@ class Buy(Orders, Prop):
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:
             self.completed = True
+        if self.sale and self.sale._status:
+            raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         super(Buy, self).save(*args, **kwargs)
         if not (self.completed or self.cancel): self.exchange()
  
@@ -80,6 +84,9 @@ class Buy(Orders, Prop):
             return u",<br>".join(s)
     _pir.allow_tags = True
     _pir.short_description="пир"
+    @property
+    def _status(self):
+        return self._completed or self.cancel or self.completed
     @property
     def _commission_debit(self):
         if self._completed:
@@ -135,6 +142,7 @@ class Buy(Orders, Prop):
         _amo_buy = self._ret_amount
         for r in s:
             _amo_sale = r._ret_amount
+            if self._completed or self.cancel or self.completed: return True
             if _amo_sale == _amo_buy:
                 self.buy_buy.add(r)
                 continue
@@ -150,7 +158,7 @@ class Sale(Orders, Prop):
     buy = models.ForeignKey("warrant.Buy", verbose_name=u"Покупка", blank=True, null=True, related_name="buy_buy")
     @property
     def _md5key_subtotal(self):
-        s = "Sale" + str(self.pk) + str(self.pair)
+        s = "Sale" + str(self.pk) + str(self.pair) + str(self.updated)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
         print "Sale save"
@@ -159,6 +167,8 @@ class Sale(Orders, Prop):
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:
             self.completed = True
+        if self.buy and self.buy._status:
+            raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         super(Sale, self).save(*args, **kwargs)
         if not (self.completed or self.cancel): self.exchange()
 
@@ -173,6 +183,9 @@ class Sale(Orders, Prop):
             return format_html(",<br>".join(s))
     _pir.allow_tags = True
     _pir.short_description=u"пир"
+    @property
+    def _status(self):
+        return self._completed or self.cancel or self.completed
     @property
     def _commission_debit(self):
         return self._total * self.commission / D(100)
@@ -226,6 +239,7 @@ class Sale(Orders, Prop):
         _amo_sale = self._ret_amount
         for r in s:
             _amo_buy = r._ret_amount
+            if self._completed or self.cancel or self.completed: return True
             if _amo_buy == _amo_sale:
                 self.sale_sale.add(r)
                 continue
