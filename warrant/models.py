@@ -43,7 +43,7 @@ class Prop:
 class Orders(models.Model):
     created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
     updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
-    #user = models.ForeignKey('users.Profile', related_name="%(app_label)s_%(class)s_related", editable=False)
+    user = models.ForeignKey('users.Profile', related_name="%(app_label)s_%(class)s_related")
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
     pair = models.ForeignKey("currency.TypePair", related_name="%(app_label)s_%(class)s_related")
     amount = models.DecimalField(u"Количество", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -8)])
