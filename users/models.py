@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 
 
 class MyCustomUserManager(BaseUserManager):
-    def create_user(self, username, email, password=None):
+    def create_user(self, email, password=None):
         """
         Creates and saves a User with the given email and password.
         """
@@ -16,16 +16,15 @@ class MyCustomUserManager(BaseUserManager):
             raise ValueError('Users must have an email address')
 
         user = self.model(
-            email=MyCustomUserManager.normalize_email(email),
-            username=username
+            email=MyCustomUserManager.normalize_email(email)
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password):
-        u = self.create_user(username, email, password=password)
+    def create_superuser(self, email, password):
+        u = self.create_user(email, password=password)
         u.is_active = u.is_staff = u.is_superuser = True
         u.save(using=self._db)
         return u
