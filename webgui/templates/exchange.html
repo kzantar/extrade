@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block meta %}
+<title>{% trans 'Настройки сайта' %}</title>
+{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+
+{% block content %}
+
+        <div class="btcSpisok">
+        	<ul>
+{% for pair in pair_list %}
+                <li{% if object.pk == pair.pk %} class="activeLi"{% endif %}>
+                    <a href="{% url 'exchange' pair.slug %}">{{ pair.tpair }} {{ pair.avg_rate }}</a>
+                </li>
+{% endfor %}
+        	</ul>
+        </div>
+
+
+
+
+
+
+
+
+
+{###############################################}
+        <div class="leftBar">
+        	
+            <div class="burBtcBlock">
+            	<span class="zagolovokSp">
+                	Купить {{ object.left }}
+                </span>
+                <div class="yourFundsHead">
+                	<div class="leftBlockSec">
+                    	<span class="hreySp">
+                        	Ваши средства
+                        </span>
+                        <span class="usdOrange">
+                        	0 {{ object.right }}
+                        </span>
+                    </div>
+                    <div class="rightBlockSec">
+                    	<span class="hreySp">
+                        	Мин цена
+                        </span>
+                        <span class="usdBlack">
+                        	900 {{ object.right }}
+                        </span>
+                    </div>
+                    <div class="clr"></div>
+                </div>
+                <div class="buyBtcMiddle">
+                	<span class="BBtcSp">Количество {{ object.left }}:</span>
+                    <input type="text" class="buyBtcInp">
+                    <span class="BBtcSp">Цена за {{ object.left }}:</span>
+                    <input type="text" class="buyBtcInp">
+                    <div class="BBtcSp">Всего:</div>
+                    <div class="btcUsdSp">0 {{ object.right }}</div>
+                    <div class="clr"></div>
+                    <div class="BBtcSp">Комиссия:</div>
+                    <div class="btcUsdSp">0 {{ object.left }}</div>
+                    
+                    <div class="clr"></div>
+                     <p class="infoBtcP">
+                        Нажмите <span class="blodspan">подсчитать</span>, 
+                        чтобы расчитать сумму
+						в соответствии с ордерами.
+                	</p>
+                    <div class="buttonBlock">
+                    	<input type="button" value=" " class="podschBut">
+                        <input type="button" value=" " class="buyBtcbut">
+                    </div>
+                    <div class="clr"></div>
+                </div>
+            </div>
+            <div class="orderBlock">
+            	<h3>Ордера на покупку</h3>
+                <span class="kollSp">Всего: {{ object.sumamount }} {{ object.left }}</span>
+                <div class="clr"></div>
+                <table class="orderTb orderTbFr">
+                	<tbody><tr class="tableheadTr">
+                        	<td class="cosrTdd">
+                            	Цена
+                            </td>
+                            <td class="btcTdd">
+                            	{{ object.left }}
+                            </td>
+                            <td>
+                            	{{ object.right }}
+                            </td>
+                        </tr>
+                </tbody></table>
+                <div class="orderBlockTb">
+                	<table class="orderTb">
+                        <tbody>
+                        {% for rate, amount, total in order_buy %}
+                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        	<td class="cosrTdd">
+                            	{{ rate|floatformat:-8 }}
+                            </td>
+                            <td class="btcTdd">
+                            	{{ amount|floatformat:-8 }}
+                            </td>
+                            <td>
+                            	{{ total|floatformat:-8 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody></table>
+                </div>
+            </div>
+        </div>
+{###############################################}
+<div class="rightBar">
+            <div class="burBtcBlock">
+            	<span class="zagolovokSp">
+                	Купить {{ object.left }}
+                </span>
+                <div class="yourFundsHead">
+                	<div class="leftBlockSec">
+                    	<span class="hreySp">
+                        	Ваши средства
+                        </span>
+                        <span class="usdOrange">
+                        	0 {{ object.right }}
+                        </span>
+                    </div>
+                    <div class="rightBlockSec">
+                    	<span class="hreySp">
+                        	Мин цена
+                        </span>
+                        <span class="usdBlack">
+                        	900 {{ object.right }}
+                        </span>
+                    </div>
+                    <div class="clr"></div>
+                </div>
+                <div class="buyBtcMiddle">
+                	<span class="BBtcSp">Количество {{ object.left }}:</span>
+                    <input type="text" class="buyBtcInp">
+                    <span class="BBtcSp">Цена за {{ object.left }}:</span>
+                    <input type="text" class="buyBtcInp">
+                    <div class="BBtcSp">Всего:</div>
+                    <div class="btcUsdSp">0 {{ object.right }}</div>
+                    <div class="clr"></div>
+                    <div class="BBtcSp">Комиссия:</div>
+                    <div class="btcUsdSp">0 {{ object.left }}</div>
+                    
+                    <div class="clr"></div>
+                     <p class="infoBtcP">
+                        Нажмите <span class="blodspan">подсчитать</span>, 
+                        чтобы расчитать сумму
+						в соответствии с ордерами.
+                	</p>
+                    <div class="buttonBlock">
+                    	<input type="button" value=" " class="podschBut">
+                        <input type="button" value=" " class="buyBtcbut">
+                    </div>
+                    <div class="clr"></div>
+                </div>
+            </div>
+            <div class="orderBlock">
+            	<h3>Ордера на продажу</h3>
+                <div class="clr"></div>
+                <table class="orderTb orderTbFr">
+                	<tbody><tr class="tableheadTr">
+                        	<td class="cosrTdd">
+                            	Цена
+                            </td>
+                            <td class="btcTdd">
+                            	{{ object.left }}
+                            </td>
+                            <td>
+                            	{{ object.right }}
+                            </td>
+                        </tr>
+                </tbody></table>
+                <div class="orderBlockTb">
+                	<table class="orderTb">
+                        <tbody>
+                        {% for rate, amount, total in order_sale %}
+                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        	<td class="cosrTdd">
+                            	{{ rate|floatformat:-8 }}
+                            </td>
+                            <td class="btcTdd">
+                            	{{ amount|floatformat:-8 }}
+                            </td>
+                            <td>
+                            	{{ total|floatformat:-8 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody></table>
+                </div>
+            </div>
+        
+        </div>
+{###############################################}
+<div class="clr"></div>
+
+<div class="activeOrderBlock">
+        	<h3>Ваши активные ордеры:</h3>
+            <table width="100%" class="activeOrderTabb">
+                <tbody><tr class="tableheadTr">
+                        <td class="tiptdd">Тип</td>
+                        <td class="costTdd">Цена</td>
+                        <td class="therdTdd">Кол-во {{ object.left }}</td>
+                        <td>Всего {{ object.right }}</td>
+                        <td>Дата</td>
+                        <td>Действия</td>
+                    </tr>
+{% for updated, type, rate, amount, total, pk in order_actives %}
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <td class="costTdd"><span class="{% if type == 'sell' %}buyGreen{% else %}buyRed{% endif %}">{{ type }}</span></td>
+                        <td class="therdTdd">{{ rate|floatformat:-8 }} {{ object.right }}</td>
+                        <td>{{ amount|floatformat:-8 }} {{ object.left }}</td>
+                        <td>{{ total|floatformat:-8 }} {{ object.right }}</td>
+                        <td>{{ updated }}</td>
+                        <td><a href="{{ pk }}">отменить</a></td>
+                    </tr>
+{% endfor %}
+            </tbody></table>
+{% if not order_actives %}
+            <span class="emptyOrder">
+            	Нет активных ордеров в данный момент.
+            </span>
+{% endif %}
+        </div>
+
+
+
+        <div class="borderBlock">
+        	<span class="kommSd">
+        		Комиссия на сделки составляет {{ object.commission }}%.
+            </span>
+            <h3>История сделок</h3>
+            <table width="100%" class="activeOrderTabb">
+                <tbody><tr class="tableheadTr">
+                        <td class="tiptdd">Дата</td>
+                        <td class="costTdd">Тип</td>
+                        <td class="therdTdd">Цена</td>
+                        <td>Кол-во ({{ object.left }})</td>
+                        <td>Всего ({{ object.right }})</td>
+                    </tr>
+{% for updated, type, rate, amount, total in order_history %}
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <td class="tiptdd">{{ updated }}</td>
+                        <td class="costTdd"><span class="{% if type == 'sell' %}buyGreen{% else %}buyRed{% endif %}">{{ type }}</span></td>
+                        <td class="therdTdd">{{ rate|floatformat:-8 }} {{ object.right }}</td>
+                        <td>{{ amount|floatformat:-8 }} {{ object.left }}</td>
+                        <td>{{ total|floatformat:-8 }} {{ object.right }}</td>
+                    </tr>
+{% endfor %}
+            </tbody></table>
+        </div>
+
+{% endblock %}
+
+
+{% block news %}
+    	<div class="zagg">
+        	<h1>НОВОСТИ</h1>
+        </div>
+        <div class="newsBarr">
+            <div class="newsBlock">
+            	<h3>Сирийский министр: Запад ведет переговоры с режимом</h3>
+                <p>
+                	Как заявил Би-би-си заместитель министра иностранных дел Сирии, представители западных разведслужб приезжали в Дамаск на переговоры о способах противодействия радикальным исламистским группировкам.
+<span class="redsp">40 минут назад</span>
+                </p>
+            </div>
+            <div class="newsBlock">
+            	<h3>Сирийский министр: Запад ведет переговоры с режимом</h3>
+                <p>
+                	Как заявил Би-би-си заместитель министра иностранных дел Сирии, представители западных разведслужб приезжали в Дамаск на переговоры о способах противодействия радикальным исламистским группировкам.
+<span class="redsp">40 минут назад</span>
+                </p>
+            </div>
+            <div class="newsBlock">
+            	<h3>Сирийский министр: Запад ведет переговоры с режимом</h3>
+                <p>
+                	Как заявил Би-би-си заместитель министра иностранных дел Сирии, представители западных разведслужб приезжали в Дамаск на переговоры о способах противодействия радикальным исламистским группировкам.
+<span class="redsp">40 минут назад</span>
+                </p>
+            </div>
+            <div class="newsBlock">
+            	<h3>Сирийский министр: Запад ведет переговоры с режимом</h3>
+                <p>
+                	Как заявил Би-би-си заместитель министра иностранных дел Сирии, представители западных разведслужб приезжали в Дамаск на переговоры о способах противодействия радикальным исламистским группировкам.
+<span class="redsp">40 минут назад</span>
+                </p>
+            </div>
+        </div>
+        <div class="clr"></div>
+{% endblock %}

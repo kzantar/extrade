@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 
 
 class MyCustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, username, email, password=None):
         """
         Creates and saves a User with the given email and password.
         """
@@ -16,21 +16,23 @@ class MyCustomUserManager(BaseUserManager):
             raise ValueError('Users must have an email address')
 
         user = self.model(
-            email=MyCustomUserManager.normalize_email(email)
+            email=MyCustomUserManager.normalize_email(email),
+            username=username
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password):
-        u = self.create_user(email, password=password)
+    def create_superuser(self, username, email, password):
+        u = self.create_user(username, email, password=password)
         u.is_active = u.is_staff = u.is_superuser = True
         u.save(using=self._db)
         return u
 
 
 class Profile(AbstractBaseUser, PermissionsMixin):
+    username = models.CharField((u'Имя пользователя'), max_length=40, unique=True)
     email = models.EmailField('E-mail', unique=True)
     date_joined = models.DateTimeField(
         (u'Дата регистрации'), default=timezone.now)
@@ -42,7 +44,6 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         (u'Статус персонала'), default=False,
         help_text=(u'Отметьте, если пользователь может входить в '
                     u'административную часть сайта.'))
-
     class Meta:
         verbose_name = (u'Профиль')
         verbose_name_plural = (u'Профили')
@@ -78,7 +79,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return False
 
     def __unicode__(self):
-        return self.email
+        return self.username
 
     def save(self, *args, **kwargs):
         return super(Profile, self).save(*args, **kwargs)

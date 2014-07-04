@@ -24,11 +24,13 @@ SECRET_KEY = 'mc7=8$!ep*g45qaj^ocm+@+b+8g1-f#!c5eqlg!wbj&(-!i*1h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+GEOIP_PATH = os.path.join(PROJECT_ROOT, 'geoip')
 
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SITE_ID=1
 
 # Application definition
 
@@ -39,8 +41,14 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'south',
+    'registration',
+    'secureauth',
+    'widget_tweaks',
+    'change_email',
 
+    'webgui',  # ордера
     'warrant',  # ордера
     'currency', # валюта
     'users',  # пользователи
@@ -54,6 +62,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
 
 ROOT_URLCONF = 'bitextrade.urls'
 

@@ -1,0 +1,695 @@
+/* Eric Meyer's CSS Reset */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+a:hover {
+	text-decoration: none;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+/* End of Eric Meyer's CSS Reset */
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	width: 100%;
+	background-color: #f0f0f0;
+	font-size: 12px;
+
+}
+.wrapper {
+	width: 1000px;
+	margin: 0 auto;
+}
+.clr {
+	clear: both;
+	margin: 0;
+}
+
+
+/* Header
+-----------------------------------------------------------------------------*/
+.header {
+	height: 150px;
+}
+.logo {
+	width: 189px;
+	height: 103px;
+	margin-left: 15px;
+	padding-top: 47px;
+	float: left;
+}
+.headerMiddle {
+	float: left;
+	width: 425px;
+	height: 120px;
+	margin-left: 50px;
+	padding-top: 30px;
+}
+.headerMenu {
+	width: auto;
+	height: 24px;
+	margin-bottom: 17px;
+}
+.headerMenu ul li {
+	float: left;
+	margin-right: 35px;
+}
+.headerMenu ul li a {
+	font-size: 16px;
+	font-family: "Trebuchet MS";
+	color: #000000;
+	text-decoration: none;
+}
+.headerMenu ul li a:hover {
+	color: #f75429;
+	border-bottom: 1px dotted;
+}
+.blodspan {
+	font-weight: bold;
+}
+.headerMiddleInfo {
+	width: 390px;
+	height: auto;
+}
+.headerMiddleInfo p {
+	font-size: 13px;
+	color: #757575;
+	line-height: 18px;
+}
+.headerEnter {
+	width: 297px;
+	height: 120px;
+	float: right;
+	padding-top: 30px;
+}
+.avtoriz {
+	font-size: 16px;
+	color: #000000;
+	font-family: "Trebuchet MS";
+	border-bottom: 1px dotted #000000;
+	margin-bottom: 6px;
+	display: inline-block;
+}
+.endterD {
+	width: 172px;
+	height: auto;
+	float: left;
+	position: relative;
+}
+.enterEmailIn, .enterPassIn {
+	width: 145px!important;
+	padding-right: 18px!important;
+}
+.enterEmailImg {
+	width: 11px;
+	height: 11px;
+	display: block;
+	background-image: url(img/sprAvtorizat.png); 
+	position: absolute;
+	right: 6px;
+	top: 13px;
+}
+.enterPasslImg {
+	width: 11px;
+	height: 11px;
+	display: block;
+	background-image: url(img/sprAvtorizat.png); 
+	position: absolute;
+	right: 6px;
+	top: 42px;
+	background-position: 1px 12px;
+}
+.enterEmailIn, .enterPassIn, .buyBtcInp {
+	width: 159px;
+	height: 21px;
+	border: 1px solid #ebebeb;
+	background-color: #ffffff;
+	margin-top: 6px;
+	color: #999999;
+	padding: 0px 5px;
+}
+.enterEmailIn:focus, .enterPassIn:focus, .buyBtcInp:focus, .registrationBar input:focus {
+	border: 1px solid #f5af42!important;
+}
+#focusss {
+	border: 1px solid #f5af42!important;	
+}
+.subD {
+	width: 60px;
+	height: 23px;
+	float: left;
+	margin-left: 16px;
+	margin-top: 36px;
+}
+.subD input {
+	width: 60px;
+	height: 23px;	
+	background: none;
+	border: 0px;
+	background-image: url(img/enterSub.png);
+	cursor: pointer;
+}
+.regFor {
+	margin-top: 11px;
+}
+.regFor ul li {
+	display: inline-block;
+	margin-right: 5px;
+}
+.regFor ul li a {
+	color: #f75429;
+	font-family: "Trebuchet MS";
+}
+.lineSp {
+	display: inline-block;
+	background-color: #d1d1d1;
+	height: 12px;
+	width: 1px;
+	position: relative;
+	top: 3px;
+}
+
+
+
+
+
+
+/* Middle
+-----------------------------------------------------------------------------*/
+.content {
+	background-color: #ffffff;
+	margin-top: 16px;
+	padding: 27px 61px 45px 42px;
+}
+.contentSec {
+	padding: 35px 61px 45px 42px;	
+}
+.leftBar {
+	float: left;
+	width: 428px;
+	height: auto;
+}
+
+.zagg h1 {
+	font-size: 17px;
+	margin-bottom: 2px;
+	font-weight: bold;
+}
+.newsBlock {
+	width: 428px;
+	float: left;
+	margin-top: 22px;
+}
+.newsBlock h3, .orderBlock h3, .activeOrderBlock h3 {
+	color: #174f82;
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 6px;
+}
+.redsp {
+	color: #d20000!important;
+	font-size: 11px;
+	display: block;
+}
+.newsBlock p {
+	color: #0b0b0b;
+	line-height: 16px;
+}
+.zagolovokSp {
+	color: #174f82;
+	display: block;
+	font-size: 14px;
+}
+.burBtcBlock {
+	margin-top: 40px;
+}
+.yourFundsHead {
+	background-color: #f0f0f0;
+	padding: 12px 0px 8px 18px;
+	margin-top: 5px;
+}
+.newsBarr {
+	width: auto;
+	height: auto;
+	min-height: 180px;
+}
+.btcSpisok {
+	width: auto;
+	height: auto;
+	margin-top: 33px;
+}
+.btcSpisok li {
+	width: 86px;
+	height: 35px;
+	margin-right: 1px;
+	display: inline-block;	
+}
+.btcSpisok li a {
+	width: 64px;
+	height: 29px;
+	display: block;
+	background-image: url(img/btcBgSp.png);
+	background-position: 0px 35px;
+	font-size: 14px;
+	color: #fefefe;
+	font-weight: bold;
+	text-decoration: none;
+	padding: 3px 11px;
+}
+.btcSpisok li a:hover {
+	background-image: url(img/btcBgSp.png);
+	background-position: 0px 0px;	
+}
+.activeLi a {
+	background-image: url(img/btcBgSp.png)!important;
+	background-position: 0px 0px!important;	
+}
+
+
+.leftBlockSec {
+	width: 130px;
+	height: auto;
+	float: left;
+	margin-right: 39px;
+}
+.hreySp {
+	color: #777777;
+	font-size: 14px;
+	display: block;
+	margin-bottom: 5px;
+}
+.usdOrange {
+	color: #f75429;
+	display: block;
+	font-size: 15px;
+	font-weight: bold;
+}
+.usdBlack {
+	font-size: 14px;
+	font-weight: bold;
+}
+.buyBtcMiddle {
+	width: auto;
+	height: auto;
+	background-color: #f7f7f7;
+	padding: 16px 20px 15px 17px;
+}
+.BBtcSp {
+	float: left;
+	width: 142px;
+	display: block;
+	margin-right: 15px;
+	padding-top: 15px;
+}
+.buyBtcInp {
+	float: left;
+	width: 138px;
+	height: 26px;
+}
+.btcUsdSp {
+	width: 209px;
+	display: block;
+	color: #0b0b0b;
+	font-size: 14px;
+	font-weight: bold;
+	float: left;
+	padding-top: 12px;
+}
+.infoBtcP {
+	width: 260px;
+	margin-top: 23px;
+	line-height: 15px;
+}
+.buttonBlock {
+	float: right;
+	margin-top: 12px;
+}
+.podschBut {
+	background: none;
+	border: 0px;
+	width: 90px;
+	height: 23px;
+	background-image: url(img/countBut.png);
+	cursor: pointer;
+}
+.buyBtcbut {
+	background: none;
+	border: 0px;
+	width: 90px;
+	height: 23px;
+	background-image: url(img/buyAllBut.png);
+	cursor: pointer;	
+}
+
+
+
+
+.rightBlockSec {
+	width: 165px;
+	height: auto;
+	float: left;
+}
+.orderTb tr td {
+	color: #040404;
+}
+.orderBlock {
+	border: 1px solid #f7f7f7;
+	margin-top: 36px;
+	padding: 9px 4px 4px 4px;
+	position: relative;
+}
+.kollSp {
+	display: block;
+	color: #999999;
+	right: 5px;
+	position: absolute;
+}
+
+.tableheadTr td {
+	font-size: 14px;
+}
+.orderBlockTb {
+	width: auto;
+	height: 368px;
+	overflow: auto;
+	margin-top: 32px;
+	position: relative;
+	padding-top: 24px;
+}
+.orderTb {
+	width: 400px;
+}
+.orderTbFr {
+	position: absolute;
+	top: 54px;
+	z-index: 9999;
+}
+.orderTb tr td {
+	vertical-align: middle;
+}
+
+.tableheadTr {
+	width: auto;
+	height: 24px;
+	background-image: url(img/lineBg.jpg);
+	background-repeat: repeat-x;
+}
+.cosrTdd {
+	width: 99px;
+	padding-left: 31px;
+}
+.btcTdd {
+	width: 103px;
+}
+.tableTrrFirst {
+	height: 30px;
+}
+.tableTrrSecond {
+	height: 22px;
+	border: 1px solid #f6f6f6;
+	background-color: #f1f1f1;
+}
+
+
+
+
+
+
+
+
+
+.rightBar {
+	float: right;
+	width: 428px;
+	height: auto;
+}
+.activeOrderBlock, .borderBlock {
+	width: auto;
+	height: auto;
+	border: 1px solid #f8f8f8;
+	padding: 12px 5px 8px 5px;
+	margin-top: 12px;
+}
+.activeOrderBlock h3 {
+	margin-bottom: 16px;
+}
+.activeOrderTabb tr td {
+	vertical-align: middle;
+	color: #040404;
+}
+
+.tiptdd {
+	width: 147px;
+	padding-left: 30px;
+}
+.costTdd {
+	width: 120px;
+}
+.emptyOrder {
+	display: block;
+	margin: 13px 0px 0px  6px;
+	color: #040404;
+	font-size: 13px;
+}
+.borderBlock {
+	width: auto;
+	height: auto;
+}
+.kommSd {
+	color: #999999;
+	font-size: 13px;	
+	display: block;
+	text-align: right;
+}
+.borderBlock h3  {
+	font-size: 14px;
+	font-weight: bold;
+	margin-top: 5px;
+	color: #010101;
+	margin-bottom: 10px;
+}
+.therdTdd {
+	width: 160px;
+}
+.buyGreen {
+	color: #1d8815;
+	font-weight: bold;
+}
+.buyRed {
+	color: #ff0000;
+	font-weight: bold;
+}
+
+/* Footer
+-----------------------------------------------------------------------------*/
+.footer {
+	height: 78px;
+	text-align: center;
+	padding-top: 22px;
+	
+}
+.copySp {
+	color: #999999;
+}
+
+/* login page
+-----------------------------------------------------------------------------*/
+
+.userHeader {
+	color: #131313;
+	font-family: "Trebuchet MS";
+	display: block;
+	margin-top: 12px;
+}
+.userHeader a {
+	color: #f75429;
+}
+.lineSpOrange {
+	height: 12px;
+	width: 1px;
+	background-color: #f75429; 
+	display: block;
+	position: relative;
+	top: 3px;
+}
+.userSetting {
+	margin-top: 8px;
+}
+.userSetting li {
+	display: inline-block;
+	margin-right: 4px;
+}
+.userSetting li a {
+	color: #f75429;
+}
+.balansUsdUserHeader, .balansBtUserHeader {
+	margin-top: 11px;
+	display: inline-block;
+	margin-right: 32px;
+	color: #3e3e3e;
+	font-family: "Trebuchet MS";
+	background-image: url(img/sprIcons.png);
+	background-repeat: no-repeat;
+	padding-left: 15px;
+}
+.balansBtUserHeader {
+	background-position: 0 -14px;
+}
+.mapSiteLog {
+	float: left;
+}
+.mapSiteLog ul li {
+	margin-bottom: 12px;
+}
+.mapSiteLog ul li a {
+	color: #4d4d4d;
+	font-family: "Trebuchet MS";
+	font-size: 13px;
+	text-decoration: none;
+	border-bottom: 1px dotted #4d4d4d;
+}
+.mapSiteLog ul li a:hover {
+	color: #f75429;
+	border-bottom: 1px dotted #f75429;	
+}
+.infoSpLog {
+	font-size: 15px;
+	color: #141414;
+	display: block;
+	margin-bottom: 16px;
+}
+.logInfo {
+	float: left;
+	margin-left: 50px;
+}
+.furstTdd {
+	width: 180px;
+	padding-bottom: 15px;
+}
+.logInfo table tr td {
+	color: #141414;
+}
+
+/* registration
+-----------------------------------------------------------------------------*/
+
+.regSp {
+	color: #f75429;
+	font-size: 16px;
+	font-family: "Trebuchet MS";
+	display: block;
+	margin-bottom: 15px;
+	
+}
+.registrationBar {
+	width: auto;
+	height: auto;
+}
+.registrationBar p {
+	font-weight: bold;
+	line-height: 18px;
+	margin-bottom: 16px;
+}
+.registrationBar input {
+	width: 182px;
+	height: 23px;
+	background-color: #ffffff;
+	border: 1px solid #e4e4e4;
+	padding: 0px 4px;
+	color: #999999;
+	display: block;
+	margin-bottom: 14px;
+}
+
+/* forgotPassword
+-----------------------------------------------------------------------------*/
+.enterPassLogg {
+	width: 192px;
+	height: 23px;
+	background-color: #ffffff;
+	padding: 0px 4px;
+	border: 1px solid #e4e4e4;
+	display: block;
+	margin-bottom: 14px;
+	color: #999999;
+	
+}
+.forgotPasswordBar p {
+	color: #141414;
+	line-height: 18px;
+}
+.blodspann {
+	font-weight: bold;
+	display: block;
+}
+.capchaBlock {
+	width: 160px;
+	float: left;
+	border: 1px solid #ebebeb;
+	border-radius: 4px 4px 4px 4px;
+	padding: 5px 5px;
+	margin-top: 20px;
+	margin-right: 13px;
+}
+.capchaBlock input {
+	color: #999999;
+	border: 1px solid #e4e4e4;
+	padding: 0px 4px;
+	height: 23px;
+	width: 150px;
+	margin-top: 5px;
+	border-radius: 4px 4px 4px 4px;
+}
+.vossBut {
+	width: 100px;
+	height: 21px;
+	float: left;
+	margin-top: 113px;
+}
+.vossBut input {
+	width: 100px;
+	height: 21px;
+	background: none;
+	border: 0px;
+	background-image: url(img/restoreButton.png);
+	cursor: pointer;
+	background-repeat: no-repeat;
+}

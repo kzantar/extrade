@@ -1,0 +1,28 @@
+{% extends "profile.html" %}
+{% load i18n widget_tweaks %}
+
+{% block meta %}
+<title>{% trans 'Сменить e-mail' %}</title>
+{% endblock %}
+
+{% block content_profile %}
+<div class="page-header">
+    <h1>{% trans 'Сменить e-mail' %}</h1>
+</div>
+{% if messages %}{% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}{% endif %}
+<form action="." method="post" class="form-horizontal" role="form" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="form-group">
+            <label for="id_{{ field.html_name }}" class="col-lg-2 control-label">{{ field.label_tag }}</label>
+            <div class="col-lg-10">{{ field|add_class:"form-control" }}</div>
+            {% if field.errors %}<div class="alert alert-error">{{ field.errors|striptags }}</div>{% endif %}
+        </div>
+    {% endfor %}
+    <div class="form-group">
+        <div class="col-lg-offset-2 col-lg-10">
+            <button type="submit" class="btn btn-primary">{% trans 'Сохранить' %}</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

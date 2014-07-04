@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block meta %}
+<title>{% if account %}{% trans 'Активация завершена' %}{% else %}{% trans 'Активация неудачна' %}{% endif %}</title>
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+{% if account %}
+{% trans 'Спасибо {{ account }}, активация завершена!  Теперь вы можете' %} <a href='{% url 'auth_login' %}'>{% trans 'войти' %}</a> {% trans 'используя имя пользователя и пароль, указаные при регистрации.' %}
+{% else %}
+{% trans 'Похоже, что ключ активации является недействительным. Пожалуйста, проверьте URL снова.' %}
+{% endif %}
+{% endblock %}

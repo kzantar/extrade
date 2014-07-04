@@ -1,0 +1,31 @@
+        	<span class="userHeader">{{ user.username }}<a href="#">cообщ. (0)</a></span>
+            <ul class="userSetting">
+            	<li>
+                	<a href="{% url 'profile' %}">Профиль</a>
+                </li>
+                <li>
+                	<span class="lineSpOrange"></span>
+                </li>
+                <li>
+                	<a href="#">Финансы</a>
+                </li>
+                <li>
+                	<span class="lineSpOrange"></span>
+                </li>
+                <li>
+                	<a href="{% url 'change_email_index' %}">Редактировать</a>
+                </li>
+                <li>
+                	<span class="lineSpOrange"></span>
+                </li>
+                <li>
+                	<a href="{% url 'auth_logout' %}?next={% url 'auction' %}">Выйти</a>
+                </li>
+            </ul>
+            <span class="balansUsdUserHeader">
+            	0 USD
+            </span>
+            <span class="balansBtUserHeader">
+            	0 BT
+            </span>
+

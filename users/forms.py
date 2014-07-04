@@ -21,6 +21,8 @@ class Email(forms.EmailField):
 
 class UserRegistrationForm(forms.Form):
 
+    username = forms.CharField(label=u"Имя пользователя")
+
     email = Email()
     password1 = forms.CharField(
         widget=forms.PasswordInput(), label=(u'Пароль'))
@@ -45,10 +47,11 @@ class EmailAuthenticationForm(AuthenticationForm):
         super(EmailAuthenticationForm, self).__init__(request, *args, **kwargs)
         del self.fields['username']
         self.fields['email'] = forms.EmailField(
-            label=_('E-mail'), max_length=75)
+            label=('E-mail'), max_length=75)
         self.fields.insert(0, 'email', self.fields.pop('email'))
 
     def clean(self):
+        username = self.cleaned_data.get('username')
         email = self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')
 
@@ -88,4 +91,4 @@ class UserAdminForm(UserChangeForm):
 
     def __init__(self, *args, **kwargs):
         super(UserAdminForm, self).__init__(*args, **kwargs)
-        self.fields['username'].required = False
+        self.fields['username'].required = True

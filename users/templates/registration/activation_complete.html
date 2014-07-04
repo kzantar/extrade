@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block meta %}
+<title>{% trans 'Активация завершена' %}</title>
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+{% trans 'Спасибо, активация завершена! Теперь вы можете' %} <a href='{% url 'auth_login' %}'>{% trans 'войти' %}</a> {% trans 'используя имя пользователя и пароль, указаные при регистрации.' %}
+{% endblock %}

@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans %}Регистрация аккаунта для {{ site.name }}{% endblocktrans %}

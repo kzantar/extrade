@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load i18n widget_tweaks %}
+
+{% block meta %}
+<title>{% trans 'Профиль' %}</title>
+{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+
+
+        <div class="mapSiteLog">
+        	<ul>
+            	<li>
+                	<a href="{% url 'profile' %}">Информация</a>
+                </li>
+                <li>
+                	<a href="#">Финансы</a>
+                </li>
+                <li>
+                	<a href="{% url 'change_email_index' %}">Редактировать</a>
+                </li>
+                <li>
+                	<a href="{% url 'history_transactions' %}">История сделок</a>
+                </li>
+                <li>
+                	<a href="{% url 'history_order' %}">История ордеров</a>
+                </li>
+            </ul>
+        </div>
+        <div class="logInfo">
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% block content_profile %}
+        	<span class="infoSpLog">
+            	Информация:
+            </span>
+            <table>
+            	<tbody><tr>
+                	<td class="furstTdd">
+                   		Пользователь:	
+                    </td>
+                    <td>
+                    	{{ user.username }}
+                    </td>
+                </tr>
+                <tr>
+                	<td class="furstTdd">
+                   		Группа:	
+                    </td>
+                    <td>
+                        
+                    	{% if user.is_superuser %}
+                        Суперпользователь,
+                        {% endif %}
+                    	{% if 'customer' in user.get_role %}
+                        Пользователь
+                        {% else %}
+                        Менеджер
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                	<td class="furstTdd">
+                   		E-mail:	
+                    </td>
+                    <td>
+                    	скрыт
+                    </td>
+                </tr>
+            </tbody></table>
+{% endblock %}
+        </div>
+{% endblock %}

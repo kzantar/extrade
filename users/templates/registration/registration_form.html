@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n widget_tweaks %}
+
+{% block meta %}
+<title>{% trans 'Зарегистрировать учетную запись' %}</title>
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+        <form action="{% url 'registration_register' %}?next={% url 'auction' %}" method="post" class="form-horizontal" role="form">
+        {% csrf_token %}
+            <div class="registrationBar">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{% url 'auction' %}">
+                <span class="regSp">РЕГИСТРАЦИЯ</span>
+                <p>
+                    Для безопасности ваших средств настоятельно рекомендуем использовать почту с двухфакторной авторизацией.
+                    <br>Например GMail.
+                </p>
+            {% for field in form %}
+                {% if 'password1' == field.name %}
+                <p>
+                    Пожалуйста используйте разные пароли на почте и на аккаунте BTC-e. Использование одинаковых паролей небезопасно.
+                </p>
+                {% endif %}
+                    {{ field.label_tag }}
+                    {% if field.errors %}<div class="alert alert-error">{{ field.errors|striptags }}</div>{% endif %}
+                    {{ field }}
+            {% endfor %}
+{% comment %}
+                <input type="text" value="E-mail" onfocus="if (this.value=='E-mail') this.value='' " onblur="if (this.value==''){this.value='E-mail'}">
+                <input type="text" value="Повторите E-mail:" onfocus="if (this.value=='Повторите E-mail:') this.value='' " onblur="if (this.value==''){this.value='Повторите E-mail:'}">
+                <input type="text" value="Логин:" onfocus="if (this.value=='Логин:') this.value='' " onblur="if (this.value==''){this.value='Логин:'}">
+
+                <input type="text" value="Пароль:" onfocus="if (this.value=='Пароль:') this.value='' " onblur="if (this.value==''){this.value='Пароль:'}">
+                <input type="text" value="Повторите пароль:" onfocus="if (this.value=='Повторите пароль:') this.value='' " onblur="if (this.value==''){this.value='Повторите пароль:'}">
+
+{% endcomment %}
+                <button type="submit" class="btn btn-primary">{% trans 'Зарегистрироваться' %}</button>
+            </div>
+        </form>
+{% endblock %}

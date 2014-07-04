@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}
+This template is used for the html alternative of the activation email
+if you use a django-registration backend that looks for it. e.g.
+https://github.com/huseyinyilmaz/django-registration-extended-backend
+{% endcomment %}<body>
+<h3>{% trans 'Регистрация аккаунта для' %} {{ site.name }}</h3>
+<p>
+{% trans 'Вы (или кто-то другой) запросили регистрацию аккаунта для' %}
+<b>{{ site.name }}</b>.<br/>
+{% trans 'Если это были не вы, не обращайте внимание на это письмо и ваш адрес будет удалён с нашей базы.' %}
+</p>
+<p>
+{% trans 'Для активации этой учетной записи, пожалуйста, перейдите по следующей ссылке в течение следующих' %} 
+<b>{{ expiration_days }}</b> {% trans 'дней' %}:<br/>
+<a href="https://{{site.domain}}{% url 'registration_activate' activation_key %}">http://{{site.domain}}{% url 'registration_activate' activation_key %}</a>
+</p>
+<p>
+{% trans 'С уважением' %},<br/>
+{{ site.name }} {% trans 'Администрация' %}
+</p>
+</body>

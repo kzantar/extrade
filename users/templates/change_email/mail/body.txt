@@ -1,0 +1,7 @@
+{% load i18n %}
+{% trans 'Здравствуйте. Вы запросили смену e-mail адреса.' %}
+{% trans 'Для того, чтобы подтвердить смену e-mail адреса пожалуйста пройдите по ссылке' %} http://artela.net{% url 'change_email_confirm' signature %}
+
+
+{% trans 'С уважением' %},
+{{ site.name }} {% trans 'Администрация' %}

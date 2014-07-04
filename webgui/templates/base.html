@@ -1,0 +1,104 @@
+{% load staticfiles i18n webgui_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    {% block meta %}{% endblock %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="{{ STATIC_URL }}images/favicon.png">
+        {#<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">#}
+        {#<link rel="stylesheet" href="{% static 'css/custom.css' %}">#}
+        {#<script type="text/javascript" src="{% static 'js/jquery-1.10.2.min.js' %}"></script>#}
+    <!--[if lt IE 9]>
+      <script src="{% static 'js/html5shiv.js' %}"></script>
+      <script src="{% static 'js/respond.min.js' %}"></script>
+    <![endif]-->
+        <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" />
+        <style type="text/css">
+.subD input
+    { background-image: url({% static 'img/enterSub.png' %}); }
+.btcSpisok li a
+    { background-image: url({% static 'img/btcBgSp.png' %}); }
+.btcSpisok li a:hover
+    { background-image: url({% static 'img/btcBgSp.png' %}); }
+.activeLi a
+    { background-image: url({% static 'img/btcBgSp.png' %})!important; }
+.podschBut
+    { background-image: url({% static 'img/countBut.png' %}); }
+.buyBtcbut
+    { background-image: url({% static 'img/buyAllBut.png' %}); }
+.tableheadTr
+    { background-image: url({% static 'img/lineBg.jpg' %}); }
+.balansUsdUserHeader, .balansBtUserHeader
+    { background-image: url({% static 'img/sprIcons.png' %}); }
+.vossBut input
+    { background-image: url({% static 'img/restoreButton.png' %}); }
+.enterEmailImg
+    { background-image: url({% static 'img/sprAvtorizat.png' %}); }
+.enterPasslImg
+    { background-image: url({% static 'img/sprAvtorizat.png' %}); }
+        </style>
+        {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="wrapper">
+
+	<div class="header">
+    	<div class="logo">
+        	<a href="/"><img src="{% static 'img/logo.png' %}" alt=" " width="189" height="41" /></a>
+        </div>
+        <div class="headerMiddle">
+{% block before %}
+            <div class="headerMenu">
+                <ul>
+                    <li>
+                        <a href="{% url 'auction' %}">Торги</a>
+                    </li>
+                    <li>
+                        <a href="#">Новости</a>
+                    </li>
+                    <li>
+                        <a href="#">Правила</a>
+                    </li>
+                    <li>
+                        <a href="#">FAQ	Support</a>
+                    </li>
+                </ul>
+                <div class="clr"></div>
+            </div>
+            <div class="headerMiddleInfo">
+{% block info %}{% information %}{% endblock %}
+            </div>
+{% endblock %}
+        </div>
+        <div class="headerEnter">
+{% if user.is_authenticated %}
+    {% include 'user_menu.html' %}
+{% else %}
+    {% include 'user_login.html' %}
+{% endif %}
+        </div>
+		<div class="clr"></div>
+	</div><!-- .header-->
+
+	<div class="content{# contentSec#}">
+
+{% block news %}{% endblock %}
+
+{% block content %}{% endblock %}
+
+        <div class="clr"></div>
+	</div><!-- .content-->
+{% block after %}
+	<div class="footer">
+		<span class="copySp">Copyright © 2011-2014 BTC-e.com. All rights reserved. </span>
+	</div><!-- .footer -->
+{% endblock %}
+</div><!-- .wrapper -->
+
+
+
+
+
+</body>

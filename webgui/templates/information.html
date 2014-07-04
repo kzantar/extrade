@@ -1,0 +1,4 @@
+                <p>
+                	Last Price: <span class="blodspan">{{ last_order.rate|floatformat:-8 }} {{ pair.right }}</span> Low: <span class="blodspan">{{ min|floatformat:-8 }} {{ pair.right }}</span> High: <span class="blodspan">{{ max|floatformat:-8 }} {{ pair.right }}</span>
+					Volume: <span class="blodspan">{{ sum_amount|floatformat:-8 }} {{ pair.left }} / {{ sum_total|floatformat:-8 }} {{ pair.right }}</span> Server Time: <span class="blodspan">{% now "d.m.y H:i" %}</span>
+                </p>

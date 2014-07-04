@@ -1,0 +1,27 @@
+        	<span class="avtoriz">Авторизация</span>
+            <form action="{% url 'auth_login' %}?next={% url 'auction' %}" method="post">
+                {% csrf_token %}
+            	<div class="endterD">
+                	<input type="text" class="enterEmailIn" name="email" value="E-mail" onfocus="if (this.value=='E-mail') this.value='' " onblur="if (this.value==''){this.value='E-mail'}" />
+                    <span class="enterEmailImg"></span>
+                    <input type="password" class="enterPassIn" name="password" value="Пароль" onfocus="if (this.value=='Пароль') this.value='' " onblur="if (this.value==''){this.value='Пароль'}" />
+                    <span class="enterPasslImg"></span>
+                </div>
+                <div class="subD">
+                	<input type="submit" value=" " />
+                </div>
+            	<div class="clr"></div>
+                <div class="regFor">
+                	<ul>
+                    	<li>
+                        	<a href="{% url 'registration_register' %}">Регистрация</a>
+                        </li>
+                        <li>
+                        	<span class="lineSp"></span>
+                        </li>
+                        <li>
+                        	<a href="{% url 'auth_password_reset' %}">Забыли пароль</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>

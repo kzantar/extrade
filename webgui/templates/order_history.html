@@ -1,0 +1,12 @@
+{% extends "profile.html" %}
+{% load i18n widget_tweaks %}
+
+{% block meta %}
+<title>{% trans 'история сделок' %}</title>
+{% endblock %}
+
+{% block content_profile %}
+
+{{ object_list }}
+
+{% endblock %}

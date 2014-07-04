@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block meta %}
+<title>{% trans 'Уведомление об активации отправлено' %}</title>
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+{% trans 'Уведомление об активации отправлено. Пожалуйста, проверьте свою электронную почту и нажмите на ссылку, чтобы активировать аккаунт.' %}
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "profile.html" %}
+{% load i18n widget_tweaks %}
+
+{% block meta %}
+<title>{% trans 'история сделок' %}</title>
+{% endblock %}
+{% block head %}
+<style type="text/css">
+.content 
+    { padding-right: 0px; }
+</style>
+{% endblock %}
+
+{% block content_profile %}
+
+            <h3>История сделок</h3>
+            <table width="100%" class="activeOrderTabb">
+                <tbody><tr class="tableheadTr">
+                        <td class="tiptdd">Пара</td>
+                        <td class="costTdd">Тип</td>
+                        <td class="therdTdd">Кол-во</td>
+                        <td>Цена</td>
+                        <td>Всего</td>
+                        <td>Дата</td>
+                    </tr>
+{% for object in object_list %}
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <td>{{ object.pair }}</td>
+                        <td class="costTdd"><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
+                        <td>{{ object.amount|floatformat:-8 }}</td>
+                        <td>{{ object.rate|floatformat:-8 }}</td>
+                        <td>{{ object.total|floatformat:-8 }}</td>
+                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
+                    </tr>
+{% endfor %}
+            </tbody></table>
+{% endblock %}

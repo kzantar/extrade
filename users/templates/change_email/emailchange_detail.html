@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block meta %}
+<title>{% trans 'Сменить e-mail' %}</title>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% trans 'Сменить e-mail' %}</h1>
+</div>
+{% if messages %}{% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}{% endif %}
+<p>{% trans 'Вы успешно сменили e-mail адрес. Для подтверждения пожалуйста пройдите по ссылке, отправленной на ваш новый e-mail' %}</p>
+{% endblock %}
