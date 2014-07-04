@@ -7,6 +7,7 @@ from common.mixin import LoginRequiredMixin
 
 from currency.models import TypePair
 from warrant.models import Orders, Buy, Sale
+from news.models import News
 
 from django.contrib.auth import login, get_user_model
 
@@ -36,6 +37,7 @@ class ExchangeView(DetailView):
         ctx['order_buy'] = self.object.buy()
         ctx['order_sale'] = self.object.sale()
         ctx['order_history'] = self.object.history()
+        ctx['news'] = News.getlast()
 
         if self.request.user.is_authenticated():
             user = Profile.objects.get(pk=self.request.user.pk)

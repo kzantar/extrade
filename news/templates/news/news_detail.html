@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n widget_tweaks %}
+
+{% block meta %}
+{% endblock %}
+
+{% block content %}
+    	<div class="zagg">
+        	<h1>НОВОСТИ</h1>
+        </div>
+        <div class="newsBarr">
+            {% include "news/news_item.html" %}
+            <div class="clr"></div>
+            <a href="{% url 'news_list' %}">все новости</a>
+        </div>
+{% endblock %}

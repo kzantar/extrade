@@ -1,0 +1,11 @@
+            <div class="newsBlock">
+        {% if link %}
+                <h3><a href="{% url 'news_detail' link %}">{{ object.title }}</a></h3>
+        {% else %}
+                <h3>{{ object.title }}</h3>
+        {% endif %}
+                <p>
+                	{{ object.text|safe }}
+<span class="redsp">{{ object.date|date:"d.m.y H:i" }}</span>
+                </p>
+            </div>

@@ -1,6 +1,7 @@
 Django==1.6
 MySQL-python==1.2.5
 South==0.8.4
+chunks==0.1
 django-change-email==0.1.2
 django-easysettings==1.0.1
 django-filter==0.7

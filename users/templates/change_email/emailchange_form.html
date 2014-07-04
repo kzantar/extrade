@@ -9,7 +9,7 @@
 <div class="page-header">
     <h1>{% trans 'Сменить e-mail' %}</h1>
 </div>
-{% if messages %}{% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}{% endif %}
+{#{% if messages %}{% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}{% endif %}#}
 <form action="." method="post" class="form-horizontal" role="form" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in form %}

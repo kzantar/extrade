@@ -47,11 +47,13 @@ INSTALLED_APPS = (
     'secureauth',
     'widget_tweaks',
     'change_email',
+    'chunks',
 
     'webgui',  # ордера
     'warrant',  # ордера
     'currency', # валюта
     'users',  # пользователи
+    'news',  # новости
 )
 
 MIDDLEWARE_CLASSES = (

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n widget_tweaks %}
+
+{% block meta %}
+{% endblock %}
+
+{% block content %}
+    	<div class="zagg">
+        	<h1>НОВОСТИ</h1>
+        </div>
+        <div class="newsBarr">
+    {% for object in object_list %}
+        {% include "news/news_item.html" with link=object.pk %}
+    {% endfor %}
+        </div>
+{% endblock %}
