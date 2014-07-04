@@ -9,6 +9,9 @@ from django.core.cache import cache
 from common.lib import strmd5sum
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinValueValidator
+from django.db.models import Avg, Max, Min
+from django.contrib.auth.models import User
+from django.template.defaultfilters import floatformat
 
 from time import sleep
 
@@ -16,12 +19,16 @@ from time import sleep
 class Prop:
     def __unicode__(self):
         return u"%s %s %s %s %s %s" % (self.pk, self.pair, self.amount, self.amo_sum, self.rate, self.ret_amount)
+
     @property
     def amo_sum(self):
         return self._amo_sum
     @property
     def ret_amount(self):
         return self._ret_amount
+    @property
+    def ret_sum(self):
+        return self.ret_amount * self.rate
     @property
     def compl(self):
         return self.completed or self._completed
@@ -39,6 +46,9 @@ class Prop:
         return self._part
     def exchange(self):
         return self._exchange()
+    @classmethod
+    def flr(cls, pair=None):
+        return cls.objects.exclude(Q(cancel=True) | Q(completed=True)).filter(pair=pair)
 
 class Orders(models.Model):
     created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
@@ -46,11 +56,54 @@ class Orders(models.Model):
     user = models.ForeignKey('users.Profile', related_name="%(app_label)s_%(class)s_related")
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
     pair = models.ForeignKey("currency.TypePair", related_name="%(app_label)s_%(class)s_related")
-    amount = models.DecimalField(u"Количество", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -8)])
-    rate = models.DecimalField(u"Стоимость", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -8)])
+    amount = models.DecimalField(u"Количество", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -7)])
+    rate = models.DecimalField(u"Стоимость", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -7)])
     cancel = models.BooleanField(u"отменен", default=False)
     completed = models.BooleanField(u"Завершен", default=False)
-
+    @classmethod
+    def min_max_avg_rate(cls, pair, to_int=None, to_round=None):
+        v = cls.objects.filter(pair=pair).filter(completed=True).exclude(cancel=True).aggregate(Min('rate'), Max('rate'), Avg('rate')).values()
+        v = [x if not x is None else _Zero for x in v]
+        if to_int: return [x.__int__() for x in v]
+        if to_round: return [round(x, to_round) for x in v]
+        return v
+    @classmethod
+    def sum_amount(cls, pair, to_int=None, to_round=None):
+        v = cls.objects.filter(pair=pair).filter(completed=True).exclude(cancel=True).aggregate(Sum('amount')).values()[0]
+        if v is None: v = _Zero
+        if to_int: return v.__int__()
+        if to_round: return round(v, to_round)
+        return v
+    @classmethod
+    def sum_total(cls, pair, to_int=None, to_round=None):
+        v = cls.objects.filter(pair=pair).filter(completed=True).exclude(cancel=True).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum
+        if v is None: v = _Zero
+        if to_int: return v.__int__()
+        if to_round: return round(v, to_round)
+        return v
+    @classmethod
+    def actives(cls, user, pair=None):
+        for o in cls.objects.filter(completed=False, pair=pair, user=user).exclude(cancel=True).only('updated', 'rate', 'amount').distinct().order_by('-updated'):
+            if hasattr(o, 'sale'):
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.sale._ret_amount, o.sale._sum_ret, o.pk
+            if hasattr(o, 'buy'):
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.buy._ret_amount, o.buy._sum_ret, o.pk
+    @classmethod
+    def history(cls, pair=None):
+        for o in cls.objects.filter(completed=True, pair=pair).exclude(cancel=True).only('updated', 'rate', 'amount').distinct().order_by('-updated')[:40]:
+            if hasattr(o, 'sale'):
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.amount, o.total
+            if hasattr(o, 'buy'):
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.amount, o.total
+    @property
+    def total(self):
+        return self.amount * self.rate
+    @property
+    def _left(self):
+        return self.pair.left
+    @property
+    def _right(self):
+        return self.pair.right
 #    class Meta:
 #        abstract = True
 
@@ -92,6 +145,9 @@ class Buy(Orders, Prop):
         if self._completed:
             return self.amount * self.commission / D(100)
         return self._amo_sum * self.commission / D(100) or _Zero
+    @property
+    def _sum_ret(self):
+        return self._ret_amount * self.rate
     @property
     def _total(self):
         if self._completed:
@@ -189,6 +245,9 @@ class Sale(Orders, Prop):
     @property
     def _commission_debit(self):
         return self._total * self.commission / D(100)
+    @property
+    def _sum_ret(self):
+        return self._ret_amount * self.rate
     @property
     def _total(self):
         if self._completed:
