@@ -6,10 +6,10 @@ from django.views.generic import DetailView, RedirectView
 from warrant.models import Buy, Sale
 
 # Create your views here.
-class Buy(DetailView, FormMixin):
+class BuyDetailView(DetailView, FormMixin):
     def post(self, request):
         pass
 
-class Sale(DetailView, FormMixin):
+class SaleDetailView(DetailView, FormMixin):
     def post(self, request):
         pass
