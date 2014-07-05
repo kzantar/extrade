@@ -10,7 +10,7 @@ from currency.models import TypePair
 def calc(request, amount, rate, slug, ttype):
     dajax = Dajax()
     pair = TypePair.objects.get(slug=slug)
-    total, commission = pair.calc(amount, rate)
+    total, commission = pair.calc(amount, rate, ttype)
     dajax.script("$('#{type}_total_result').text('{total} {right}');".format(**{"type":ttype, "total": total, "right":pair.right}))
-    dajax.script("$('#{type}_commission_result').text('{commission} {left}');".format(**{"type":ttype, "commission": commission, "left":pair.left}))
+    dajax.script("$('#{type}_commission_result').text('{commission} {pos}');".format(**{"type":ttype, "commission": commission, "pos":pair.left if ttype=='buy' else pair.right}))
     return dajax.json()

@@ -33,12 +33,16 @@ class TypePair(models.Model):
         if c.exists():
             return c[0].slug
         return ""
-    def calc(self, amount, rate):
+    def calc(self, amount, rate, ttype):
         amount = D(amount)
         rate = D(rate)
-        commission = floatformat(normalized(amount * self.commission / D(100)), -8)
-        total = floatformat(normalized(amount * rate, where="DOWN"), -8)
-        return total, commission
+        total = normalized(amount * rate, where="DOWN")
+        if ttype== 'sale':
+            _amo = total
+        else:
+            _amo = amount
+        commission = normalized(_amo * self.commission / D(100))
+        return floatformat(total, -8), floatformat(commission, -8)
     @classmethod
     def flr(cls):
         return cls.objects.all()
