@@ -57,14 +57,14 @@
                 </div>
                 <div class="buyBtcMiddle">
                 	<span class="BBtcSp">Количество {{ object.left }}:</span>
-                    <input type="text" class="buyBtcInp">
+                    <input type="text" class="buyBtcInp" name="buy_amount" id="buy_amount">
                     <span class="BBtcSp">Цена за {{ object.left }}:</span>
-                    <input type="text" class="buyBtcInp">
+                    <input type="text" class="buyBtcInp" name="buy_rate" id="buy_rate">
                     <div class="BBtcSp">Всего:</div>
-                    <div class="btcUsdSp">0 {{ object.right }}</div>
+                    <div class="btcUsdSp" id="buy_total_result">0 {{ object.right }}</div>
                     <div class="clr"></div>
                     <div class="BBtcSp">Комиссия:</div>
-                    <div class="btcUsdSp">0 {{ object.left }}</div>
+                    <div class="btcUsdSp" id="buy_commission_result">0 {{ object.left }}</div>
                     
                     <div class="clr"></div>
                      <p class="infoBtcP">
@@ -73,7 +73,15 @@
 						в соответствии с ордерами.
                 	</p>
                     <div class="buttonBlock">
-                    	<input type="button" value=" " class="podschBut">
+                    	<input type="button" value=" " class="podschBut"
+                        onclick="
+                        Dajaxice.warrant.calc(Dajax.process, {
+                            'amount': $('#buy_amount').attr('value'),
+                            'rate':$('#buy_rate').attr('value'),
+                            'slug': '{{ object.slug }}',
+                            'ttype': 'buy'
+                            });
+                        ">
                         <input type="button" value=" " class="buyBtcbut">
                     </div>
                     <div class="clr"></div>
@@ -143,14 +151,14 @@
                 </div>
                 <div class="buyBtcMiddle">
                 	<span class="BBtcSp">Количество {{ object.left }}:</span>
-                    <input type="text" class="buyBtcInp">
+                    <input type="text" class="buyBtcInp" name="sale_amount" id="sale_amount">
                     <span class="BBtcSp">Цена за {{ object.left }}:</span>
-                    <input type="text" class="buyBtcInp">
+                    <input type="text" class="buyBtcInp" name="sale_rate" id="sale_rate">
                     <div class="BBtcSp">Всего:</div>
-                    <div class="btcUsdSp">0 {{ object.right }}</div>
+                    <div class="btcUsdSp" id="sale_total_result">0 {{ object.right }}</div>
                     <div class="clr"></div>
                     <div class="BBtcSp">Комиссия:</div>
-                    <div class="btcUsdSp">0 {{ object.left }}</div>
+                    <div class="btcUsdSp" id="sale_commission_result">0 {{ object.left }}</div>
                     
                     <div class="clr"></div>
                      <p class="infoBtcP">
@@ -159,7 +167,14 @@
 						в соответствии с ордерами.
                 	</p>
                     <div class="buttonBlock">
-                    	<input type="button" value=" " class="podschBut">
+                    	<input type="button" value=" " class="podschBut" onclick="
+                        Dajaxice.warrant.calc(Dajax.process, {
+                            'amount': $('#sale_amount').attr('value'),
+                            'rate':$('#sale_rate').attr('value'),
+                            'slug': '{{ object.slug }}',
+                            'ttype': 'sale'
+                            });
+                        ">
                         <input type="button" value=" " class="buyBtcbut">
                     </div>
                     <div class="clr"></div>

@@ -48,6 +48,8 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'change_email',
     'chunks',
+    'dajaxice',
+    'dajax',
 
     'webgui',  # ордера
     'warrant',  # ордера
@@ -63,6 +65,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+)
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'dajaxice.finders.DajaxiceFinder',
 )
 
 

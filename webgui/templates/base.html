@@ -1,4 +1,4 @@
-{% load staticfiles i18n webgui_tags %}
+{% load staticfiles i18n webgui_tags dajaxice_templatetags %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,6 +13,9 @@
       <script src="{% static 'js/html5shiv.js' %}"></script>
       <script src="{% static 'js/respond.min.js' %}"></script>
     <![endif]-->
+        <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+        <script type="text/javascript" src="{% static 'dajax/jquery.dajax.core.js' %}"></script>
+        {% dajaxice_js_import %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" />
         <style type="text/css">
 .subD input

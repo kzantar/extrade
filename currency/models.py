@@ -1,6 +1,13 @@
 #-*- coding:utf-8 -*-
 from django.db import models
 
+from decimal import Decimal as D, _Zero
+from django.db.models import Avg, Max, Min
+from django.template.defaultfilters import floatformat
+from common.numeric import normalized
+
+
+
 # Create your models here.
 
 class Valuta(models.Model):
@@ -26,6 +33,12 @@ class TypePair(models.Model):
         if c.exists():
             return c[0].slug
         return ""
+    def calc(self, amount, rate):
+        amount = D(amount)
+        rate = D(rate)
+        commission = floatformat(normalized(amount * self.commission / D(100)), -8)
+        total = floatformat(normalized(amount * rate, where="DOWN"), -8)
+        return total, commission
     @classmethod
     def flr(cls):
         return cls.objects.all()

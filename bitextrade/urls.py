@@ -7,12 +7,16 @@ from users.forms import UserRegistrationForm, EmailAuthenticationForm
 from django.conf.urls.static import static
 from django.contrib import admin
 admin.autodiscover()
+from dajaxice.core import dajaxice_autodiscover, dajaxice_config
+dajaxice_autodiscover()
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'bitextrade.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
     url(r'^admin/', include(admin.site.urls)),
+    url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
 
     url(r'', include('webgui.urls')),
     url(r'', include('warrant.urls')),
@@ -27,3 +31,4 @@ urlpatterns = patterns('',
     url(r'', include('bitextrade.change_email_urls')),
 
 ) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += staticfiles_urlpatterns()
