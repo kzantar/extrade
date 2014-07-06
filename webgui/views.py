@@ -8,7 +8,7 @@ from common.mixin import LoginRequiredMixin
 from currency.models import TypePair
 from warrant.models import Orders, Buy, Sale
 from news.models import News
-from warrant.forms import OrderForm
+from warrant.forms import OrdersForm
 
 from django.contrib.auth import login, get_user_model
 
@@ -39,8 +39,9 @@ class ExchangeView(DetailView):
         ctx['order_sale'] = self.object.sale()
         ctx['order_history'] = self.object.history()
         ctx['news'] = News.getlast()
-        ctx['form_buy'] = OrderForm(prefix="buy")
-        ctx['form_sale'] = OrderForm(prefix="sale")
+        ctx['min_max_avg'] = min_max_avg = self.object.min_max_avg(to_int=True)
+        ctx['buy_form'] = OrdersForm(prefix="buy", initial={"pair":self.object, "rate": min_max_avg[0]})
+        ctx['sale_form'] = OrdersForm(prefix="sale", initial={"pair":self.object, "rate": min_max_avg[1]})
 
         if self.request.user.is_authenticated():
             user = Profile.objects.get(pk=self.request.user.pk)

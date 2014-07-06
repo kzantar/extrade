@@ -46,7 +46,8 @@ table {
 	border-spacing: 0;
 }
 /* End of Eric Meyer's CSS Reset */
-
+input.error
+    { border:1px red solid; }
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	width: 100%;

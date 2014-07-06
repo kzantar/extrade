@@ -39,10 +39,12 @@ class TypePair(models.Model):
         total = normalized(amount * rate, where="DOWN")
         if ttype== 'sale':
             _amo = total
+            pos = self.right
         else:
             _amo = amount
+            pos = self.left
         commission = normalized(_amo * self.commission / D(100))
-        return floatformat(total, -8), floatformat(commission, -8)
+        return floatformat(total, -8), floatformat(commission, -8), pos
     @classmethod
     def flr(cls):
         return cls.objects.all()
@@ -67,6 +69,12 @@ class TypePair(models.Model):
         _min = v.pop()
         _max = v.pop()
         return u"{min} / {max}".format(**{"min":_min, "max":_max,})
+    @property
+    def _min_max(self):
+        v = self.min_max_avg(to_int=True)
+        _min = v.pop()
+        _max = v.pop()
+        return _min, _max
     def history(self):
         return self.warrant_orders_related.model.history(pair=self)
     def actives(self, user):
