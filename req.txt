@@ -3,6 +3,8 @@ MySQL-python==1.2.5
 South==0.8.4
 chunks==0.1
 django-change-email==0.1.2
+django-dajax==0.9.2
+django-dajaxice==0.6
 django-easysettings==1.0.1
 django-filter==0.7
 -e hg+https://bitbucket.org/LinnTroll/django-registration-1.5@c71d5b8e273551cffdfc7869545430e30f417432#egg=django_registration-dev
