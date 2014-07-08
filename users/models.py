@@ -33,14 +33,14 @@ class MyCustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password):
-        u = self.create_user(email, password=password)
+        u = self.create_user(email, email, password=password)
         u.is_active = u.is_staff = u.is_superuser = True
         u.save(using=self._db)
         return u
 
 
 class Profile(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField((u'Имя пользователя'), max_length=40)
+    username = models.CharField((u'Имя пользователя'), max_length=40, unique=True)
     email = models.EmailField('E-mail', unique=True)
     pair = models.ForeignKey("currency.TypePair", blank=True, null=True, editable=False)
     date_joined = models.DateTimeField(

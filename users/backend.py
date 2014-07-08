@@ -18,7 +18,7 @@ class Backend(simple.SimpleBackend):
         g = GeoIP()
         geo_data = g.country(get_client_ip(request))
         username, email, password = kwargs['username'], kwargs['email'], kwargs['password1']
-        user = Profile.objects.create_user(username, email, password)
+        user = Profile.objects.create_user(email, username, password)
         user.country = geo_data['country_code'] or 'RU'
         user.save()
 

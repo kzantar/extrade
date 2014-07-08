@@ -29,6 +29,10 @@ class UserRegistrationForm(forms.Form):
     password2 = forms.CharField(
         widget=forms.PasswordInput(), label=(u'Пароль (ещё раз)'))
 
+    def clean_username(self):
+        if Profile.objects.filter(username=self.cleaned_data['username']).exists():
+            raise forms.ValidationError((u'Это имя пользователя уже занято.'))
+        return self.cleaned_data['username']
     def clean_password(self):
         if self.cleaned_data['password1'] != self.cleaned_data['password2']:
             raise forms.ValidationError((u'Пароли не совпадают'))
