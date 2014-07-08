@@ -42,7 +42,7 @@
                         	Ваши средства
                         </span>
                         <span class="usdOrange">
-                        	0 {{ object.right }}
+                        	{{ user.balance_right }}
                         </span>
                     </div>
                     <div class="rightBlockSec">
@@ -133,7 +133,7 @@
                         	Ваши средства
                         </span>
                         <span class="usdOrange">
-                        	0 {{ object.right }}
+                        	{{ user.balance_left }}
                         </span>
                     </div>
                     <div class="rightBlockSec">
@@ -159,7 +159,7 @@
                     <div class="btcUsdSp" id="sale_total_result">0 {{ object.right }}</div>
                     <div class="clr"></div>
                     <div class="BBtcSp">Комиссия:</div>
-                    <div class="btcUsdSp" id="sale_commission_result">0 {{ object.left }}</div>
+                    <div class="btcUsdSp" id="sale_commission_result">0 {{ object.right }}</div>
                     <div class="clr"></div>
                      <p class="infoBtcP" id="info_sale">
                         Нажмите <span class="blodspan">подсчитать</span>, 
@@ -225,13 +225,13 @@
                         <td>Действия</td>
                     </tr>
 {% for updated, type, rate, amount, total, pk in order_actives %}
-                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}" id="active_orders_list-{{ pk }}">
                         <td class="costTdd"><span class="{% if type == 'sell' %}buyGreen{% else %}buyRed{% endif %}">{{ type }}</span></td>
                         <td class="therdTdd">{{ rate|floatformat:-8 }} {{ object.right }}</td>
                         <td>{{ amount|floatformat:-8 }} {{ object.left }}</td>
                         <td>{{ total|floatformat:-8 }} {{ object.right }}</td>
                         <td>{{ updated }}</td>
-                        <td><a href="{{ pk }}">отменить</a></td>
+                        <td><a href="{{ pk }}" onclick="Dajaxice.warrant.cancel(Dajax.process, {'pk': '{{ pk }}'}); return false;">отменить</a></td>
                     </tr>
 {% endfor %}
             </tbody></table>

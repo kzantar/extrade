@@ -5,6 +5,7 @@ from decimal import Decimal as D, _Zero
 from django.db.models import Avg, Max, Min
 from django.template.defaultfilters import floatformat
 from common.numeric import normalized
+from django.db.models import Sum, Count, F, Q
 
 
 
@@ -80,18 +81,18 @@ class TypePair(models.Model):
     def actives(self, user):
         return self.warrant_orders_related.model.actives(user=user, pair=self)
     def buy(self):
-        for o in self.warrant_orders_related.model.buy.related.model.objects.filter(pair=self, completed=False).distinct():
+        for o in self.warrant_orders_related.model.buy.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).distinct():
             yield o.rate, o.ret_amount, o.ret_sum
     def sale(self):
-        for o in self.warrant_orders_related.model.sale.related.model.objects.filter(pair=self, completed=False).distinct():
+        for o in self.warrant_orders_related.model.sale.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).distinct():
             yield o.rate, o.ret_amount, o.ret_sum
     @property
     def avg_rate(self):
         return self.min_max_avg(to_int=True)[2]
     @property
     def last_order(self):
-        o = self.warrant_orders_related.filter(completed=True)
+        o = self.warrant_orders_related.filter(Q(cancel=True) | Q(completed=True))
         if o.exists():
-            return self.warrant_orders_related.filter(completed=True)[0]
+            return self.warrant_orders_related.filter(Q(cancel=True) | Q(completed=True))[0]
     class Meta:
         unique_together = (("left", "right",),)

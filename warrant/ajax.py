@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.conf import settings
 from currency.models import TypePair
 from warrant.forms import OrdersForm
+from warrant.models import Orders
 
 @dajaxice_register
 def calc(request, form):
@@ -18,8 +19,8 @@ def calc(request, form):
     form = OrdersForm(prefix=ttype, data=q)
     if form.is_valid():
         c=form.cleaned_data
-        pair = c.get('pair')
-        total, commission, pos = pair.calc(c.get('amount'), c.get('rate'), ttype)
+        pair, amount, rate = c.get('pair'), c.get('amount'), c.get('rate')
+        total, commission, pos = pair.calc(amount, rate, ttype)
         dajax.script("$('#{type}_total_result').text('{total} {right}');".format(**{"type":ttype, "total": total, "right":pair.right}))
         dajax.script("$('#{type}_commission_result').text('{commission} {pos}');".format(**{"type":ttype, "commission": commission, "pos":pos }))
         dajax.remove_css_class('#{type}_form input'.format(**{"type":ttype}), 'error')
@@ -27,12 +28,17 @@ def calc(request, form):
         dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":"Неправильно заполнено одно из полей.", }))
         for error in form.errors:
             dajax.add_css_class('#id_%s-%s' % (ttype, error), 'error')
-    """
-    pair = TypePair.objects.get(slug=slug)
-    total, commission = pair.calc(amount, rate, ttype)
-    dajax.script("$('#{type}_total_result').text('{total} {right}');".format(**{"type":ttype, "total": total, "right":pair.right}))
-    dajax.script("$('#{type}_commission_result').text('{commission} {pos}');".format(**{"type":ttype, "commission": commission, "pos":pair.left if ttype=='buy' else pair.right}))
-    if not request.user.is_authenticated:
-        dajax.script("$('#info_{type}').text('');".format(**{}))
-    """
+    return dajax.json()
+
+@dajaxice_register
+def cancel(request, pk):
+    dajax = Dajax()
+    user=request.user
+    if user.is_authenticated() and user.is_active:
+        o = Orders.is_active_order(user=user, pk=pk)
+        if o.exists():
+            _o=o[0]
+            if o.update(cancel=True) > 0:
+                dajax.script("$('#active_orders_list-{pk}').remove()".format(**{"pk": pk,}))
+                dajax.script("alert('ордер на сумму {sum} отменен успешно')".format(**{"sum": _o.sum_order_current}))
     return dajax.json()

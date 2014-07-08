@@ -4,6 +4,8 @@ from django.views.generic.edit import FormMixin
 from django.views.generic import ListView, DetailView, RedirectView, TemplateView
 from django.shortcuts import get_object_or_404
 from common.mixin import LoginRequiredMixin
+from django.db.models import Sum, Count, F, Q
+
 
 from currency.models import TypePair
 from warrant.models import Orders, Buy, Sale
@@ -22,8 +24,6 @@ class ExchangeView(DetailView):
     slug_url_kwarg = 'pair'
     def get_object(self, queryset=None):
         qs = queryset or self.get_queryset()
-        #self.request.session['pair'] = self.object.slug
-        #self.request.session.save()
         return super(ExchangeView, self).get_object(queryset=qs)
     def get(self, request, *args, **kwargs):
         _pair = self.request.session.get('pair', None)
@@ -45,6 +45,7 @@ class ExchangeView(DetailView):
 
         if self.request.user.is_authenticated():
             user = Profile.objects.get(pk=self.request.user.pk)
+            user._update_pair(self.object)
             ctx['order_actives'] = self.object.actives(user)
         return ctx
 
@@ -54,8 +55,7 @@ class ProfileOrderHistoryView(LoginRequiredMixin, ListView):
     model = Orders
     paginate_by = 41
     def get_queryset(self):
-        self.queryset = self.model._default_manager.filter(user=self.request.user)
-        print self.queryset
+        self.queryset = self.model._default_manager.filter(user=self.request.user).exclude(Q(cancel=True) | Q(completed=True))
         return super(ProfileOrderHistoryView, self).get_queryset()
 
 class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
@@ -63,5 +63,5 @@ class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     model = Orders
     paginate_by = 41
     def get_queryset(self):
-        self.queryset = self.model._default_manager.filter(user=self.request.user)
+        self.queryset = self.model._default_manager.filter(user=self.request.user).filter(completed=True)
         return super(ProfileTransactionHistoryView, self).get_queryset()

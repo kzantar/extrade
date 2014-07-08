@@ -2,11 +2,42 @@
 {% load i18n widget_tweaks %}
 
 {% block meta %}
-<title>{% trans 'история сделок' %}</title>
+<title>{% trans 'история ордеров' %}</title>
+{% endblock %}
+{% block head %}
+<style type="text/css">
+.content 
+    { padding-right: 0px; }
+</style>
 {% endblock %}
 
 {% block content_profile %}
 
-{{ object_list }}
-
+            <h3>История ордеров</h3>
+            <table width="100%" class="activeOrderTabb">
+                <tbody><tr class="tableheadTr">
+                        <td class="tiptdd">Пара</td>
+                        <td class="costTdd">Тип</td>
+                        <td>Цена</td>
+                        <td class="therdTdd">Кол-во</td>
+                        <td>Всего</td>
+                        <td>Дата</td>
+                        <td>Исполнен</td>
+                        <td>Статус</td>
+                        <td>Действия</td>
+                    </tr>
+{% for object in object_list %}
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}" id="active_orders_list-{{ object.pk }}">
+                        <td>{{ object.pair }}</td>
+                        <td class="costTdd"><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
+                        <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
+                        <td>{{ object.amount|floatformat:-8 }} {{ object.pair.left }}</td>
+                        <td>{{ object.total|floatformat:-8 }} {{ object.pair.right }}</td>
+                        <td></td>
+                        <td></td>
+                        <td><a href="{{ pk }}" onclick="Dajaxice.warrant.cancel(Dajax.process, {'pk': '{{ object.pk }}'}); return false;">отменить</a></td>
+                    </tr>
+{% endfor %}
+            </tbody></table>
 {% endblock %}
+

@@ -3,6 +3,14 @@ from django.db import models
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from decimal import Decimal as D, _Zero
+from django.core.validators import RegexValidator, MinValueValidator
+from currency.models import Valuta
+from django.db.models import Avg, Max, Min, Sum
+from django.template.defaultfilters import floatformat
+from warrant.models import Orders
+
+
 
 # Create your models here.
 
@@ -32,8 +40,9 @@ class MyCustomUserManager(BaseUserManager):
 
 
 class Profile(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField((u'Имя пользователя'), max_length=40, unique=True)
+    username = models.CharField((u'Имя пользователя'), max_length=40)
     email = models.EmailField('E-mail', unique=True)
+    pair = models.ForeignKey("currency.TypePair", blank=True, null=True, editable=False)
     date_joined = models.DateTimeField(
         (u'Дата регистрации'), default=timezone.now)
     is_active = models.BooleanField(
@@ -83,6 +92,42 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         return super(Profile, self).save(*args, **kwargs)
+    def _user_balance(self, valuta=None):
+        balance={}
+        for v in Valuta.objects.all():
+            b = self.profilebalance_set.filter(valuta__value=v.value, profile=self).aggregate(Sum('value')).values()[0] or _Zero
+            balance.update({v.value: b })
+        if valuta: return balance.get(valuta, _Zero)
+        return balance
+    def _user_balance_val(self, valuta):
+        return self._user_balance(valuta)
+    def orders_balance(self, valuta):
+        return self._user_balance_val(valuta=valuta) - Orders.sum_from_user_buy_sale(user=self, valuta=valuta)
+    def _update_pair(self, pair):
+        if not pair == self.pair:
+            self.pair = pair
+            self.save()
+    @property
+    def amount_right(self):
+        if self.pair:
+            return self.orders_balance(self.pair.right.value)
+        return _Zero
+    @property
+    def amount_left(self):
+        if self.pair:
+            return self.orders_balance(self.pair.left.value)
+        return _Zero
+    @property
+    def balance_left(self):
+        return "{amo} {pos}".format(**{"amo":floatformat(self.amount_left, -8), "pos":self.pair.left})
+    @property
+    def balance_right(self):
+        return "{amo} {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right})
+
+class ProfileBalance(models.Model):
+    value = models.DecimalField(u"Баланс", max_digits=14, decimal_places=8, validators=[MinValueValidator(_Zero)])
+    valuta = models.ForeignKey("currency.Valuta")
+    profile = models.ForeignKey("users.Profile", verbose_name=(u'Профиль'))
 
 class ProfileRole(models.Model):
     PROFILE_ROLE = (

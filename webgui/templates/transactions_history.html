@@ -27,9 +27,9 @@
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
                         <td>{{ object.pair }}</td>
                         <td class="costTdd"><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
-                        <td>{{ object.amount|floatformat:-8 }}</td>
-                        <td>{{ object.rate|floatformat:-8 }}</td>
-                        <td>{{ object.total|floatformat:-8 }}</td>
+                        <td>{{ object.amount|floatformat:-8 }} {{ object.pair.left }}</td>
+                        <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
+                        <td>{{ object.total|floatformat:-8 }} {{ object.pair.left }}</td>
                         <td>{{ object.updated|date:"d.m.y H:i" }}</td>
                     </tr>
 {% endfor %}
