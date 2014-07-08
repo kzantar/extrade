@@ -46,6 +46,10 @@ class TypePair(models.Model):
             pos = self.left
         commission = normalized(_amo * self.commission / D(100))
         return floatformat(total, -8), floatformat(commission, -8), pos
+    def order_sale(self, user, amount, rate):
+        return self.warrant_orders_related.model.sale.related.model.objects.create(user=user, amount=amount, rate=rate, pair=self)
+    def order_buy(self, user, amount, rate):
+        return self.warrant_orders_related.model.buy.related.model.objects.create(user=user, amount=amount, rate=rate, pair=self)
     @classmethod
     def flr(cls):
         return cls.objects.all()

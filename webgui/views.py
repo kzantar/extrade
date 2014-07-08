@@ -42,9 +42,8 @@ class ExchangeView(DetailView):
         ctx['min_max_avg'] = min_max_avg = self.object.min_max_avg(to_int=True)
         ctx['buy_form'] = OrdersForm(prefix="buy", initial={"pair":self.object, "rate": min_max_avg[0]})
         ctx['sale_form'] = OrdersForm(prefix="sale", initial={"pair":self.object, "rate": min_max_avg[1]})
-
-        if self.request.user.is_authenticated():
-            user = Profile.objects.get(pk=self.request.user.pk)
+        user = self.request.user
+        if user.is_authenticated() and user.is_active:
             user._update_pair(self.object)
             ctx['order_actives'] = self.object.actives(user)
         return ctx

@@ -31,6 +31,29 @@ def calc(request, form):
     return dajax.json()
 
 @dajaxice_register
+def order(request, form):
+    dajax = Dajax()
+    q=deserialize_form(form)
+    ttype = ''
+    if not q.get('buy-amount', None) is None: ttype='buy'
+    if not q.get('sale-amount', None) is None: ttype='sale'
+    form = OrdersForm(prefix=ttype, data=q)
+    if form.is_valid():
+        c=form.cleaned_data
+        user=request.user
+        if user.is_authenticated() and user.is_active:
+            pair, amount, rate = c.get('pair'), c.get('amount'), c.get('rate')
+            _ret = getattr(pair, "order_%s" % ttype)(user, amount, rate)
+            print _ret
+            dajax.remove_css_class('#{type}_form input'.format(**{"type":ttype}), 'error')
+            dajax.script("location.reload();")
+    else:
+        dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":"Неправильно заполнено одно из полей.", }))
+        for error in form.errors:
+            dajax.add_css_class('#id_%s-%s' % (ttype, error), 'error')
+    return dajax.json()
+
+@dajaxice_register
 def cancel(request, pk):
     dajax = Dajax()
     user=request.user

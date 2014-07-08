@@ -78,7 +78,7 @@
                 	</p>
                     <div class="buttonBlock">
                     	<input type="button" value=" " class="podschBut" onclick="Dajaxice.warrant.calc(Dajax.process, {'form':$('#buy_form').serialize(true)});">
-                        <input type="button" value=" " class="buyBtcbut">
+                        <input type="button" value=" " class="buyBtcbut" onclick="Dajaxice.warrant.order(Dajax.process, {'form':$('#buy_form').serialize(true)});">
                     </div>
                     </form>
                     <div class="clr"></div>
@@ -168,7 +168,7 @@
                 	</p>
                     <div class="buttonBlock">
                     	<input type="button" value=" " class="podschBut" onclick="Dajaxice.warrant.calc(Dajax.process, {'form':$('#sale_form').serialize(true)});">
-                        <input type="button" value=" " class="buyBtcbut">
+                        <input type="button" value=" " class="buyBtcbut" onclick="Dajaxice.warrant.order(Dajax.process, {'form':$('#sale_form').serialize(true)});">
                     </div>
                     <div class="clr"></div>
                 </div>
@@ -233,13 +233,16 @@
                         <td>{{ updated }}</td>
                         <td><a href="{{ pk }}" onclick="Dajaxice.warrant.cancel(Dajax.process, {'pk': '{{ pk }}'}); return false;">отменить</a></td>
                     </tr>
+{% empty %}
+            <tr>
+                <td colspan="6">
+                    <span class="emptyOrder">
+                        Нет активных ордеров в данный момент.
+                    </span>
+                </td>
+            </tr>
 {% endfor %}
             </tbody></table>
-{% if not order_actives %}
-            <span class="emptyOrder">
-            	Нет активных ордеров в данный момент.
-            </span>
-{% endif %}
         </div>
 
 

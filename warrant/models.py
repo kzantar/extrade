@@ -119,9 +119,6 @@ class Orders(models.Model):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.amount, o.total
             if hasattr(o, 'buy'):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.amount, o.total
-    @classmethod
-    def balance(cls, user, pair, ):
-        pass
     @property
     def total(self):
         return self.amount * self.rate
@@ -140,8 +137,8 @@ class Buy(Orders, Prop):
         s = "Buy" + str(self.pk) + str(self.pair) + str(self.updated)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
-        print "Buy save"
-        e=Buy.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
+        #print "Buy save"
+        #e=Buy.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
         #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:
@@ -250,8 +247,8 @@ class Sale(Orders, Prop):
         s = "Sale" + str(self.pk) + str(self.pair) + str(self.updated)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
-        print "Sale save"
-        e=Sale.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
+        #print "Sale save"
+        #e=Sale.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
         #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:
