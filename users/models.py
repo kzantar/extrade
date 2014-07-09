@@ -98,7 +98,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return super(Profile, self).save(*args, **kwargs)
     def _user_balance(self, valuta):
         q=self.profilebalance_set.filter(valuta__value=valuta, profile=self)
-        md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta))
+        md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta) + str(self.pk))
         b = cache.get(md5key)
         if b is None:
             balance_plus = q.filter(action="+").distinct().aggregate(Sum('value')).values()[0] or _Zero

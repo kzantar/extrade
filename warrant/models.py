@@ -71,7 +71,7 @@ class Orders(models.Model):
     @classmethod
     def sum_from_user_buy_sale(cls, user, valuta):
         obj = cls.objects.filter(user=user).filter(Q(pair__left__value=valuta) | Q(pair__right__value=valuta)).only('pair', 'rate', 'amount').distinct()
-        md5key = strmd5sum( "balance" + str(obj.count()) + str(user.pk) + str(valuta) )
+        md5key = strmd5sum( "balance" + str(obj.count()) + str(user.pk) + str(valuta) ) #FIXME add self.sale_sale, self.buy_buy
         _s = cache.get(md5key)
         if _s is None:
             _s=_Zero

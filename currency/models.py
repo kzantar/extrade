@@ -34,7 +34,7 @@ class TypePair(models.Model):
         if c.exists():
             return c[0].slug
         return ""
-    def calc(self, amount, rate, ttype):
+    def calc(self, amount, rate, ttype, totext=None):
         amount = D(amount)
         rate = D(rate)
         total = normalized(amount * rate, where="DOWN")
@@ -45,7 +45,9 @@ class TypePair(models.Model):
             _amo = amount
             pos = self.left
         commission = normalized(_amo * self.commission / D(100))
-        return floatformat(total, -8), floatformat(commission, -8), pos
+        if totext:
+            return floatformat(total, -8), floatformat(commission, -8), pos
+        return total, commission, pos
     def order_sale(self, user, amount, rate):
         return self.warrant_orders_related.model.sale.related.model.objects.create(user=user, amount=amount, rate=rate, pair=self)
     def order_buy(self, user, amount, rate):

@@ -8,6 +8,8 @@ from django.conf import settings
 from currency.models import TypePair
 from warrant.forms import OrdersForm
 from warrant.models import Orders
+from django.template.defaultfilters import floatformat
+
 
 @dajaxice_register
 def calc(request, form):
@@ -20,7 +22,7 @@ def calc(request, form):
     if form.is_valid():
         c=form.cleaned_data
         pair, amount, rate = c.get('pair'), c.get('amount'), c.get('rate')
-        total, commission, pos = pair.calc(amount, rate, ttype)
+        total, commission, pos = pair.calc(amount, rate, ttype, totext=True)
         dajax.script("$('#{type}_total_result').text('{total} {right}');".format(**{"type":ttype, "total": total, "right":pair.right}))
         dajax.script("$('#{type}_commission_result').text('{commission} {pos}');".format(**{"type":ttype, "commission": commission, "pos":pos }))
         dajax.remove_css_class('#{type}_form input'.format(**{"type":ttype}), 'error')
@@ -35,18 +37,28 @@ def order(request, form):
     dajax = Dajax()
     q=deserialize_form(form)
     ttype = ''
-    if not q.get('buy-amount', None) is None: ttype='buy'
-    if not q.get('sale-amount', None) is None: ttype='sale'
+    if not q.get('buy-amount', None) is None: ttype = 'buy'
+    if not q.get('sale-amount', None) is None: ttype = 'sale'
     form = OrdersForm(prefix=ttype, data=q)
     if form.is_valid():
         c=form.cleaned_data
         user=request.user
         if user.is_authenticated() and user.is_active:
             pair, amount, rate = c.get('pair'), c.get('amount'), c.get('rate')
-            _ret = getattr(pair, "order_%s" % ttype)(user, amount, rate)
-            print _ret
-            dajax.remove_css_class('#{type}_form input'.format(**{"type":ttype}), 'error')
-            dajax.script("location.reload();")
+            total, commission, pos = pair.calc(amount, rate, ttype)
+            if ttype == 'buy': pos = pair.right
+            if ttype == 'sale': pos = pair.left
+            valuta = pos.value
+            balance = user.orders_balance(valuta)
+            if ttype == 'buy': _sum = balance - total
+            if ttype == 'sale': _sum = balance - amount
+            if _sum >= 0:
+                _ret = getattr(pair, "order_%s" % ttype)(user, amount, rate)
+                dajax.remove_css_class('#{type}_form input'.format(**{"type":ttype}), 'error')
+                dajax.script("location.reload();")
+            else:
+                text = "Сумма сделки превышает ваш баланс на {sum} {valuta}".format(**{"sum":floatformat(-_sum, -8), "valuta": pos })
+                dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":text, }))
     else:
         dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":"Неправильно заполнено одно из полей.", }))
         for error in form.errors:

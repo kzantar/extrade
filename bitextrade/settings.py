@@ -110,6 +110,13 @@ DATABASES = {
 }
 
 USE_CACHE = not DEBUG
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+   }
+}
+
+
 TIMEOUT = 3600
 if not DEBUG:
     CACHES = {
