@@ -52,15 +52,20 @@ class ExchangeView(DetailView):
 class ProfileOrderHistoryView(LoginRequiredMixin, ListView):
     template_name = "order_history.html"
     model = Orders
-    paginate_by = 41
+    paginate_by = 5
     def get_queryset(self):
-        self.queryset = self.model._default_manager.filter(user=self.request.user).exclude(Q(cancel=True) | Q(completed=True))
+        self.queryset = self.model._default_manager.filter(user=self.request.user)
         return super(ProfileOrderHistoryView, self).get_queryset()
 
 class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     template_name = "transactions_history.html"
     model = Orders
-    paginate_by = 41
+    paginate_by = 5
     def get_queryset(self):
         self.queryset = self.model._default_manager.filter(user=self.request.user).filter(completed=True)
         return super(ProfileTransactionHistoryView, self).get_queryset()
+
+class ProfileFinancesView(LoginRequiredMixin, ListView):
+    template_name = "balance_list.html"
+    def get_queryset(self):
+        return self.request.user.finances()

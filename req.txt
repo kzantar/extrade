@@ -5,6 +5,7 @@ chunks==0.1
 django-change-email==0.1.2
 django-dajax==0.9.2
 django-dajaxice==0.6
+django-debug-toolbar==1.2.1
 django-easysettings==1.0.1
 django-filter==0.7
 -e hg+https://bitbucket.org/LinnTroll/django-registration-1.5@c71d5b8e273551cffdfc7869545430e30f417432#egg=django_registration-dev
@@ -15,5 +16,6 @@ httpagentparser==1.7.3
 httplib2==0.9
 pyotp==1.4.1
 six==1.7.2
+sqlparse==0.1.11
 twilio==3.6.6
 wsgiref==0.1.2

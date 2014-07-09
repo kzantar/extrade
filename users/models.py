@@ -9,6 +9,10 @@ from currency.models import Valuta
 from django.db.models import Avg, Max, Min, Sum
 from django.template.defaultfilters import floatformat
 from warrant.models import Orders
+from django.core.cache import cache
+from common.lib import strmd5sum
+
+
 
 
 
@@ -93,12 +97,17 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         return super(Profile, self).save(*args, **kwargs)
     def _user_balance(self, valuta=None):
-        balance={}
+        md5key = strmd5sum("_user_balance" + str(self.profilebalance_set.count()))
+        b = cache.get(md5key)
+        if b is None:
+            balance_plus = self.profilebalance_set.filter(valuta__value=valuta, profile=self, action="+").distinct().aggregate(Sum('value')).values()[0] or _Zero
+            balance_minus = self.profilebalance_set.filter(valuta__value=valuta, profile=self, action="-").distinct().aggregate(Sum('value')).values()[0] or _Zero
+            b = balance_plus - balance_minus
+            cache.set(md5key, b)
+        return b
+    def finances(self):
         for v in Valuta.objects.all():
-            b = self.profilebalance_set.filter(valuta__value=v.value, profile=self).aggregate(Sum('value')).values()[0] or _Zero
-            balance.update({v.value: b })
-        if valuta: return balance.get(valuta, _Zero)
-        return balance
+            yield v, floatformat(self.orders_balance(v.value), -8), v.pk
     def _user_balance_val(self, valuta):
         return self._user_balance(valuta)
     def orders_balance(self, valuta):
@@ -125,9 +134,19 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return "{amo} {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right})
 
 class ProfileBalance(models.Model):
-    value = models.DecimalField(u"Баланс", max_digits=14, decimal_places=8, validators=[MinValueValidator(_Zero)])
-    valuta = models.ForeignKey("currency.Valuta")
+    ACTIONS=(
+        ('+', '+пополнение'),
+        ('-', '-списание'),
+    )
+    value = models.DecimalField(u"количество", max_digits=14, decimal_places=8, validators=[MinValueValidator(_Zero)])
+    valuta = models.ForeignKey("currency.Valuta", verbose_name=u"валюта")
     profile = models.ForeignKey("users.Profile", verbose_name=(u'Профиль'))
+    action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
+    def __unicode__(self):
+        return u"{action}{amount}".format(**{"action": self.action, "amount": self.value})
+    class Meta:
+        verbose_name = u'перевод'
+        verbose_name_plural = u'переводы средств'
 
 class ProfileRole(models.Model):
     PROFILE_ROLE = (

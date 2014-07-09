@@ -69,6 +69,10 @@ class TypePair(models.Model):
         _sum = self.sum_amount(to_round=2)
         return u"{sum}".format(**{"sum":_sum,})
     @property
+    def sumtotal(self):
+        _sum = self.sum_total(to_round=2)
+        return u"{sum}".format(**{"sum":_sum,})
+    @property
     def min_max(self):
         v = self.min_max_avg(to_int=True)
         _min = v.pop()
