@@ -5,7 +5,11 @@
                 <h3>{{ object.title }}</h3>
         {% endif %}
                 <p>
-                	{{ object.text|safe }}
+                	{% if link %}
+                        {{ object.smalltext|safe }}
+                    {% else %}
+                        {{ object.text|safe }}
+                    {% endif %}
 <span class="redsp">{{ object.date|date:"d.m.y H:i" }}</span>
                 </p>
             </div>
