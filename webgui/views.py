@@ -39,7 +39,7 @@ class ExchangeView(DetailView):
         ctx['order_sale'] = self.object.sale()
         ctx['order_history'] = self.object.history()
         ctx['news'] = News.getlast()
-        ctx['min_max_avg'] = min_max_avg = self.object.min_max_avg(to_int=True)
+        ctx['min_max_avg'] = min_max_avg = self.object.min_max_avg(to_round=8)
         ctx['buy_form'] = OrdersForm(prefix="buy", initial={"pair":self.object, "rate": min_max_avg[0]})
         ctx['sale_form'] = OrdersForm(prefix="sale", initial={"pair":self.object, "rate": min_max_avg[1]})
         user = self.request.user
