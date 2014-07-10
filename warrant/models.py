@@ -139,11 +139,11 @@ class Orders(models.Model):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.el._ret_amount, o.el._sum_ret, o.pk
     @classmethod
     def history(cls, pair=None):
-        for o in cls.objects.filter(pair=pair).filter(Q(cancel=True) | Q(completed=True)).only('updated', 'rate', 'amount').distinct().order_by('-updated')[:40]:
+        for o in cls.objects.filter(pair=pair).filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(cancel=True, sale__sale_sale__gte=1) | Q(completed=True)).only('updated', 'rate', 'amount').distinct().order_by('-updated')[:40]:
             if o.is_action('sale'):
-                yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.amount, o.total
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.amount, o.total, o.pk
             if o.is_action('buy'):
-                yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.amount, o.total
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.amount, o.total, o.pk
     @property
     def action(self):
         md5key = strmd5sum( "order action" + str(self.pk))

@@ -27,7 +27,7 @@
                     </tr>
 {% for object in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{#{ object.pk }#}{{ object.pair }}</td>
+                        <td>{{ object.pair }}</td>
                         {% if user == object.user %}
                         <td><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
                         {% else %}

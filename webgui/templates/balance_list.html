@@ -8,6 +8,8 @@
 <style type="text/css">
 .content 
     { padding-right: 0px; }
+.logInfo
+    { width:70%; }
 </style>
 {% endblock %}
 
@@ -20,30 +22,10 @@
                         <td>Всего</td>
                     </tr></tbody>
     {% for valuta, balance, pk in object_list %}
-                    <tr>
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
                         <td>{{ valuta }}</td>
                         <td>{{ balance }}</td>
                     </tr>
     {% endfor %}
     </table>
-{% comment %}
-        <div class="inblock">
-<div style="float:left">
-<h3 style="margin-bottom: 2px;">{{ valuta }}</h3>
-<div style="width:240px; float:left">
-<p>Баланс: <b>{{ balance }}</b> {{ valuta }}</p>{#<p>Всего: <b>40.06587186</b> {{ valuta }}</p>#}
-</div>
-<div style="width:240px; float:left">
-{#<p><a href="https://btc-e.com/profile#orders_history" onclick="profile(&quot;orders_history&quot;, 1, 0, undefined)">На ордерах</a>: <b>0.00963031</b> {{ valuta }}</p>#}
-</div>
-</div>
-<div style="float:right">
-<div style="width:250px; float:right">
-<a href="#funds/withdraw_coin/14" onclick="billing_profile(&quot;withdraw_coin/14&quot;)" class="button minibutton" style="float: right;">Вывести</a><a href="#funds/deposit_coin/14" onclick="billing_profile(&quot;deposit_coin/14&quot;)" class="button minibutton" style="float: right;">Пополнить</a>
-<div class="clear"></div>
-</div>
-</div>
-<div class="clear"></div></div>
-{% endcomment %}
-
 {% endblock %}

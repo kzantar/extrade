@@ -86,7 +86,7 @@
             </div>
             <div class="orderBlock">
             	<h3>Ордера на покупку</h3>
-                <span class="kollSp">Всего: {{ object.sumamount }} {{ object.left }}</span>
+                <span class="kollSp">Всего: {{ object.in_orders_sum_buy|floatformat:-8 }} {{ object.left }}</span>
                 <div class="clr"></div>
                 <table class="orderTb orderTbFr">
                 	<tbody><tr class="tableheadTr">
@@ -175,7 +175,7 @@
             </div>
             <div class="orderBlock">
             	<h3>Ордера на продажу</h3>
-                <span class="kollSp">Всего: {{ object.sumtotal }} {{ object.right }}</span>
+                <span class="kollSp">Всего: {{ object.in_orders_sum_sell|floatformat:-8 }} {{ object.right }}</span>
                 <div class="clr"></div>
                 <table class="orderTb orderTbFr">
                 	<tbody><tr class="tableheadTr">
@@ -261,7 +261,7 @@
                         <td>Кол-во ({{ object.left }})</td>
                         <td>Всего ({{ object.right }})</td>
                     </tr>
-{% for updated, type, rate, amount, total in order_history %}
+{% for updated, type, rate, amount, total, pk in order_history %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
                         <td class="tiptdd">{{ updated }}</td>
                         <td class="costTdd"><span class="{% if type == 'sell' %}buyGreen{% else %}buyRed{% endif %}">{{ type }}</span></td>
