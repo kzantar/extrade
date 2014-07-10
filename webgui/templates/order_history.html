@@ -8,18 +8,28 @@
 <style type="text/css">
 .content 
     { padding-right: 0px; }
+.logInfo
+    { width:70%; }
 </style>
 {% endblock %}
 
 {% block content_profile %}
 
             <h3>История ордеров</h3>
+            <br>
+            <p>
+            <a href="{% url 'history_order' 'active' %}">активные</a>,
+            <a href="{% url 'history_order' 'executed' %}">выполненые</a>, 
+            <a href="{% url 'history_order' 'part_executed' %}">частично выполненые</a>,
+            <a href="{% url 'history_order' 'cancel' %}">отмененные</a>
+            </p>
+            <br>
             <table width="100%" class="activeOrderTabb">
                 <tbody><tr class="tableheadTr">
-                        <td class="tiptdd">Пара</td>
-                        <td class="costTdd">Тип</td>
+                        <td>Пара</td>
+                        <td>Тип</td>
                         <td>Цена</td>
-                        <td class="therdTdd">Кол-во</td>
+                        <td>Кол-во</td>
                         <td>Всего</td>
                         <td>Дата</td>
                         <td>Исполнен</td>
@@ -29,12 +39,13 @@
 {% for object in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}" id="active_orders_list-{{ object.pk }}">
                         <td>{{ object.pair }}</td>
-                        <td class="costTdd"><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
+                        <td><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
                         <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
                         <td>{{ object.amount|floatformat:-8 }} {{ object.pair.left }}</td>
                         <td>{{ object.total|floatformat:-8 }} {{ object.pair.right }}</td>
-                        <td></td>
-                        <td></td>
+                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
+                        <td>{#{ object.pk }#}{{ object.w_percent }}%</td>
+                        <td>{{ object.w_status }}</td>
                         <td><a href="{{ pk }}" onclick="Dajaxice.warrant.cancel(Dajax.process, {'pk': '{{ object.pk }}'}); return false;">отменить</a></td>
                     </tr>
 {% endfor %}

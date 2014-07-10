@@ -54,15 +54,27 @@ class ProfileOrderHistoryView(LoginRequiredMixin, ListView):
     model = Orders
     paginate_by = 5
     def get_queryset(self):
-        self.queryset = self.model._default_manager.filter(user=self.request.user)
+        sort_by = self.kwargs.get('sort_by')
+        q = self.model._default_manager.filter(user=self.request.user).order_by('-updated')
+        if sort_by == 'active': q = q.exclude(Q(cancel=True) | Q(completed=True)).distinct()
+        if sort_by == 'executed': q = q.filter(completed=True)
+        if sort_by == 'part_executed': q = q.filter(cancel=True).exclude(completed=True).filter(Q(sale__sale_sale__gte=1) | Q(buy__buy_buy__gte=1)).distinct()
+        if sort_by == 'cancel': q = q.filter(cancel=True)
+        self.queryset = q
         return super(ProfileOrderHistoryView, self).get_queryset()
 
 class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     template_name = "transactions_history.html"
     model = Orders
-    paginate_by = 5
+    paginate_by = 41
     def get_queryset(self):
-        self.queryset = self.model._default_manager.filter(user=self.request.user).filter(completed=True)
+        self.queryset = self.model._default_manager.filter(
+            Q(sale__buy__user=self.request.user) |
+            Q(buy__sale__user=self.request.user) |
+            #Q(sale__sale_sale__user=self.request.user) |
+            #Q(buy__buy_buy__user=self.request.user) |
+            Q(user=self.request.user)
+            ).filter(completed=True).distinct().order_by('-updated')
         return super(ProfileTransactionHistoryView, self).get_queryset()
 
 class ProfileFinancesView(LoginRequiredMixin, ListView):
