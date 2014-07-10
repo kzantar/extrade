@@ -33,7 +33,7 @@
                         {% else %}
                         <td><span class="{% if not object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if not object.sale %}Sale{% else %}Buy{% endif %}</span></td>
                         {% endif %}
-                        <td>{{ object.el.amo_sum|floatformat:-8 }} {{ object.pair.left }} {{ object.user }}</td>
+                        <td>{{ object.el.amo_sum|floatformat:-8 }} {{ object.pair.left }}</td>
                         <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
                         <td>{{ object.total|floatformat:-8 }} {{ object.pair.right }}</td>
                         <td>{{ object.updated|date:"d.m.y H:i" }}</td>

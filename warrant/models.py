@@ -78,6 +78,9 @@ class Orders(models.Model):
         if self.is_action('buy'):
             return self.buy
     @classmethod
+    def set_completed(cls, pk):
+        return cls.objects.filter(id=pk).update(completed=True)
+    @classmethod
     def is_active_order(cls, user, pk):
         return cls.objects.filter(id=pk).exclude(Q(cancel=True) | Q(completed=True))
     @property
@@ -265,8 +268,9 @@ class Buy(Orders, Prop):
             if self._completed or self.cancel or self.completed: return True
             if _amo_sale == _amo_buy:
                 self.buy_buy.add(r)
+                Orders.set_completed(self.pk)
                 continue
-            if _amo_sale <= _amo_buy:
+            if _amo_sale < _amo_buy:
                 self.buy_buy.add(r)
                 continue
             if _amo_sale >= _amo_buy:
@@ -374,8 +378,9 @@ class Sale(Orders, Prop):
             if self._completed or self.cancel or self.completed: return True
             if _amo_buy == _amo_sale:
                 self.sale_sale.add(r)
+                Orders.set_completed(self.pk)
                 continue
-            if _amo_buy <= _amo_sale:
+            if _amo_buy < _amo_sale:
                 self.sale_sale.add(r)
                 continue
             if _amo_buy >= _amo_sale:
