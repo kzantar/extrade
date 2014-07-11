@@ -6,6 +6,20 @@
 {% endblock %}
 
 {% block head %}
+<script type="text/javascript">
+function a_calc(el, act) {
+    balance=Number(el.children.item().textContent.replace(',', '.').replace(/[^0-9\.]+/g,''))
+    $('#id_'+act+'-amount').val(parseFloat(balance / $('#id_'+act+'-rate').val().replace(',', '.')).toFixed(8))
+}
+function set_price(amount, rate, act) {
+    amount = amount.replace(',', '.')
+    rate = rate.replace(',', '.')
+    $('#id_'+act+'-amount').val(amount);
+    $('#id_buy-rate').val(rate);
+    $('#id_sale-rate').val(rate);
+    Dajaxice.warrant.calc(Dajax.process, {'form':$('#'+act+'_form').serialize(true)});
+}
+</script>
 {% endblock %}
 
 
@@ -41,7 +55,7 @@
                     	<span class="hreySp">
                         	Ваши средства
                         </span>
-                        <span class="usdOrange">
+                        <span class="usdOrange" onclick="a_calc(this, 'buy');">
                         	{{ user.balance_right }}
                         </span>
                     </div>
@@ -105,7 +119,7 @@
                 	<table class="orderTb">
                         <tbody>
                         {% for rate, amount, total in order_buy %}
-                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}" onclick='set_price("{{ amount }}", "{{ rate }}", "sale");'>
                         	<td class="cosrTdd">
                             	{{ rate|floatformat:-8 }}
                             </td>
@@ -132,7 +146,7 @@
                     	<span class="hreySp">
                         	Ваши средства
                         </span>
-                        <span class="usdOrange">
+                        <span class="usdOrange"  onclick="a_calc(this, 'sale');">
                         	{{ user.balance_left }}
                         </span>
                     </div>
@@ -194,7 +208,7 @@
                 	<table class="orderTb">
                         <tbody>
                         {% for rate, amount, total in order_sale %}
-                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}" onclick='set_price("{{ amount }}", "{{ rate }}", "buy");'>
                         	<td class="cosrTdd">
                             	{{ rate|floatformat:-8 }}
                             </td>
@@ -277,6 +291,7 @@
 
 
 {% block news %}
+{% if news %}
     	<div class="zagg">
         	<h1>НОВОСТИ</h1>
         </div>
@@ -286,4 +301,5 @@
     {% endfor %}
         </div>
         <div class="clr"></div>
+{% endif %}
 {% endblock %}

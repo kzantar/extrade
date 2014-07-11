@@ -11,6 +11,7 @@ from django.template.defaultfilters import floatformat
 from warrant.models import Orders
 from django.core.cache import cache
 from common.lib import strmd5sum
+from django.utils.safestring import mark_safe
 
 
 
@@ -129,10 +130,10 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return _Zero
     @property
     def balance_left(self):
-        return "{amo} {pos}".format(**{"amo":floatformat(self.amount_left, -8), "pos":self.pair.left})
+        return mark_safe("<span>{amo}<span> {pos}".format(**{"amo":floatformat(self.amount_left, -8), "pos":self.pair.left}))
     @property
     def balance_right(self):
-        return "{amo} {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right})
+        return mark_safe("<span>{amo}</span> {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right}))
 
 class ProfileBalance(models.Model):
     ACTIONS=(
