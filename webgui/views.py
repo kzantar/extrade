@@ -52,7 +52,7 @@ class ExchangeView(DetailView):
 class ProfileOrderHistoryView(LoginRequiredMixin, ListView):
     template_name = "order_history.html"
     model = Orders
-    paginate_by = 5
+    paginate_by = 41
     def get_queryset(self):
         sort_by = self.kwargs.get('sort_by')
         q = self.model._default_manager.filter(user=self.request.user).order_by('-updated')
