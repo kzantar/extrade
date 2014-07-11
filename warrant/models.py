@@ -93,13 +93,13 @@ class Orders(models.Model):
         return floatformat(res, -8)
     @classmethod
     def sum_from_user_buy_sale(cls, user, valuta):
-        obj = cls.objects.filter(user=user, completed=True).filter(Q(pair__left__value=valuta) | Q(pair__right__value=valuta)).only('pair', 'rate', 'amount').distinct()
-        md5key = strmd5sum( "balance" + str(obj.count()) + str(user.pk) + str(valuta) )
+        obj = cls.objects.filter(user=user).filter(Q(pair__left__value=valuta) | Q(pair__right__value=valuta)).only('pair', 'rate', 'amount').distinct()
+        md5key = strmd5sum( "balance" + str(obj.count()) + str(user.pk) + str(valuta) ) #FIXME add self.sale_sale, self.buy_buy
         _s = cache.get(md5key)
-        if _s is None:
+        if _s is None or True: # FIX and remove True
             _s=_Zero
             for c in obj:
-                if _s is None:
+                if c.is_action('sale'):
                     if c.sale.pair.left.value == valuta:
                         _s += c.sale._debit_left
                     elif c.sale.pair.right.value == valuta:
@@ -110,30 +110,6 @@ class Orders(models.Model):
                     elif c.buy.pair.right.value == valuta:
                         _s += c.buy._debit_right
             cache.set(md5key, _s)
-        obj = cls.objects.filter(user=user, completed=False).filter(Q(pair__left__value=valuta) | Q(pair__right__value=valuta)).only('pair', 'rate', 'amount').distinct()
-        for c in obj:
-            if c.is_action('sale'):
-                md5key_c = strmd5sum( "balance sale" + str(c.pk) + str(user.pk) + str(valuta) + str(c.el.sale_sale.count()) ) #FIXME add self.sale_sale, self.buy_buy
-                s = cache.get(md5key_c)
-                if s is None:
-                    s=_Zero
-                    if c.sale.pair.left.value == valuta:
-                        s += c.sale._debit_left
-                    elif c.sale.pair.right.value == valuta:
-                        s -= c.sale._debit_right
-                    cache.set(md5key_c, s)
-                _s += s
-            if c.is_action('buy'):
-                md5key_c = strmd5sum( "balance buy" + str(c.pk) + str(user.pk) + str(valuta) + str(c.el.buy_buy.count()) ) #FIXME add self.sale_sale, self.buy_buy
-                s = cache.get(md5key_c)
-                if s is None:
-                    s=_Zero
-                    if c.buy.pair.left.value == valuta:
-                        s -= c.buy._debit_left
-                    elif c.buy.pair.right.value == valuta:
-                        s += c.buy._debit_right
-                    cache.set(md5key_c, s)
-                _s += s
         return _s
     @classmethod
     def min_buy_rate(cls, pair):
