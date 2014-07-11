@@ -75,5 +75,6 @@ def cancel(request, pk):
             _o=o[0]
             if o.update(cancel=True) > 0:
                 dajax.script("$('#active_orders_list-{pk}').remove()".format(**{"pk": pk,}))
-                dajax.script("alert('ордер на сумму {sum} отменен успешно')".format(**{"sum": _o.sum_order_current}))
+                #dajax.script("alert('ордер на сумму {sum} отменен успешно')".format(**{"sum": _o.sum_order_current}))
+                dajax.script("location.reload();")
     return dajax.json()
