@@ -94,22 +94,18 @@ class Orders(models.Model):
     @classmethod
     def sum_from_user_buy_sale(cls, user, valuta):
         obj = cls.objects.filter(user=user).filter(Q(pair__left__value=valuta) | Q(pair__right__value=valuta)).only('pair', 'rate', 'amount').distinct()
-        md5key = strmd5sum( "balance" + str(obj.count()) + str(user.pk) + str(valuta) ) #FIXME add self.sale_sale, self.buy_buy
-        _s = cache.get(md5key)
-        if _s is None or True: # FIX and remove True
-            _s=_Zero
-            for c in obj:
-                if c.is_action('sale'):
-                    if c.sale.pair.left.value == valuta:
-                        _s += c.sale._debit_left
-                    elif c.sale.pair.right.value == valuta:
-                        _s -= c.sale._debit_right
-                if c.is_action('buy'):
-                    if c.buy.pair.left.value == valuta:
-                        _s -= c.buy._debit_left
-                    elif c.buy.pair.right.value == valuta:
-                        _s += c.buy._debit_right
-            cache.set(md5key, _s)
+        _s=_Zero
+        for c in obj:
+            if c.is_action('sale'):
+                if c.sale.pair.left.value == valuta:
+                    _s += c.sale._debit_left
+                elif c.sale.pair.right.value == valuta:
+                    _s -= c.sale._debit_right
+            if c.is_action('buy'):
+                if c.buy.pair.left.value == valuta:
+                    _s -= c.buy._debit_left
+                elif c.buy.pair.right.value == valuta:
+                    _s += c.buy._debit_right
         return _s
     @classmethod
     def min_buy_rate(cls, pair):
