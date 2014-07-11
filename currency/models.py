@@ -67,9 +67,17 @@ class TypePair(models.Model):
     def sum_total(self, to_int=None, to_round=None):
         return self.warrant_orders_related.model.sum_total(self, to_int, to_round)
     def in_orders_sum_buy(self):
-        return self.warrant_orders_related.filter(buy__gte=1).exclude(Q(cancel=True) | Q(completed=True)).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
+        q = self.warrant_orders_related.filter(buy__gte=1).filter(completed=False, cancel=False)
+        v = _Zero
+        for v1 in q.only('amount', 'rate'):
+            v += v1.el._sum_ret
+        return v
     def in_orders_sum_sell(self):
-        return self.warrant_orders_related.filter(sale__gte=1).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Sum('amount')).values()[0] or _Zero
+        q = self.warrant_orders_related.filter(sale__gte=1).filter(completed=False, cancel=False)
+        v = _Zero
+        for v1 in q.only('amount', 'rate'):
+            v += v1.el._ret_amount
+        return v
     @property
     def sumamount(self):
         _sum = self.sum_amount(to_round=2)
