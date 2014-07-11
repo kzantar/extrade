@@ -6,6 +6,7 @@ from django.db.models import Avg, Max, Min
 from django.template.defaultfilters import floatformat
 from common.numeric import normalized
 from django.db.models import Sum, Count, F, Q
+from django.core.cache import cache
 
 
 
@@ -26,6 +27,8 @@ class TypePair(models.Model):
     slug = models.SlugField(editable=False)
     #decimal_places = models.PositiveIntegerField(default=8)
     def save(self, *args, **kwargs):
+        if self.pk: cache.delete(self.cache_unicode_key)
+        if self.pk: cache.delete(self.cache_tpair_key)
         self.slug = u"%s_%s" % (self.left.value, self.right.value)
         super(TypePair, self).save(*args, **kwargs)
     @classmethod
@@ -55,11 +58,27 @@ class TypePair(models.Model):
     @classmethod
     def flr(cls):
         return cls.objects.all()
+    @property
+    def cache_tpair_key(self):
+        return 'typepair_tpair' + str(self.id)
+    @property
+    def cache_unicode_key(self):
+        return 'typepair__unicode__' + str(self.id)
     def __unicode__(self):
-        return u"{left}/{right}".format(**{"left": self.left, "right":self.right})
+        key = self.cache_unicode_key
+        ret = cache.get(key)
+        if ret is None:
+            ret = u"{left}/{right}".format(**{"left": self.left, "right":self.right})
+            cache.set(key, ret)
+        return ret
     @property
     def tpair(self):
-        return u"{left}/{right}".format(**{"left": self.left.value.upper(), "right":self.right.value.upper()})
+        key = self.cache_tpair_key
+        ret = cache.get(key)
+        if ret is None:
+            ret = u"{left}/{right}".format(**{"left": self.left.value.upper(), "right":self.right.value.upper()})
+            cache.set(key, ret)
+        return ret
     def min_max_avg(self, to_int=None, to_round=None):
         return self.warrant_orders_related.model.min_max_avg_rate(self, to_int, to_round)
     def sum_amount(self, to_int=None, to_round=None):
