@@ -100,8 +100,8 @@ function set_price(amount, rate, act) {
 						в соответствии с ордерами.
                 	</p>
                     <div class="buttonBlock">
-                    	<input type="button" value=" " class="podschBut" onclick="Dajaxice.warrant.calc(Dajax.process, {'form':$('#buy_form').serialize(true)});">
-                        <input type="button" value=" " class="buyBtcbut" onclick="Dajaxice.warrant.order(Dajax.process, {'form':$('#buy_form').serialize(true)});">
+                    	<input type="button" value="подсчитать" class="podschBut" onclick="Dajaxice.warrant.calc(Dajax.process, {'form':$('#buy_form').serialize(true)});">
+                        <input type="button" value="купить {{ object.left }}" class="buyBtcbut" onclick="Dajaxice.warrant.order(Dajax.process, {'form':$('#buy_form').serialize(true)});">
                     </div>
                     </form>
                     <div class="clr"></div>
@@ -190,8 +190,8 @@ function set_price(amount, rate, act) {
 						в соответствии с ордерами.
                 	</p>
                     <div class="buttonBlock">
-                    	<input type="button" value=" " class="podschBut" onclick="Dajaxice.warrant.calc(Dajax.process, {'form':$('#sale_form').serialize(true)});">
-                        <input type="button" value=" " class="buyBtcbut" onclick="Dajaxice.warrant.order(Dajax.process, {'form':$('#sale_form').serialize(true)});">
+                    	<input type="button" value="подсчитать" class="podschBut" onclick="Dajaxice.warrant.calc(Dajax.process, {'form':$('#sale_form').serialize(true)});">
+                        <input type="button" value="продать {{ object.left }}" class="buyBtcbut" onclick="Dajaxice.warrant.order(Dajax.process, {'form':$('#sale_form').serialize(true)});">
                     </div>
                     <div class="clr"></div>
                 </div>

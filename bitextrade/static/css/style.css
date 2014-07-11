@@ -366,18 +366,16 @@ body {
 .podschBut {
 	background: none;
 	border: 0px;
-	width: 90px;
-	height: 23px;
-	background-image: url(img/countBut.png);
 	cursor: pointer;
+    background-color:rgb(63,63,63);
+    color:white;
 }
 .buyBtcbut {
 	background: none;
 	border: 0px;
-	width: 90px;
-	height: 23px;
-	background-image: url(img/buyAllBut.png);
-	cursor: pointer;	
+	cursor: pointer;
+    background-color:rgb(239,95,65);
+    color:white;
 }
 
 
