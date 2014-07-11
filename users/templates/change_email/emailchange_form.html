@@ -25,4 +25,37 @@
         </div>
     </div>
 </form>
+<br>
+<div class="page-header">
+<h1>сменить пароль</h1>
+</div>
+<br>
+    <form action="{% url 'profile_password' %}" method="post" class="form-horizontal" role="form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="col-lg-2 control-label">{% trans 'Текущий пароль' %}</label>
+            <div class="col-lg-10">
+                <input type="password" name="old_password" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">{% trans 'Новый пароль' %}</label>
+            <div class="col-lg-10">
+                <input type="password" name="new_password1" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">{% trans 'Новый пароль ещё раз' %}</label>
+            <div class="col-lg-10">
+                <input type="password" name="new_password2" class="form-control">
+            </div>
+        </div>
+        <div class="form-group" id="actions">
+            <div class="col-lg-offset-2 col-lg-10">
+                <button type="submit" class="btn btn-primary">{% trans 'Сохранить' %}</button>
+            </div>
+        </div>
+    </form>
+
+
 {% endblock %}

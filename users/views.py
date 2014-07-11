@@ -88,7 +88,6 @@ class ProfilePasswordView(LoginRequiredMixin, RedirectView):
             messages.success(
                 self.request,
                 (u'Неверный текущий пароль. Пожалуйста попробуйте ещё раз'))
-
         else:
             user = Profile.objects.get(pk=self.request.user.pk)
             user.set_password(new_password2)
@@ -98,4 +97,4 @@ class ProfilePasswordView(LoginRequiredMixin, RedirectView):
                 (u'Пароль успешно изменён. Теперь вы можете войти в '
                   u'систему используя новый пароль'))
 
-        return reverse_lazy('profile')
+        return reverse_lazy('change_email_create')

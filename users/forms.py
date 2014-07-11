@@ -74,7 +74,7 @@ class ProfileForm(forms.ModelForm):
 
     def __init__(self, request=None, *args, **kwargs):
         super(ProfileForm, self).__init__(request, *args, **kwargs)
-        self.fields['email'].widget.attrs['readonly'] = True
+        #self.fields['email'].widget.attrs['readonly'] = True
 
     class Meta:
         model = Profile
