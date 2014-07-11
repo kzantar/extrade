@@ -35,7 +35,7 @@
                         {% endif %}
                         <td>{{ object.el.amo_sum|floatformat:-8 }} {{ object.pair.left }}</td>
                         <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
-                        <td>{{ object.total|floatformat:-8 }} {{ object.pair.right }}</td>
+                        <td>{{ object.w_total|floatformat:-8 }} {{ object.pair.right }}</td>
                         <td>{{ object.updated|date:"d.m.y H:i" }}</td>
                     </tr>
 {% endfor %}

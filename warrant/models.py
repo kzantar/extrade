@@ -69,6 +69,9 @@ class Orders(models.Model):
     def w_percent(self):
         return int((self.amount - self.el.ret_amount) / self.amount * 100)
     @property
+    def w_total(self):
+        return self.el.amo_sum * self.rate
+    @property
     def status(self):
         return self.el._status
     @property
