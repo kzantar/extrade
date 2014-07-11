@@ -127,14 +127,20 @@ class Orders(models.Model):
         return v
     @classmethod
     def sum_amount(cls, pair, to_int=None, to_round=None):
-        v = cls.objects.filter(pair=pair).filter(Q(cancel=True) | Q(completed=True)).aggregate(Sum('amount')).values()[0]
+        q = cls.objects.filter(pair=pair, buy__gte=1)
+        v = q.filter(completed=True).aggregate(Sum('amount')).values()[0] or _Zero
+        for v1 in q.filter(completed=False).only('amount', 'rate'):
+            v += v1.el._total
         if v is None: v = _Zero
         if to_int: return v.__int__()
         if to_round: return round(v, to_round)
         return v
     @classmethod
     def sum_total(cls, pair, to_int=None, to_round=None):
-        v = cls.objects.filter(pair=pair).filter(Q(cancel=True) | Q(completed=True)).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum
+        q = cls.objects.filter(pair=pair).filter(sale__gte=1)
+        v = q.filter(completed=True).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum
+        for v1 in q.filter(completed=False).only('amount', 'rate'):
+            v += v1.el._total
         if v is None: v = _Zero
         if to_int: return v.__int__()
         if to_round: return round(v, to_round)
@@ -182,9 +188,6 @@ class Buy(Orders, Prop):
         s = "Buy" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.buy_buy.count())
         return strmd5sum(s)
     def save(self, *args, **kwargs):
-        print "Buy save"
-        #e=Buy.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
-        #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         self.updated = datetime.today()
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:
@@ -294,9 +297,6 @@ class Sale(Orders, Prop):
         s = "Sale" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.sale_sale.count())
         return strmd5sum(s)
     def save(self, *args, **kwargs):
-        print "Sale save"
-        #e=Sale.objects.filter(id=self.pk).filter(Q(cancel=True) | Q(completed=True)).exists()
-        #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         self.updated = datetime.today()
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:

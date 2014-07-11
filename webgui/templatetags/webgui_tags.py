@@ -19,7 +19,7 @@ def information(context):
         else:
             slug = TypePair.default()
         pair = TypePair.flr().get(slug=slug)
-    _min, _max, _avg = pair.min_max_avg(to_int=True)
+    _max, _min, _avg = pair.min_max_avg(to_int=True)
     sum_amount = pair.sum_amount()
     sum_total = pair.sum_total()
     return {

@@ -102,11 +102,11 @@ class TypePair(models.Model):
             yield o.rate, o.ret_amount, o.ret_sum
     @property
     def avg_rate(self):
-        return self.min_max_avg(to_int=True)[2]
+        return self.min_max_avg(to_round=6)[2]
     @property
     def last_order(self):
-        o = self.warrant_orders_related.filter(Q(cancel=True) | Q(completed=True))
+        o = self.warrant_orders_related.filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(completed=True)).filter(buy__gte=1).only('updated', 'rate', 'amount').order_by('-updated')
         if o.exists():
-            return self.warrant_orders_related.filter(Q(cancel=True) | Q(completed=True))[0]
+            return o[0]
     class Meta:
         unique_together = (("left", "right",),)
