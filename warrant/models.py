@@ -134,7 +134,7 @@ class Orders(models.Model):
     @classmethod
     def sum_total(cls, pair, to_int=None, to_round=None):
         q = cls.objects.filter(pair=pair).filter(sale__gte=1)
-        v = q.filter(completed=True).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum
+        v = q.filter(completed=True).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
         for v1 in q.filter(completed=False).only('amount', 'rate'):
             v += v1.el._total
         if v is None: v = _Zero
@@ -219,6 +219,7 @@ class Buy(Orders, Prop):
     def _total(self):
         if self._completed:
             return self.amount
+        print self._amo_sum
         return self._amo_sum
     @property
     def _adeudo(self):
