@@ -112,9 +112,15 @@ class Orders(models.Model):
             cache.set(md5key, _s)
         return _s
     @classmethod
+    def min_buy_rate(cls, pair):
+        return cls.objects.filter(pair=pair, sale__gte=1).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Min('rate')).values()[0] or _Zero
+    @classmethod
+    def max_sale_rate(cls, pair):
+        return cls.objects.filter(pair=pair, buy__gte=1).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Max('rate')).values()[0] or _Zero
+    @classmethod
     def min_max_avg_rate(cls, pair, to_int=None, to_round=None):
-        r = cls.objects.filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Avg('rate'), Max('rate'), Min('rate'))
-        v=[r.get('rate__min'), r.get('rate__max'), r.get('rate__avg')]
+        r = cls.objects.filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Avg('rate'))
+        v=[cls.min_buy_rate(pair), cls.max_sale_rate(pair), r.get('rate__avg')]
         v = [x if not x is None else _Zero for x in v]
         if to_int: return [x.__int__() for x in v]
         if to_round: return [round(x, to_round) for x in v]

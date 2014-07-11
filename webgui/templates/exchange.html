@@ -108,8 +108,8 @@ function set_price(amount, rate, act) {
                 </div>
             </div>
             <div class="orderBlock">
-            	<h3>Ордера на покупку</h3>
-                <span class="kollSp">Всего: {{ object.in_orders_sum_buy|floatformat:-8 }} {{ object.left }}</span>
+            	<h3>Ордера на продажу</h3>
+                <span class="kollSp">Всего: {{ object.in_orders_sum_sell|floatformat:-8 }} {{ object.left }}</span>
                 <div class="clr"></div>
                 <table class="orderTb orderTbFr">
                 	<tbody><tr class="tableheadTr">
@@ -127,8 +127,8 @@ function set_price(amount, rate, act) {
                 <div class="orderBlockTb">
                 	<table class="orderTb">
                         <tbody>
-                        {% for rate, amount, total in order_buy %}
-                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %} cursor-pointer" onclick='set_price("{{ amount }}", "{{ rate }}", "sale");'>
+                        {% for rate, amount, total in order_sale %}
+                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %} cursor-pointer" onclick='set_price("{{ amount }}", "{{ rate }}", "buy");'>
                         	<td class="cosrTdd">
                             	{{ rate|floatformat:-8 }}
                             </td>
@@ -197,8 +197,8 @@ function set_price(amount, rate, act) {
                 </div>
             </div>
             <div class="orderBlock">
-            	<h3>Ордера на продажу</h3>
-                <span class="kollSp">Всего: {{ object.in_orders_sum_sell|floatformat:-8 }} {{ object.right }}</span>
+            	<h3>Ордера на покупку</h3>
+                <span class="kollSp">Всего: {{ object.in_orders_sum_buy|floatformat:-8 }} {{ object.right }}</span>
                 <div class="clr"></div>
                 <table class="orderTb orderTbFr">
                 	<tbody><tr class="tableheadTr">
@@ -216,8 +216,8 @@ function set_price(amount, rate, act) {
                 <div class="orderBlockTb">
                 	<table class="orderTb">
                         <tbody>
-                        {% for rate, amount, total in order_sale %}
-                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %} cursor-pointer" onclick='set_price("{{ amount }}", "{{ rate }}", "buy");'>
+                        {% for rate, amount, total in order_buy %}
+                        <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %} cursor-pointer" onclick='set_price("{{ amount }}", "{{ rate }}", "sale");'>
                         	<td class="cosrTdd">
                             	{{ rate|floatformat:-8 }}
                             </td>
@@ -232,7 +232,6 @@ function set_price(amount, rate, act) {
                     </tbody></table>
                 </div>
             </div>
-        
         </div>
 {###############################################}
 <div class="clr"></div>
