@@ -280,6 +280,7 @@ class Buy(Orders, Prop):
                 Orders.set_completed(self.pk)
                 continue
             if _amo_sale < _amo_buy:
+                Orders.set_completed(self.pk)
                 self.buy_buy.add(r)
                 continue
             if _amo_sale >= _amo_buy:
@@ -387,6 +388,7 @@ class Sale(Orders, Prop):
                 Orders.set_completed(self.pk)
                 continue
             if _amo_buy < _amo_sale:
+                Orders.set_completed(self.pk)
                 self.sale_sale.add(r)
                 continue
             if _amo_buy >= _amo_sale:
