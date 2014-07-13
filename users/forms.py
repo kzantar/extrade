@@ -2,6 +2,8 @@
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserChangeForm
+from users.models import ProfileBalance
+from django.forms.widgets import HiddenInput
 
 
 
@@ -87,6 +89,21 @@ class ProfileForm(forms.ModelForm):
                 'placeholder': (u'Формат: +12345678910')
             }),
         }
+class AddBalanceForm(forms.ModelForm):
+    class Meta:
+        model = ProfileBalance
+        fields = ('value', 'valuta', 'bank', )
+        widgets = {
+                'valuta': HiddenInput(),
+            }
+    def __init__(self, user=None, action=None, *args, **kwargs):
+        super(AddBalanceForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        self.user = user
+        self.fields['bank'].required = True
+    def save(self, *args, **kwargs):
+        self.instance.profile = self.user
+        return super(AddBalanceForm, self).save(*args, **kwargs)
 
 class UserAdminForm(UserChangeForm):
 

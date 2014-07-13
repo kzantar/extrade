@@ -11,6 +11,8 @@ from currency.models import TypePair
 from warrant.models import Orders, Buy, Sale
 from news.models import News
 from warrant.forms import OrdersForm
+from users.models import ProfileBalance
+from users.forms import AddBalanceForm
 
 from django.contrib.auth import login, get_user_model
 

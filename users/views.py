@@ -2,15 +2,16 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, DetailView, RedirectView, View, ListView
 from common.mixin import LoginRequiredMixin
+from django.views.generic.edit import FormMixin
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect, Http404
 from django.contrib import messages
 
 
 from django.contrib.auth import get_user_model
+from users.models import ProfileBalance
 
-
-from users.forms import ProfileForm
+from users.forms import ProfileForm, AddBalanceForm
 
 # Create your views here.
 Profile = get_user_model()

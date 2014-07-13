@@ -17,6 +17,9 @@ class Valuta(models.Model):
     def save(self, *args, **kwargs):
         self.value = self.value.lower()
         super(Valuta, self).save(*args, **kwargs)
+    @property
+    def val(self):
+        return self.value
     def __unicode__(self):
         return self.value.upper()
 

@@ -5,11 +5,17 @@ from dajax.core import Dajax
 from django.http import Http404
 from django.db.models import Q
 from django.conf import settings
-from currency.models import TypePair
+from currency.models import TypePair, Valuta
 from warrant.forms import OrdersForm
 from warrant.models import Orders
-from django.template.defaultfilters import floatformat
+from users.forms import AddBalanceForm
+from users.models import ProfileBalance
 
+from django.template.defaultfilters import floatformat
+from django.template.loader import render_to_string
+from django.core.urlresolvers import reverse
+from django.core.context_processors import csrf
+from django.shortcuts import get_object_or_404
 
 @dajaxice_register
 def calc(request, form):
@@ -77,4 +83,66 @@ def cancel(request, pk):
                 dajax.script("$('#active_orders_list-{pk}').remove()".format(**{"pk": pk,}))
                 #dajax.script("alert('ордер на сумму {sum} отменен успешно')".format(**{"sum": _o.sum_order_current}))
                 dajax.script("location.reload();")
+    return dajax.json()
+
+@dajaxice_register
+def get_form_input_balance(request, valuta, form=None, edit=None, cancel=None):
+    dajax = Dajax()
+    v = get_object_or_404(Valuta, pk=valuta)
+    if form: edit = 1
+    if form: form=deserialize_form(form)
+    cb = ProfileBalance.exists_input(valuta, request.user)
+    if cancel:
+        cb.cancel=True
+        cb.save()
+        return get_form_input_balance(request, valuta, form, edit, cancel=None)
+    form = AddBalanceForm(user=request.user, instance=cb, data=form, initial={'valuta':valuta})
+    if form.is_valid():
+        form.instance.action="+"
+        form.save()
+        if cb: obj = "<p>Заявка на вывод средств успешно отредактированна.</p>"
+        if not cb: obj = "<p>Заявка на вывод средств успешно создана.</p>"
+    else:
+        if not edit and form.instance and form.instance.pk:
+            obj = """
+<p>Вы уже создали заявку на вывод средств.</p>
+<p>Её можно <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {{'valuta': '{valuta}', 'edit':'1'}});return false;">отредактировать</a>
+заново или <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {{'cancel': 1, 'valuta': '{valuta}'}});return false;">отменить</a></p>
+""".format(**{"valuta": form.instance.valuta.pk})
+        else:
+            c = {"form": form, "url": ".", "submit": "пополнить %s" % v, "functions": "get_form_input_balance"}
+            c.update(csrf(request))
+            obj = render_to_string("balance_form.html", c)
+    dajax.assign('#balance_form_content', 'innerHTML', obj)
+    return dajax.json()
+
+@dajaxice_register
+def get_form_output_balance(request, valuta, form=None, edit=None, cancel=None):
+    dajax = Dajax()
+    v = get_object_or_404(Valuta, pk=valuta)
+    if form: edit = 1
+    if form: form=deserialize_form(form)
+    cb = ProfileBalance.exists_output(valuta, request.user)
+    if cancel:
+        cb.cancel=True
+        cb.save()
+        return get_form_output_balance(request, valuta, form, edit, cancel=None)
+    form = AddBalanceForm(user=request.user, instance=cb, data=form, initial={'valuta':valuta})
+    if form.is_valid():
+        form.instance.action="-"
+        form.save()
+        if cb: obj = "<p>Заявка на вывод средств успешно отредактированна.</p>"
+        if not cb: obj = "<p>Заявка на вывод средств успешно создана.</p>"
+    else:
+        if not edit and form.instance and form.instance.pk:
+            obj = """
+<p>Вы уже создали заявку на вывод средств.</p>
+<p>Её можно <a href="#" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {{'valuta': '{valuta}', 'edit':'1'}});return false;">отредактировать</a>
+заново или <a href="#" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {{'cancel': 1, 'valuta': '{valuta}'}});return false;">отменить</a></p>
+""".format(**{"valuta": form.instance.valuta.pk})
+        else:
+            c = {"form": form, "url": ".", "submit": "вывести %s" % v, "functions": "get_form_output_balance"}
+            c.update(csrf(request))
+            obj = render_to_string("balance_form.html", c)
+    dajax.assign('#balance_form_content', 'innerHTML', obj)
     return dajax.json()

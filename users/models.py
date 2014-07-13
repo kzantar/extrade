@@ -144,6 +144,21 @@ class ProfileBalance(models.Model):
     valuta = models.ForeignKey("currency.Valuta", verbose_name=u"валюта")
     profile = models.ForeignKey("users.Profile", verbose_name=(u'Профиль'))
     action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
+    bank = models.CharField((u'номер счета на вывод'), max_length=255, blank=True, null=True)
+    accept = models.BooleanField(verbose_name=(u'Подтвердить'), default=False)
+    cancel = models.BooleanField(verbose_name=(u'Отменить'), default=False)
+    @classmethod
+    def exists_input(cls, valuta, user):
+        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta)
+        if cb.exists():
+            return cb[0]
+        return None
+    @classmethod
+    def exists_output(cls, valuta, user):
+        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="-", valuta=valuta)
+        if cb.exists():
+            return cb[0]
+        return None
     def __unicode__(self):
         return u"{action}{amount}".format(**{"action": self.action, "amount": self.value})
     class Meta:

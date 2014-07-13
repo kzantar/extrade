@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, url
 
-from webgui.views import ExchangeView, ProfileOrderHistoryView, ProfileTransactionHistoryView, ProfileFinancesView
+from webgui.views import ExchangeView, ProfileOrderHistoryView,\
+                            ProfileTransactionHistoryView,\
+                            ProfileFinancesView
 from django.views.generic import TemplateView
 from currency.models import TypePair
 

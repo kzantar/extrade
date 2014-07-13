@@ -17,12 +17,16 @@
                 <tbody><tr class="tableheadTr">
                         <td>Валюта</td>
                         <td>Всего</td>
+                        <td></td>
                     </tr></tbody>
     {% for valuta, balance, pk in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
                         <td>{{ valuta }}</td>
                         <td>{{ balance }}</td>
+                        <td style="text-align:right"><input type="button" value="пополнить" class="podschBut" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'valuta': '{{ valuta.pk }}'});">
+                        <input type="button" value="вывести" class="buyBtcbut" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {'valuta':'{{ valuta.pk }}' });"></td>
                     </tr>
     {% endfor %}
     </table>
+    <div id="balance_form_content"></div>
 {% endblock %}
