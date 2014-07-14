@@ -271,19 +271,18 @@ class Buy(Orders, Prop):
     def _exchange(self):
         if self._completed or self.cancel or self.completed: return True
         s = self.getForSale()
-        _amo_buy = self._ret_amount
+        #_amo_buy = self._ret_amount
         for r in s:
             _amo_sale = r._ret_amount
             if self._completed or self.cancel or self.completed: return True
-            if _amo_sale == _amo_buy:
+            if _amo_sale == self._ret_amount:
                 self.buy_buy.add(r)
                 Orders.set_completed(self.pk)
                 continue
-            if _amo_sale < _amo_buy:
-                Orders.set_completed(self.pk)
+            if _amo_sale < self._ret_amount:
                 self.buy_buy.add(r)
                 continue
-            if _amo_sale >= _amo_buy:
+            if _amo_sale >= self._ret_amount:
                 r._exchange()
                 continue
             return True
@@ -379,19 +378,18 @@ class Sale(Orders, Prop):
     def _exchange(self):
         if self._completed or self.cancel or self.completed: return True
         s = self.getForBuy()
-        _amo_sale = self._ret_amount
+        #_amo_sale = self._ret_amount
         for r in s:
             _amo_buy = r._ret_amount
             if self._completed or self.cancel or self.completed: return True
-            if _amo_buy == _amo_sale:
+            if _amo_buy == self._ret_amount:
                 self.sale_sale.add(r)
                 Orders.set_completed(self.pk)
                 continue
-            if _amo_buy < _amo_sale:
-                Orders.set_completed(self.pk)
+            if _amo_buy < self._ret_amount:
                 self.sale_sale.add(r)
                 continue
-            if _amo_buy >= _amo_sale:
+            if _amo_buy >= self._ret_amount:
                 r._exchange()
                 continue
             return True
