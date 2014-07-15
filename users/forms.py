@@ -3,7 +3,13 @@ from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserChangeForm
 from users.models import ProfileBalance
-from django.forms.widgets import HiddenInput
+from django.forms.widgets import HiddenInput, TextInput, Textarea, NumberInput
+from django.core.mail import send_mail
+from django.db.models import Q
+from django.conf import settings
+from decimal import Decimal as D, _Zero
+from common.numeric import normalized
+
 
 
 
@@ -89,21 +95,73 @@ class ProfileForm(forms.ModelForm):
                 'placeholder': (u'Формат: +12345678910')
             }),
         }
+
 class AddBalanceForm(forms.ModelForm):
+    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_inp(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_inp(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val(), 'act': '+'});"}), label=u"вы получите", required=False)
     class Meta:
         model = ProfileBalance
-        fields = ('value', 'valuta', 'bank', )
+        fields = ('value', 'valuta', 'calc_value')
         widgets = {
-                'valuta': HiddenInput(),
+                'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
+                'value': NumberInput(attrs={"id": "balance-value", "onkeyup": "Dajaxice.warrant.calc_inp(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});", "onchange": "Dajaxice.warrant.calc_inp(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});"}),
             }
-    def __init__(self, user=None, action=None, *args, **kwargs):
+    def __init__(self, user=None, commission=_Zero, *args, **kwargs):
         super(AddBalanceForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         self.user = user
-        self.fields['bank'].required = True
+        if not commission > _Zero:
+            del self.fields['calc_value']
     def save(self, *args, **kwargs):
         self.instance.profile = self.user
+        self.instance.bank = self.instance.valuta.bank
+
+        self.instance.value *= ( 1 - self.instance.valuta.commission_inp / D(100))
+        self.instance.value = normalized(self.instance.value, where="DOWN")
+
+        e1 = Profile.objects.filter(pk=self.user.pk).values_list('email', flat=True)
+        e2 = Profile.objects.filter(is_active=True, is_staff=True).values_list('email', flat=True)
+        subject = u"оформлена новая заявка на пополнение средств"
+        message = u"оформлена новая заявка на пополнение средств"
+        from_email = settings.DEFAULT_FROM_EMAIL
+        try:
+            send_mail(subject, message, from_email, e1)
+            send_mail(subject, message, from_email, e2)
+        except:
+            pass
         return super(AddBalanceForm, self).save(*args, **kwargs)
+
+class GetBalanceForm(forms.ModelForm):
+    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_out(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_out(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val(), 'act': '+'});"}), label=u"вы получите", required=False)
+    class Meta:
+        model = ProfileBalance
+        fields = ('bank', 'value', 'valuta', 'calc_value')
+        widgets = {
+                'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
+                'value': NumberInput(attrs={"id": "balance-value", "onkeyup": "Dajaxice.warrant.calc_out(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});", "onchange": "Dajaxice.warrant.calc_out(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});"}),
+            }
+    def __init__(self, user=None, commission=_Zero, *args, **kwargs):
+        super(GetBalanceForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        self.user = user
+        self.fields['bank'].required = True
+        if not commission > _Zero:
+            del self.fields['calc_value']
+    def save(self, *args, **kwargs):
+        self.instance.profile = self.user
+        self.instance.value *= ( 1 - self.instance.valuta.commission_out / D(100))
+        self.instance.value = normalized(self.instance.value, where="DOWN")
+
+        e1 = Profile.objects.filter(pk=self.user.pk).values_list('email', flat=True)
+        e2 = Profile.objects.filter(is_active=True, is_staff=True).values_list('email', flat=True)
+        subject = u"оформлена новая заявка на вывод средств"
+        message = u"оформлена новая заявка на вывод средств"
+        from_email = settings.DEFAULT_FROM_EMAIL
+        try:
+            send_mail(subject, message, from_email, e1)
+            send_mail(subject, message, from_email, e2)
+        except:
+            pass
+        return super(GetBalanceForm, self).save(*args, **kwargs)
 
 class UserAdminForm(UserChangeForm):
 

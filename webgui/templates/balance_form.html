@@ -1,7 +1,8 @@
 <form action="{{ url }}" method="post" onsubmit="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta':'{{ form.valuta.value }}', 'form':$(this).serialize(true)});return false;">
 <div>
 <fieldset>
-  <legend>{{ submit }} {{ form.valuta.val }}</legend>
+  <legend>{{ submit }}</legend>
+  <div>{{ valuta.bank|default:""|safe }}</div>
 {% csrf_token %}
 <table>
 {{ form.as_table }}

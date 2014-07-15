@@ -154,6 +154,12 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "collected_static")
 #MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 #MEDIA_URL = '/f/'
 
+EMAIL_HOST = 'mx.artela.net'
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = 'fuObtixtait0'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bot@artela.net'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_CHANGE_FROM_EMAIL = 'bot@artela.net'
 
 
 try:
@@ -164,7 +170,7 @@ DEBUG_T=False
 
 if DEBUG_T:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-    INSTALLED_APPS += ('debug_toolbar',)
+    
     DEBUG_TOOLBAR_PANELS = [
         'debug_toolbar.panels.versions.VersionsPanel',
         'debug_toolbar.panels.timer.TimerPanel',

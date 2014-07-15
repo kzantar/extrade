@@ -219,7 +219,6 @@ class Buy(Orders, Prop):
     def _total(self):
         if self._completed:
             return self.amount
-        print self._amo_sum
         return self._amo_sum
     @property
     def _adeudo(self):
@@ -240,6 +239,13 @@ class Buy(Orders, Prop):
     @property
     def _amo_sum(self):
         return self._subtotal
+    @property
+    def w_amo_sum(self):
+        if not self.buy_buy.exists():
+            return self._subtotal
+        if self.sale:
+            return self._amo_sum
+        return self.amount - self._subtotal
     # buy
     @property
     def _subtotal(self):
@@ -347,6 +353,13 @@ class Sale(Orders, Prop):
     @property
     def _amo_sum(self):
         return self._subtotal
+    @property
+    def w_amo_sum(self):
+        if not self.sale_sale.exists():
+            return self._subtotal
+        if self.buy:
+            return self._amo_sum
+        return self.amount - self._subtotal
     # sale
     @property
     def _subtotal(self):

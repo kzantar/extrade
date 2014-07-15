@@ -14,6 +14,9 @@ from django.core.cache import cache
 
 class Valuta(models.Model):
     value = models.SlugField(unique=True)
+    bank = models.TextField((u'номер счета на ввод'), blank=True, null=True)
+    commission_inp = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name=u"коммиссия на ввод")
+    commission_out = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name=u"коммиссия на вывод")
     def save(self, *args, **kwargs):
         self.value = self.value.lower()
         super(Valuta, self).save(*args, **kwargs)
