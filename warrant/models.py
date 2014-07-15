@@ -157,7 +157,7 @@ class Orders(models.Model):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.amount, o.total, o.pk
     @property
     def action(self):
-        md5key = strmd5sum( "order action" + str(self.pk))
+        md5key = strmd5sum("order action" + str(self.pk))
         a = cache.get(md5key)
         if a is None:
             if hasattr(self, 'sale'): a='sale'
@@ -181,7 +181,7 @@ class Buy(Orders, Prop):
     sale = models.ForeignKey("warrant.Sale", verbose_name=u"Продажа", blank=True, null=True, related_name="sale_sale")
     @property
     def _md5key_subtotal(self):
-        s = "Buy" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.buy_buy.count())
+        s = "Buy" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.buy_buy.count()) + str(self.sale)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
         self.updated = datetime.today()
@@ -297,7 +297,7 @@ class Sale(Orders, Prop):
     buy = models.ForeignKey("warrant.Buy", verbose_name=u"Покупка", blank=True, null=True, related_name="buy_buy")
     @property
     def _md5key_subtotal(self):
-        s = "Sale" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.sale_sale.count())
+        s = "Sale" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.sale_sale.count()) + str(self.sale)
         return strmd5sum(s)
     def save(self, *args, **kwargs):
         self.updated = datetime.today()
