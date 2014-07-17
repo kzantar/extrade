@@ -33,7 +33,7 @@
                         <td>{{ w_amo_sum|floatformat:-8 }} {{ ob.pair.left }}</td>
                         <td>{{ ob.rate|floatformat:-8 }} {{ ob.pair.right }}</td>
                         <td>{{ ob.w_total|floatformat:-8 }} {{ ob.pair.right }}</td>
-                        <td>{{ ob.updated|date:"d.m.y H:i" }}</td>
+                        <td>{{ ob.created|date:"d.m.y H:i" }}</td>
                     </tr>
     {% endfor %}
 {% endfor %}

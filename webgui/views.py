@@ -71,12 +71,6 @@ class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     paginate_by = 41
     def get_queryset(self):
         self.queryset = self.model._default_manager.filter(
-            Q(sale__buy__user=self.request.user) |
-            Q(buy__sale__user=self.request.user) |
-            Q(buy__buy_buy__user=self.request.user) |
-            Q(sale__sale_sale__user=self.request.user)
-            ).filter(completed=True).distinct().order_by('-updated')
-        self.queryset = self.model._default_manager.filter(
             user=self.request.user
             ).filter(
             Q(sale__buy__completed=True) |
@@ -84,7 +78,7 @@ class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
             Q(buy__buy_buy__completed=True) |
             Q(sale__sale_sale__completed=True) |
             Q(completed=True)
-            ).distinct().order_by('-updated',  '-created')
+            ).distinct().order_by('-created')
         return super(ProfileTransactionHistoryView, self).get_queryset()
 
 class ProfileFinancesView(LoginRequiredMixin, ListView):
