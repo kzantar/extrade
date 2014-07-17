@@ -84,7 +84,7 @@ class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
             Q(buy__buy_buy__completed=True) |
             Q(sale__sale_sale__completed=True) |
             Q(completed=True)
-            ).distinct().order_by('-updated')
+            ).distinct().order_by('-updated',  '-created')
         return super(ProfileTransactionHistoryView, self).get_queryset()
 
 class ProfileFinancesView(LoginRequiredMixin, ListView):

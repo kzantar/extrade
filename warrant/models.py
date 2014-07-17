@@ -92,7 +92,7 @@ class Orders(models.Model):
     @property
     def transaction(self):
         if self.is_action('buy'):
-            el = self.buy.buy_buy.order_by('-updated')
+            el = self.buy.buy_buy.order_by('-updated',  '-created')
             if not el.exists(): yield self.buy.w_amo_sum, self.it
             if el.exists() and (self.buy.sale and not self.buy.sale.sale and self.buy.sale.buy_buy.filter(pk=self.sale.pk)): yield self.buy.sale.w_amo_sum, self.it
             for i in el:
@@ -104,7 +104,7 @@ class Orders(models.Model):
                     else:
                         yield i.w_amo_sum, i
         if self.is_action('sale'):
-            el = self.sale.sale_sale.order_by('-updated')
+            el = self.sale.sale_sale.order_by('-updated',  '-created')
             if not el.exists(): yield self.sale.w_amo_sum, self.it
             if el.exists() and (self.sale.buy and not self.sale.buy.sale and self.sale.buy.buy_buy.filter(pk=self.sale.pk)): yield self.sale.buy.w_amo_sum, self.it
             for i in el:
