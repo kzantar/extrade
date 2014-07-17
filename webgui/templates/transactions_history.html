@@ -26,18 +26,16 @@
                         <td>Дата</td>
                     </tr>
 {% for object in object_list %}
+    {% for w_amo_sum, ob in object.transaction %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{{ object.pair }}</td>
-                        {% if user == object.user %}
-                        <td><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
-                        {% else %}
-                        <td><span class="{% if not object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if not object.sale %}Sale{% else %}Buy{% endif %}</span></td>
-                        {% endif %}
-                        <td>{{ object.el.amo_sum|floatformat:-8 }} {{ object.pair.left }}</td>
-                        <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
-                        <td>{{ object.w_total|floatformat:-8 }} {{ object.pair.right }}</td>
-                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
+                        <td>{{ ob.pair }}</td>
+                        <td><span class="{% if object.action == 'sale' %}buyGreen{% else %}buyRed{% endif %}">{% if object.action == 'sale' %}Sale{% else %}Buy{% endif %}</span></td>
+                        <td>{{ w_amo_sum|floatformat:-8 }} {{ ob.pair.left }}</td>
+                        <td>{{ ob.rate|floatformat:-8 }} {{ ob.pair.right }}</td>
+                        <td>{{ ob.w_total|floatformat:-8 }} {{ ob.pair.right }}</td>
+                        <td>{{ ob.updated|date:"d.m.y H:i" }}</td>
                     </tr>
+    {% endfor %}
 {% endfor %}
             </tbody></table>
 {% include "paginate.html" %}
