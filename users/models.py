@@ -102,8 +102,8 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta) + str(self.pk))
         b = cache.get(md5key)
         if b is None:
-            balance_plus = q.filter(action="+").distinct().aggregate(Sum('value')).values()[0] or _Zero
-            balance_minus = q.filter(action="-").distinct().aggregate(Sum('value')).values()[0] or _Zero
+            balance_plus = q.filter(action="+", accept=True, cancel=False).distinct().aggregate(Sum('value')).values()[0] or _Zero
+            balance_minus = q.filter(action="-", accept=True, cancel=False).distinct().aggregate(Sum('value')).values()[0] or _Zero
             b = balance_plus - balance_minus
             cache.set(md5key, b)
         return b
