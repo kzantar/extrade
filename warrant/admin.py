@@ -10,7 +10,7 @@ class BuyAdmin(admin.ModelAdmin):
     list_editable = ('completed', 'sale')
 
 class SaleAdmin(admin.ModelAdmin):
-    list_display=('__unicode__', '_pir', 'buy', 'compl', 'total', 'commiss', 'adeudo', 'completed')
+    list_display=('__unicode__', '_pir', 'buy', 'compl', '_total', 'commiss', 'adeudo', 'completed')
     list_editable = ('completed', 'buy')
 
 admin.site.register(Sale, SaleAdmin)

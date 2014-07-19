@@ -72,7 +72,7 @@ class Orders(models.Model):
     def w_total(self):
         if self.is_action('buy'):
             if self.buy.sale and self.buy.buy_buy.exists() or (self.buy.sale and not self.buy.sale.sale and self.buy.sale.buy_buy.filter(pk=self.sale.pk)) is None:
-                return self.el.w_amo_sum * self.rate
+                return self.el.w_amo_sum * self.buy.rate
             else:
                 return self.w_amo_sum * self.rate
         if self.is_action('sale'):
@@ -91,6 +91,10 @@ class Orders(models.Model):
             return self.buy
     @property
     def transaction(self):
+        for w_amo_sum, el in self._transaction:
+            yield w_amo_sum, el.rate * w_amo_sum, el
+    @property
+    def _transaction(self):
         if self.is_action('buy'):
             el = self.buy.buy_buy.order_by('-created')
             if not el.exists(): yield self.buy.w_amo_sum, self.it
@@ -266,11 +270,15 @@ class Buy(Orders, Prop):
         return self._amo_sum
     @property
     def _adeudo(self):
-        if self._completed:
-            return self.amount * self.rate
-        return self._amo_sum * self.rate
+        amo = self.amount
+        if not self._completed:
+            amo = self._amo_sum
+        ret = amo * self.rate
+        print "-", ret, self.pk
+        return ret
     @property
     def _debit_left(self):
+        return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _debit_right(self):
@@ -321,14 +329,14 @@ class Buy(Orders, Prop):
         for r in s:
             _amo_sale = r._ret_amount
             if self._completed or self.cancel or self.completed: return True
-            if _amo_sale == self._ret_amount:
+            if r._ret_amount == self._ret_amount:
                 self.buy_buy.add(r)
                 Orders.set_completed(self.pk)
                 continue
-            if _amo_sale < self._ret_amount:
+            if r._ret_amount < self._ret_amount:
                 self.buy_buy.add(r)
                 continue
-            if _amo_sale >= self._ret_amount:
+            if r._ret_amount >= self._ret_amount:
                 r._exchange()
                 continue
             return True
@@ -368,16 +376,33 @@ class Sale(Orders, Prop):
         return self._total * self.commission / D(100)
     @property
     def _sum_ret(self):
-        return self._ret_amount * self.rate
+        return self._ret_amount * self._rate
         s = _Zero
         for el in self.sale_sale.all():
             s += el._adeudo
         return s
     @property
     def _total(self):
-        if self._completed:
-            return self.amount * self.rate
-        return self._amo_sum * self.rate
+        a=self.sale_sale.exclude(buy_buy__gte=0).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
+        for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
+            a += (c.amount - c._subtotal) * c.rate
+        if bool(self.buy) and a:
+            #a += self.buy._adeudo
+            c=self.buy
+            if c.sale and c.buy_buy.exists():
+                a += (self.amount - self._subtotal) * c.rate
+            else:
+                #a += (self._subtotal) * c.rate
+                a += self.buy._adeudo
+        if bool(self.buy) and not a:
+            a += self.amount * self.buy.rate
+        print "+", a, self.pk
+        return a
+    @property
+    def _rate(self):
+        if self.buy:
+            return self.buy.rate
+        return self.rate
     @property
     def _adeudo(self):
         if self._completed:
@@ -390,6 +415,7 @@ class Sale(Orders, Prop):
         return self._adeudo
     @property
     def _debit_right(self):
+        return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _pos(self):
@@ -435,14 +461,14 @@ class Sale(Orders, Prop):
         for r in s:
             _amo_buy = r._ret_amount
             if self._completed or self.cancel or self.completed: return True
-            if _amo_buy == self._ret_amount:
+            if r._ret_amount == self._ret_amount:
                 self.sale_sale.add(r)
                 Orders.set_completed(self.pk)
                 continue
-            if _amo_buy < self._ret_amount:
+            if r._ret_amount < self._ret_amount:
                 self.sale_sale.add(r)
                 continue
-            if _amo_buy >= self._ret_amount:
+            if r._ret_amount >= self._ret_amount:
                 r._exchange()
                 continue
             return True
