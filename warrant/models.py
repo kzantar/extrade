@@ -278,7 +278,7 @@ class Buy(Orders, Prop):
         return ret
     @property
     def _debit_left(self):
-        return self._total
+        #return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _debit_right(self):
@@ -415,7 +415,7 @@ class Sale(Orders, Prop):
         return self._adeudo
     @property
     def _debit_right(self):
-        return self._total
+        #return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _pos(self):
