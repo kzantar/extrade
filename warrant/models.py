@@ -34,7 +34,7 @@ class Prop:
         return self.completed or self._completed
     @property
     def commiss(self):
-        return normalized(self._commission_debit)
+        return floatformat(normalized(self._commission_debit), -8)
     @property
     def adeudo(self):
         return u"-%s%s" % (float(self._adeudo), self._pos)
@@ -236,8 +236,8 @@ class Buy(Orders, Prop):
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:
             self.completed = True
-        if self.sale and self.sale._status:
-            raise ValidationError(u'Этот ордер уже отменен или исполнен.')
+        #if self.sale and self.sale._status:
+        #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         super(Buy, self).save(*args, **kwargs)
         if not (self.completed or self.cancel): self.exchange()
  
@@ -332,13 +332,14 @@ class Buy(Orders, Prop):
             if r._ret_amount == self._ret_amount:
                 self.buy_buy.add(r)
                 Orders.set_completed(self.pk)
-                continue
+                return True
             if r._ret_amount < self._ret_amount:
                 self.buy_buy.add(r)
-                continue
+                Orders.set_completed(r.pk)
+                return self._exchange()
             if r._ret_amount >= self._ret_amount:
                 r._exchange()
-                continue
+                return True
             return True
 
 class Sale(Orders, Prop):
@@ -352,8 +353,8 @@ class Sale(Orders, Prop):
         if not self.commission: self.commission = self.pair.commission
         if self._completed and not self.completed:
             self.completed = True
-        if self.buy and self.buy._status:
-            raise ValidationError(u'Этот ордер уже отменен или исполнен.')
+        #if self.buy and self.buy._status:
+        #    raise ValidationError(u'Этот ордер уже отменен или исполнен.')
         super(Sale, self).save(*args, **kwargs)
         if not (self.completed or self.cancel): self.exchange()
 
@@ -383,7 +384,8 @@ class Sale(Orders, Prop):
         return s
     @property
     def _total(self):
-        a=self.sale_sale.exclude(buy_buy__gte=0).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
+        e=_Zero
+        a=self.sale_sale.exclude(buy_buy__gte=0).distinct().extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
         for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
             a += (c.amount - c._subtotal) * c.rate
         if bool(self.buy) and a:
@@ -392,8 +394,8 @@ class Sale(Orders, Prop):
             if c.sale and c.buy_buy.exists():
                 a += (self.amount - self._subtotal) * c.rate
             else:
-                #a += (self._subtotal) * c.rate
-                a += self.buy._adeudo
+                #a += c._amo_sum * c.rate
+                a += (self.amount - self._subtotal) * c.rate
         if bool(self.buy) and not a:
             a += self.amount * self.buy.rate
         print "+", a, self.pk
@@ -464,12 +466,13 @@ class Sale(Orders, Prop):
             if r._ret_amount == self._ret_amount:
                 self.sale_sale.add(r)
                 Orders.set_completed(self.pk)
-                continue
+                return True
             if r._ret_amount < self._ret_amount:
                 self.sale_sale.add(r)
-                continue
+                Orders.set_completed(r.pk)
+                return self._exchange()
             if r._ret_amount >= self._ret_amount:
                 r._exchange()
-                continue
+                return True
             return True
 

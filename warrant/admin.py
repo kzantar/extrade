@@ -6,7 +6,7 @@ from django.db.models import Sum, Count, F, Q
 # Register your models here.
 
 class BuyAdmin(admin.ModelAdmin):
-    list_display=('__unicode__', '_pir', 'sale', 'compl', 'total', 'commiss', 'adeudo', 'completed')
+    list_display=('__unicode__', '_pir', 'sale', 'compl', '_adeudo', 'commiss', 'adeudo', 'completed')
     list_editable = ('completed', 'sale')
 
 class SaleAdmin(admin.ModelAdmin):
