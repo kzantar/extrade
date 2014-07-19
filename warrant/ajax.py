@@ -102,7 +102,7 @@ def get_form_input_balance(request, valuta, form=None, edit=None, cancel=None):
         cb.cancel=True
         cb.save()
         return get_form_input_balance(request, valuta, form, edit, cancel=None)
-    form = AddBalanceForm(user=request.user, instance=cb, data=form, initial={'valuta':valuta}, commission=v.commission_inp)
+    form = AddBalanceForm(user=request.user, instance=cb, data=form, initial={'valuta':valuta}, commission=v.commission_inp, validators=v.validators_inp)
     if form.is_valid():
         form.instance.action="+"
         form.save()
@@ -136,7 +136,7 @@ def get_form_output_balance(request, valuta, form=None, edit=None, cancel=None):
         cb.cancel=True
         cb.save()
         return get_form_output_balance(request, valuta, form, edit, cancel=None)
-    form = GetBalanceForm(user=request.user, instance=cb, data=form, initial={'valuta':valuta}, commission=v.commission_inp)
+    form = GetBalanceForm(user=request.user, instance=cb, data=form, initial={'valuta':valuta}, commission=v.commission_inp, validators=v.validators_out)
     if form.is_valid():
         form.instance.action="-"
         form.save()
@@ -150,7 +150,7 @@ def get_form_output_balance(request, valuta, form=None, edit=None, cancel=None):
 заново или <a href="#" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {{'cancel': 1, 'valuta': '{valuta}'}});return false;">отменить</a></p>
 """.format(**{"valuta": form.instance.valuta.pk})
         else:
-            c = {"form": form, "url": ".", "submit": "вывести %s" % v, "functions": "get_form_output_balance"}
+            c = {"form": form, "url": ".", "submit": "вывести %s" % v, "functions": "get_form_output_balance", "valuta": v}
             c.update(csrf(request))
             obj = render_to_string("balance_form.html", c)
     dajax.assign('#balance_form_content', 'innerHTML', obj)

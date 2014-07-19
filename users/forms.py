@@ -3,12 +3,14 @@ from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserChangeForm
 from users.models import ProfileBalance
+from currency.models import Valuta
 from django.forms.widgets import HiddenInput, TextInput, Textarea, NumberInput
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.conf import settings
 from decimal import Decimal as D, _Zero
 from common.numeric import normalized
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 
 
 
@@ -105,10 +107,11 @@ class AddBalanceForm(forms.ModelForm):
                 'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
                 'value': NumberInput(attrs={"id": "balance-value", "onkeyup": "Dajaxice.warrant.calc_inp(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});", "onchange": "Dajaxice.warrant.calc_inp(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});"}),
             }
-    def __init__(self, user=None, commission=_Zero, *args, **kwargs):
+    def __init__(self, user=None, validators=None, commission=_Zero, *args, **kwargs):
         super(AddBalanceForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         self.user = user
+        if validators: self.fields['value'].validators = validators
         if not commission > _Zero:
             del self.fields['calc_value']
     def save(self, *args, **kwargs):
@@ -139,11 +142,12 @@ class GetBalanceForm(forms.ModelForm):
                 'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
                 'value': NumberInput(attrs={"id": "balance-value", "onkeyup": "Dajaxice.warrant.calc_out(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});", "onchange": "Dajaxice.warrant.calc_out(Dajax.process, {'value':$(this).val(), 'valuta':$('#balance-valuta').val()});"}),
             }
-    def __init__(self, user=None, commission=_Zero, *args, **kwargs):
+    def __init__(self, user=None, validators=None, commission=_Zero, *args, **kwargs):
         super(GetBalanceForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         self.user = user
         self.fields['bank'].required = True
+        if validators: self.fields['value'].validators = validators
         if not commission > _Zero:
             del self.fields['calc_value']
     def save(self, *args, **kwargs):

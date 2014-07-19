@@ -7,6 +7,7 @@ from django.template.defaultfilters import floatformat
 from common.numeric import normalized
 from django.db.models import Sum, Count, F, Q
 from django.core.cache import cache
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 
@@ -15,11 +16,30 @@ from django.core.cache import cache
 class Valuta(models.Model):
     value = models.SlugField(unique=True)
     bank = models.TextField((u'номер счета на ввод'), blank=True, null=True)
+    
     commission_inp = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name=u"коммиссия на ввод")
     commission_out = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name=u"коммиссия на вывод")
+
+    out_min_amount = models.DecimalField(max_digits=10, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма на вывод", validators=[MinValueValidator(_Zero)])
+    out_max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма на вывод", validators=[MinValueValidator(_Zero)])
+
+    inp_min_amount = models.DecimalField(max_digits=10, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма на ввод", validators=[MinValueValidator(_Zero)])
+    inp_max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма на ввод", validators=[MinValueValidator(_Zero)])
     def save(self, *args, **kwargs):
         self.value = self.value.lower()
         super(Valuta, self).save(*args, **kwargs)
+    @property
+    def validators_inp(self):
+        v = []
+        if self.inp_min_amount: v += [MinValueValidator(self.inp_min_amount),]
+        if self.inp_max_amount: v += [MaxValueValidator(self.inp_max_amount),]
+        return v
+    @property
+    def validators_out(self):
+        v = []
+        if self.out_min_amount: v += [MinValueValidator(self.out_min_amount),]
+        if self.out_max_amount: v += [MaxValueValidator(self.out_max_amount),]
+        return v
     @property
     def val(self):
         return self.value
