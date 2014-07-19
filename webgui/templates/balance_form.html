@@ -1,4 +1,5 @@
-<form action="{{ url }}" method="post" onsubmit="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta':'{{ form.valuta.value }}', 'form':$(this).serialize(true)});return false;">
+{% load static %}
+<form action="{{ url }}" method="post" onsubmit="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta':'{{ form.valuta.value }}', 'form':$(this).serialize(true)});$('#ajax-loader').show();$(this).hide();return false;">
 <div>
 <fieldset>
   <legend>{{ submit }}</legend>
@@ -11,3 +12,4 @@
 </div>
 <input type="submit" value="{{ submit }}">
 </form>
+<img src="{% static 'img/ajax-loader.gif' %}" style="display:none;" id="ajax-loader">
