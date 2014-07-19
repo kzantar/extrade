@@ -3,7 +3,7 @@
 <div>
 <fieldset>
   <legend>{{ submit }}</legend>
-  <div>{{ valuta.bank|default:""|safe }}</div>
+  {%  if functions == 'get_form_input_balance' %}<div>{{ valuta.bank|default:""|safe }}</div>{% endif %}
   {%  if functions == 'get_form_input_balance' %}
   {% if valuta.commission_inp %}<div>Коммиссия на ввод составляет {{ valuta.commission_inp|floatformat:-8 }}%</div>{% endif %}
   {% if valuta.inp_min_amount %}<div>Минимальная сумма на ввода {{ valuta.inp_min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
