@@ -148,10 +148,10 @@ class TypePair(models.Model):
     def actives(self, user):
         return self.warrant_orders_related.model.actives(user=user, pair=self)
     def buy(self):
-        for o in self.warrant_orders_related.model.buy.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("-rate").distinct():
+        for o in self.warrant_orders_related.model.buy.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("-rate", '-amount').distinct():
             yield o.rate, o.ret_amount, o.ret_sum
     def sale(self):
-        for o in self.warrant_orders_related.model.sale.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("-rate").distinct():
+        for o in self.warrant_orders_related.model.sale.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("rate", '-amount').distinct():
             yield o.rate, o.ret_amount, o.ret_sum
     @property
     def avg_rate(self):
