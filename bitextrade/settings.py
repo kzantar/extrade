@@ -110,11 +110,11 @@ DATABASES = {
 }
 
 USE_CACHE = not DEBUG
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-   }
-}
+#CACHES = {
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+#   }
+#}
 
 
 TIMEOUT = 3600
@@ -166,7 +166,7 @@ try:
     from settings_local import *
 except ImportError:
     pass
-DEBUG_T=False
+DEBUG_T=True
 
 if DEBUG_T:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)

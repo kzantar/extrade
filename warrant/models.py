@@ -69,18 +69,6 @@ class Orders(models.Model):
     def w_percent(self):
         return int((self.amount - self.el.ret_amount) / self.amount * 100)
     @property
-    def w_total(self):
-        if self.is_action('buy'):
-            if self.buy.sale and self.buy.buy_buy.exists() or (self.buy.sale and not self.buy.sale.sale and self.buy.sale.buy_buy.filter(pk=self.sale.pk)) is None:
-                return self.el.w_amo_sum * self.buy.rate
-            else:
-                return self.w_amo_sum * self.rate
-        if self.is_action('sale'):
-            if self.sale.buy and self.sale.sale_sale.exists() or (self.sale.buy and not self.sale.buy.sale and self.sale.buy.buy_buy.filter(pk=self.sale.pk)) is None:
-                return self.el.w_amo_sum * self.rate
-            else:
-                return self.w_amo_sum * self.rate
-    @property
     def status(self):
         return self.el._status
     @property
@@ -98,7 +86,12 @@ class Orders(models.Model):
         if self.is_action('buy'):
             el = self.buy.buy_buy.order_by('-created')
             if not el.exists(): yield self.buy.w_amo_sum, self.it
-            if el.exists() and (self.buy.sale and not self.buy.sale.sale and self.buy.sale.buy_buy.filter(pk=self.sale.pk)): yield self.buy.sale.w_amo_sum, self.it
+            if el.exists() and \
+                (self.buy.sale and \
+                not self.buy.sale.sale and \
+                self.buy.sale.buy_buy.filter(
+                    pk=self.sale.pk
+                    )): yield self.buy.sale.w_amo_sum, self.it
             for i in el:
                 if self.buy.sale and el.exists():
                     yield i.buy.w_amo_sum, i
@@ -110,7 +103,12 @@ class Orders(models.Model):
         if self.is_action('sale'):
             el = self.sale.sale_sale.order_by('-created')
             if not el.exists(): yield self.sale.w_amo_sum, self.it
-            if el.exists() and (self.sale.buy and not self.sale.buy.sale and self.sale.buy.buy_buy.filter(pk=self.sale.pk)): yield self.sale.buy.w_amo_sum, self.it
+            if el.exists() and \
+                (self.sale.buy and \
+                not self.sale.buy.sale and \
+                self.sale.buy.buy_buy.filter(
+                    pk=self.sale.pk
+                    )): yield self.sale.buy.w_amo_sum, self.it
             for i in el:
                 if self.sale.buy and el.exists():
                     yield i.w_amo_sum, i
@@ -138,26 +136,47 @@ class Orders(models.Model):
         return floatformat(res, -8)
     @classmethod
     def sum_from_user_buy_sale(cls, user, valuta):
-        obj = cls.objects.filter(user=user).filter(Q(pair__left__value=valuta) | Q(pair__right__value=valuta)).only('pair', 'rate', 'amount').distinct()
-        _s=_Zero
-        for c in obj:
-            if c.is_action('sale'):
-                if c.sale.pair.left.value == valuta:
-                    _s += c.sale._debit_left
-                elif c.sale.pair.right.value == valuta:
-                    _s -= c.sale._debit_right
-            if c.is_action('buy'):
-                if c.buy.pair.left.value == valuta:
-                    _s -= c.buy._debit_left
-                elif c.buy.pair.right.value == valuta:
-                    _s += c.buy._debit_right
+        _c1 = cls.objects.filter(user=user).count()
+        _c2 = cls.objects.filter(Q(buy__user=user) | Q(sale__user=user)).count()
+        _c3 = cls.objects.filter(cancel=False).count()
+        _c4 = cls.objects.filter(completed=True).count()
+        _md5key = strmd5sum("sum" + str(_c1) + str(_c2) + str(_c3) + str(_c4) + str(user.pk) + str(valuta))
+        _s = cache.get(_md5key)
+        if _s is None:
+            obj = cls.objects.filter(
+                user=user
+                ).filter(
+                Q(pair__left__value=valuta) |
+                Q(pair__right__value=valuta)
+                ).only('pair', 'rate', 'amount').distinct()
+            _s=_Zero
+            for c in obj:
+                if c.is_action('sale'):
+                    if c.sale.pair.left.value == valuta:
+                        _s += c.sale._debit_left
+                    elif c.sale.pair.right.value == valuta:
+                        _s -= c.sale._debit_right
+                if c.is_action('buy'):
+                    if c.buy.pair.left.value == valuta:
+                        _s -= c.buy._debit_left
+                    elif c.buy.pair.right.value == valuta:
+                        _s += c.buy._debit_right
+            cache.set(_md5key, _s)
         return _s
     @classmethod
     def min_buy_rate(cls, pair):
-        return cls.objects.filter(pair=pair, sale__gte=1).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Min('rate')).values()[0] or _Zero
+        return cls.objects.filter(
+            pair=pair, sale__gte=1
+            ).exclude(
+            Q(cancel=True) | Q(completed=True)
+            ).aggregate(Min('rate')).values()[0] or _Zero
     @classmethod
     def max_sale_rate(cls, pair):
-        return cls.objects.filter(pair=pair, buy__gte=1).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Max('rate')).values()[0] or _Zero
+        return cls.objects.filter(
+            pair=pair, buy__gte=1
+            ).exclude(
+            Q(cancel=True) | Q(completed=True)
+            ).aggregate(Max('rate')).values()[0] or _Zero
     @classmethod
     def min_max_avg_rate(cls, pair, to_int=None, to_round=None):
         r = cls.objects.filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Avg('rate'))
@@ -188,24 +207,39 @@ class Orders(models.Model):
         return v
     @classmethod
     def actives(cls, user, pair=None):
-        for o in cls.objects.filter(pair=pair, user=user).exclude(Q(cancel=True) | Q(completed=True)).only('updated', 'rate', 'amount').distinct().order_by('-rate'):
+        for o in cls.objects.filter(
+                pair=pair, user=user
+            ).exclude(
+                Q(cancel=True) |
+                Q(completed=True)
+            ).only('updated', 'rate', 'amount').distinct(
+            ).order_by('-rate'):
             if o.is_action('sale'):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.el._ret_amount, o.el._sum_ret, o.pk
             if o.is_action('buy'):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.el._ret_amount, o.el._sum_ret, o.pk
     @classmethod
     def history(cls, pair=None):
-        for o in cls.objects.filter(pair=pair).filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(cancel=True, sale__sale_sale__gte=1) | Q(completed=True)).only('updated', 'rate', 'amount').distinct().order_by('-updated')[:40]:
+        for o in cls.objects.filter(
+                    pair=pair
+                ).filter(
+                    Q(cancel=True, buy__buy_buy__gte=1) |
+                    Q(cancel=True, sale__sale_sale__gte=1) |
+                    Q(completed=True)
+                ).only('updated', 'rate', 'amount').distinct(
+                ).order_by('-updated')[:40]:
             if o.is_action('sale'):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.amount, o.total, o.pk
             if o.is_action('buy'):
                 yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.amount, o.total, o.pk
     @property
-    def _action_md5key(self):
-        return strmd5sum("order actions" + str(self.pk) + self.__str__())
+    def _keys(self):
+        s = "key2" + str(self.pk) + str(self.updated) + str(getattr(self, "%s_%s" % (self.action,) * 2).count()) + self.action
+        print "s"
+        return s
     @property
     def action(self):
-        md5key = self._action_md5key
+        md5key = strmd5sum("order actions" + str(self.pk))
         a = cache.get(md5key)
         if a is None:
             if hasattr(self, 'sale'): a='sale'
@@ -224,13 +258,21 @@ class Orders(models.Model):
     def _right(self):
         return self.pair.right
 
-
 class Buy(Orders, Prop):
     sale = models.ForeignKey("warrant.Sale", verbose_name=u"Продажа", blank=True, null=True, related_name="sale_sale")
     @property
-    def _md5key_subtotal(self):
-        s = "Buy" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.buy_buy.count())
+    def _md5key_total(self):
+        s = "Buy _md5key_total" + self._keys
         return strmd5sum(s)
+    @property
+    def _md5key_subtotal(self):
+        s = "Buy _md5key_subtotal" + self._keys
+        return strmd5sum(s)
+    @property
+    def _keys(self):
+        s = "key1" + str(self.pk) + str(self.updated) + str(self.buy_buy.count())
+        if not self.sale is None: s += str('sale')
+        return s
     def save(self, *args, **kwargs):
         self.updated = datetime.today()
         if not self.commission: self.commission = self.pair.commission
@@ -299,7 +341,7 @@ class Buy(Orders, Prop):
     def _subtotal(self):
         md5key = self._md5key_subtotal
         a = cache.get(md5key)
-        if a is None or not a > _Zero:
+        if a is None:
             a=self.buy_buy.exclude(sale_sale__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or _Zero
             for c in self.buy_buy.filter(sale_sale__gte=0).distinct():
                 a += c.amount - c._subtotal
@@ -327,7 +369,6 @@ class Buy(Orders, Prop):
         s = self.getForSale()
         #_amo_buy = self._ret_amount
         for r in s:
-            _amo_sale = r._ret_amount
             if self._completed or self.cancel or self.completed: return True
             if r._ret_amount == self._ret_amount:
                 self.buy_buy.add(r)
@@ -345,9 +386,18 @@ class Buy(Orders, Prop):
 class Sale(Orders, Prop):
     buy = models.ForeignKey("warrant.Buy", verbose_name=u"Покупка", blank=True, null=True, related_name="buy_buy")
     @property
-    def _md5key_subtotal(self):
-        s = "Sale" + str(self.pk) + str(self.pair) + str(self.updated) + str(self.sale_sale.count())
+    def _md5key_total(self):
+        s = "Sale _md5key_total" + self._keys
         return strmd5sum(s)
+    @property
+    def _md5key_subtotal(self):
+        s = "Sale _md5key_subtotal" + self._keys
+        return strmd5sum(s)
+    @property
+    def _keys(self):
+        s = "key" + str(self.pk) + str(self.updated) + str(self.sale_sale.count())
+        if not self.buy is None: s += str('buy')
+        return s
     def save(self, *args, **kwargs):
         self.updated = datetime.today()
         if not self.commission: self.commission = self.pair.commission
@@ -385,19 +435,23 @@ class Sale(Orders, Prop):
     @property
     def _total(self):
         e=_Zero
-        a=self.sale_sale.exclude(buy_buy__gte=0).distinct().extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
-        for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
-            a += (c.amount - c._subtotal) * c.rate
-        if bool(self.buy) and a:
-            #a += self.buy._adeudo
-            c=self.buy
-            if c.sale and c.buy_buy.exists():
-                a += (self.amount - self._subtotal) * c.rate
-            else:
-                #a += c._amo_sum * c.rate
-                a += (self.amount - self._subtotal) * c.rate
-        if bool(self.buy) and not a:
-            a += self.amount * self.buy.rate
+        md5key = self._md5key_total
+        a = cache.get(md5key)
+        if a is None:
+            a=self.sale_sale.exclude(buy_buy__gte=0).distinct().extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
+            for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
+                a += (c.amount - c._subtotal) * c.rate
+            if bool(self.buy) and a:
+                #a += self.buy._adeudo
+                c=self.buy
+                if c.sale and c.buy_buy.exists():
+                    a += (self.amount - self._subtotal) * c.rate
+                else:
+                    #a += c._amo_sum * c.rate
+                    a += (self.amount - self._subtotal) * c.rate
+            if bool(self.buy) and not a:
+                a += self.amount * self.buy.rate
+            cache.set(md5key, a)
         print "+", a, self.pk
         return a
     @property
@@ -433,7 +487,7 @@ class Sale(Orders, Prop):
     def _subtotal(self):
         md5key = self._md5key_subtotal
         a = cache.get(md5key)
-        if a is None or not a > _Zero:
+        if a is None:
             a=self.sale_sale.exclude(buy_buy__gte=0).aggregate(amount_sum=Sum('amount')).get('amount_sum') or _Zero
             for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
                 a += c.amount - c._subtotal
@@ -475,4 +529,3 @@ class Sale(Orders, Prop):
                 r._exchange()
                 return True
             return True
-

@@ -98,12 +98,12 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         return super(Profile, self).save(*args, **kwargs)
     def _user_balance(self, valuta):
-        q=self.profilebalance_set.filter(valuta__value=valuta, profile=self)
+        q=self.profilebalance_set.filter(valuta__value=valuta, profile=self, accept=True, cancel=False)
         md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta) + str(self.pk))
         b = cache.get(md5key)
         if b is None:
-            balance_plus = q.filter(action="+", accept=True, cancel=False).distinct().aggregate(Sum('value')).values()[0] or _Zero
-            balance_minus = q.filter(action="-", accept=True, cancel=False).distinct().aggregate(Sum('value')).values()[0] or _Zero
+            balance_plus = q.filter(action="+").distinct().aggregate(Sum('value')).values()[0] or _Zero
+            balance_minus = q.filter(action="-").distinct().aggregate(Sum('value')).values()[0] or _Zero
             b = balance_plus - balance_minus
             cache.set(md5key, b)
         return b
