@@ -138,9 +138,10 @@ class Orders(models.Model):
     def sum_from_user_buy_sale(cls, user, valuta):
         _c1 = cls.objects.filter(user=user).count()
         _c2 = cls.objects.filter(Q(buy__user=user) | Q(sale__user=user)).count()
-        _c3 = cls.objects.filter(cancel=False).count()
-        _c4 = cls.objects.filter(completed=True).count()
-        _md5key = strmd5sum("sum" + str(_c1) + str(_c2) + str(_c3) + str(_c4) + str(user.pk) + str(valuta))
+        _c3 = cls.objects.filter(Q(buy__user=user) | Q(sale__user=user) | Q(sale__sale_sale__user=user) | Q(buy__buy_buy__user=user)).count()
+        _c4 = cls.objects.filter(cancel=False).count()
+        _c5 = cls.objects.filter(completed=True).count()
+        _md5key = strmd5sum("sum" + str(_c1) + str(_c2) + str(_c3) + str(_c4) + str(_c5) + str(user.pk) + str(valuta))
         _s = cache.get(_md5key)
         if _s is None:
             obj = cls.objects.filter(
@@ -269,6 +270,10 @@ class Buy(Orders, Prop):
         s = "Buy _md5key_subtotal" + self._keys
         return strmd5sum(s)
     @property
+    def _md5key_adeudo(self):
+        s = "Buy _md5key__adeudo" + self._keys
+        return strmd5sum(s)
+    @property
     def _keys(self):
         s = "key1" + str(self.pk) + str(self.updated) + str(self.buy_buy.count())
         if not self.sale is None: s += str('sale')
@@ -312,26 +317,23 @@ class Buy(Orders, Prop):
         return self._amo_sum
     @property
     def _adeudo(self):
-        a=self.buy_buy.exclude(sale_sale__gte=0).distinct().extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
-        for c in self.buy_buy.filter(sale_sale__gte=0).distinct():
-            a += (c.amount - c._subtotal) * c.rate
-        if bool(self.sale) and a:
-            c=self.sale
-            if c.buy and c.sale_sale.exists():
-                a += (self.amount - self._subtotal) * c.rate
-            else:
-                a += (self.amount - self._subtotal) * c.rate
-        if bool(self.sale) and not a:
-            a += self.amount * self.rate
+        md5key = self._md5key_adeudo
+        a = cache.get(md5key)
+        if a is None:
+            a=self.buy_buy.exclude(sale_sale__gte=0).distinct().extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
+            for c in self.buy_buy.filter(sale_sale__gte=0).distinct():
+                a += (c.amount - c._subtotal) * c.rate
+            if bool(self.sale) and a:
+                c=self.sale
+                if c.buy and c.sale_sale.exists():
+                    a += (self.amount - self._subtotal) * c.rate
+                else:
+                    a += (self.amount - self._subtotal) * c.rate
+            if bool(self.sale) and not a:
+                a += self.amount * self.rate
+            cache.set(md5key, a)
         print "-", a, self.pk
         return a
-
-        amo = self.amount
-        if not self._completed:
-            amo = self._amo_sum
-        ret = amo * self.rate
-        print "-", ret, self.pk
-        return ret
     @property
     def _debit_left(self):
         #return self._total

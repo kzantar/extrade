@@ -11,7 +11,11 @@
 <script type="text/javascript">
 function a_calc(el, act) {
     balance=Number(el.children.item().textContent.replace(',', '.').replace(/[^0-9\.]+/g,''))
-    $('#id_'+act+'-amount').val(parseFloat(balance / $('#id_'+act+'-rate').val().replace(',', '.')).toFixed(8))
+    if(act=='sale'){
+        $('#id_'+act+'-amount').val(balance)
+    }else{
+        $('#id_'+act+'-amount').val(parseFloat(balance / $('#id_'+act+'-rate').val().replace(',', '.')).toFixed(8))
+    }
 }
 function set_price(amount, rate, act) {
     amount = amount.replace(',', '.')
