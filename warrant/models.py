@@ -312,6 +312,20 @@ class Buy(Orders, Prop):
         return self._amo_sum
     @property
     def _adeudo(self):
+        a=self.buy_buy.exclude(sale_sale__gte=0).distinct().extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
+        for c in self.buy_buy.filter(sale_sale__gte=0).distinct():
+            a += (c.amount - c._subtotal) * c.rate
+        if bool(self.sale) and a:
+            c=self.sale
+            if c.buy and c.sale_sale.exists():
+                a += (self.amount - self._subtotal) * c.rate
+            else:
+                a += (self.amount - self._subtotal) * c.rate
+        if bool(self.sale) and not a:
+            a += self.amount * self.rate
+        print "-", a, self.pk
+        return a
+
         amo = self.amount
         if not self._completed:
             amo = self._amo_sum
@@ -320,7 +334,7 @@ class Buy(Orders, Prop):
         return ret
     @property
     def _debit_left(self):
-        return self._total
+        #return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _debit_right(self):
@@ -442,15 +456,13 @@ class Sale(Orders, Prop):
             for c in self.sale_sale.filter(buy_buy__gte=0).distinct():
                 a += (c.amount - c._subtotal) * c.rate
             if bool(self.buy) and a:
-                #a += self.buy._adeudo
                 c=self.buy
                 if c.sale and c.buy_buy.exists():
                     a += (self.amount - self._subtotal) * c.rate
                 else:
-                    #a += c._amo_sum * c.rate
                     a += (self.amount - self._subtotal) * c.rate
             if bool(self.buy) and not a:
-                a += self.amount * self.buy.rate
+                a += self.amount * self.rate
             cache.set(md5key, a)
         print "+", a, self.pk
         return a
@@ -471,7 +483,7 @@ class Sale(Orders, Prop):
         return self._adeudo
     @property
     def _debit_right(self):
-        return self._total
+        #return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _pos(self):
