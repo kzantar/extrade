@@ -98,10 +98,16 @@ class Orders(models.Model):
                     )): yield self.buy.sale.w_amo_sum, self.it
             for i in el:
                 if self.buy.sale and el.exists():
-                    yield i.buy.w_amo_sum, i
+                    if self.el.created >= i.created:
+                        yield i.buy.w_amo_sum, i
+                    else:
+                        yield i.buy.w_amo_sum, self.it
                 else:
                     if i.sale_sale.exists():
-                        yield i.buy.w_amo_sum, i
+                        if self.created >= i.created:
+                            yield i.buy.w_amo_sum, i
+                        else:
+                            yield i.w_amo_sum, self.el
                     else:
                         if self.created >= i.created:
                             yield i.w_amo_sum, i
@@ -122,10 +128,16 @@ class Orders(models.Model):
                     )): yield self.sale.buy.w_amo_sum, self.it
             for i in el:
                 if self.sale.buy and el.exists():
-                    yield i.w_amo_sum, i
+                    if self.created >= i.created:
+                        yield i.w_amo_sum, i
+                    else:
+                        yield i.w_amo_sum, self.el
                 else:
                     if i.buy_buy.exists():
-                        yield i.buy.w_amo_sum, i
+                        if self.created >= i.created:
+                            yield i.buy.w_amo_sum, i
+                        else:
+                            yield i.w_amo_sum, self.el
                     else:
                         if self.created >= i.created:
                             yield i.w_amo_sum, i
