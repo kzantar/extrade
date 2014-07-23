@@ -28,7 +28,7 @@
 {% for object in object_list %}
     {% for w_amo_sum, w_total, ob in object.transaction %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{#{{ object.pk }} {{ ob.pk }} {{ ob.user }} #}{{ ob.pair }}</td>
+                        <td>{{ object.pk }} {{ ob.pk }} {{ ob.user }} {{ ob.pair }}</td>
                         <td><span class="{% if object.action == 'sale' %}buyGreen{% else %}buyRed{% endif %}">{% if object.action == 'sale' %}Sale{% else %}Buy{% endif %}</span></td>
                         <td>{{ w_amo_sum|floatformat:-8 }} {{ ob.pair.left }}</td>
                         <td>{{ ob.rate|floatformat:-8 }} {{ ob.pair.right }}</td>

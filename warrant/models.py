@@ -103,10 +103,17 @@ class Orders(models.Model):
                     if i.sale_sale.exists():
                         yield i.buy.w_amo_sum, i
                     else:
-                        yield i.w_amo_sum, i.buy
+                        if self.created >= i.created:
+                            yield i.w_amo_sum, i
+                        else:
+                            yield i.w_amo_sum, self.el
         if self.is_action('sale'):
             el = self.sale.sale_sale.order_by('-created')
-            if not el.exists(): yield self.sale.w_amo_sum, self.sale.buy
+            if not el.exists():
+                if self.created >= self.sale.buy.created:
+                    yield self.sale.w_amo_sum, self.it.buy
+                else:
+                    yield self.sale.w_amo_sum, self.it
             if el.exists() and \
                 (self.sale.buy and \
                 not self.sale.buy.sale and \
