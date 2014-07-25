@@ -126,9 +126,9 @@ class Orders(models.Model):
                     elif c.sale.pair.right.value == valuta and c.el._status:
                         _s -= c.sale._debit_right
                 if c.is_action('buy'):
-                    if c.buy.pair.left.value == valuta:
+                    if c.buy.pair.left.value == valuta and c.el._status:
                         _s -= c.buy._debit_left
-                    elif c.buy.pair.right.value == valuta and c.el._status:
+                    elif c.buy.pair.right.value == valuta:
                         _s += c.buy._debit_right
             cache.set(_md5key, _s)
         return _s
