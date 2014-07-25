@@ -120,17 +120,27 @@ class Orders(models.Model):
                 ).only('pair', 'rate', 'amount').distinct()
             _s=_Zero
             for c in obj:
+                print c.el.pair.left.value, c.el.pair.right.value, valuta
                 if c.is_action('sale'):
                     if c.sale.pair.left.value == valuta:
+                        #print "AAA btc", valuta
                         _s += c.sale._debit_left
-                    elif c.sale.pair.right.value == valuta and c.el._status:
+                        # btc
+                    if c.sale.pair.right.value == valuta:
+                        #print "BBB usd", valuta
                         _s -= c.sale._debit_right
+                        # usd
                 if c.is_action('buy'):
-                    if c.buy.pair.left.value == valuta and c.el._status:
+                    if c.buy.pair.left.value == valuta:
+                        # btc
                         _s -= c.buy._debit_left
-                    elif c.buy.pair.right.value == valuta:
+                        #print "CCC btc", valuta
+                    if c.buy.pair.right.value == valuta:
+                        #print "DDD usd", valuta
+                        # usd
                         _s += c.buy._debit_right
             cache.set(_md5key, _s)
+        print "total:", _s, valuta
         return _s
     @classmethod
     def min_buy_rate(cls, pair):
@@ -304,6 +314,7 @@ class Buy(Orders, Prop):
     @property
     def _adeudo(self):
         buy = self.buy_buy
+        a = _Zero
         if self._status:
             a = self._part_amo_sum * self._rate
         else:
@@ -316,9 +327,12 @@ class Buy(Orders, Prop):
         return a
     @property
     def _debit_left(self):
+        # btc
+        #return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _debit_right(self):
+        # usd
         return self._adeudo
     @property
     def _pos(self):
@@ -456,12 +470,13 @@ class Sale(Orders, Prop):
     @property
     def _total(self):
         sale = self.sale_sale
+        a = _Zero
         if self._status:
             a = self._part_amo_sum * self._rate
-        else:
-            a = self.amount * self.rate
+        #else:
+        #    a = self.amount * self.rate
         if sale.exists() and self.buy is None:
-            a=_Zero
+            a = _Zero
         if sale.exists():
             for c in sale.exclude():
                 a += c._part_amo_sum * c._rate
@@ -473,11 +488,13 @@ class Sale(Orders, Prop):
         return self._amo_sum
     @property
     def _debit_left(self):
+        # btc
         if not self.cancel:
             return self.amount
         return self._adeudo
     @property
     def _debit_right(self):
+        # usd
         #return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
