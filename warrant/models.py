@@ -316,14 +316,19 @@ class Buy(Orders, Prop):
         buy = self.buy_buy
         a = _Zero
         if self._status:
-            a = self._part_amo_sum * self._rate
+            if self.cancel:
+                print self.pk, self._part_amo_sum * self._rate, "EEE"
+                pass
+            else:
+                a = self._part_amo_sum * self._rate
         else:
-            a = self.amount * self.rate
-        if buy.exists() and self.sale is None:
+            a = self._ret_amount * self.rate
+        if not a and buy.exists() and self.sale is None:
             a=_Zero
         if buy.exists():
             for c in buy.exclude():
                 a += c._part_amo_sum * c._rate
+        print "ss", self.pk, a
         return a
     @property
     def _debit_left(self):
