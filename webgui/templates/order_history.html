@@ -43,7 +43,7 @@
                         <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
                         <td>{{ object.amount|floatformat:-8 }} {{ object.pair.left }}</td>
                         <td>{{ object.total|floatformat:-8 }} {{ object.pair.right }}</td>
-                        <td>{{ object.created|date:"d.m.y H:i" }}</td>
+                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
                         <td>{{ object.w_percent }}%</td>
                         <td>{{ object.w_status }}</td>
                         <td>{% if not object.status %}<a href="{{ pk }}" onclick="Dajaxice.warrant.cancel(Dajax.process, {'pk': '{{ object.pk }}'}); return false;">отменить</a>{% endif %}</td>

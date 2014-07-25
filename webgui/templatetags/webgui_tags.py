@@ -8,6 +8,9 @@ from django.template.defaultfilters import floatformat
 
 register = template.Library()
 
+@register.simple_tag
+def get_action(user, obj):
+    return obj.w_action(user)
 
 @register.inclusion_tag('information.html', takes_context=True)
 def information(context):

@@ -516,6 +516,14 @@ body {
 	color: #ff0000;
 	font-weight: bold;
 }
+.activeOrderTabb .sale,
+.activeOrderTabb .buy
+    { font-weight: bold; text-transform:capitalize; }
+
+.activeOrderTabb .sale
+    { color: #1d8815; }
+.activeOrderTabb .buy
+    { color: #ff0000; }
 
 /* Footer
 -----------------------------------------------------------------------------*/

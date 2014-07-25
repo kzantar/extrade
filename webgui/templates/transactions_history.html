@@ -1,5 +1,5 @@
 {% extends "profile.html" %}
-{% load i18n widget_tweaks %}
+{% load i18n widget_tweaks webgui_tags %}
 
 {% block meta %}
 <title>{% trans 'история сделок' %}</title>
@@ -9,7 +9,7 @@
 .content 
     { padding-right: 0px; }
 .logInfo
-    { width:70%; }
+    { width:80%; }
 </style>
 {% endblock %}
 
@@ -26,16 +26,14 @@
                         <td>Дата</td>
                     </tr>
 {% for object in object_list %}
-    {% for w_amo_sum, w_total, ob in object.transaction %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{#{{ object.pk }} {{ ob.pk }} {{ ob.user }} #}{{ ob.pair }}</td>
-                        <td><span class="{% if object.action == 'sale' %}buyGreen{% else %}buyRed{% endif %}">{% if object.action == 'sale' %}Sale{% else %}Buy{% endif %}</span></td>
-                        <td>{{ w_amo_sum|floatformat:-8 }} {{ ob.pair.left }}</td>
-                        <td>{{ ob.rate|floatformat:-8 }} {{ ob.pair.right }}</td>
-                        <td>{{ w_total|floatformat:-8 }} {{ ob.pair.right }}</td>
-                        <td>{{ ob.created|date:"d.m.y H:i" }}</td>
+                        <td>{{ forloop.counter }}:{{ object.pk }} {{ object.pair }}</td>
+                        <td><span class="{% get_action user object %}">{% get_action user object %}</span></td>
+                        <td>{{ object.el.w_amo_sum|floatformat:-8 }} {{ object.el.pair.left }}</td>
+                        <td>{{ object.profitable.rate|floatformat:-8 }} {{ object.el.pair.right }}</td>
+                        <td>{{ object.el.w_total|floatformat:-8 }} {{ object.el.pair.right }}</td>
+                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
                     </tr>
-    {% endfor %}
 {% endfor %}
             </tbody></table>
 {% include "paginate.html" %}
