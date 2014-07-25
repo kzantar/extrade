@@ -120,27 +120,21 @@ class Orders(models.Model):
                 ).only('pair', 'rate', 'amount').distinct()
             _s=_Zero
             for c in obj:
-                print c.el.pair.left.value, c.el.pair.right.value, valuta
                 if c.is_action('sale'):
                     if c.sale.pair.left.value == valuta:
-                        #print "AAA btc", valuta
                         _s += c.sale._debit_left
                         # btc
                     if c.sale.pair.right.value == valuta:
-                        #print "BBB usd", valuta
                         _s -= c.sale._debit_right
                         # usd
                 if c.is_action('buy'):
                     if c.buy.pair.left.value == valuta:
                         # btc
                         _s -= c.buy._debit_left
-                        #print "CCC btc", valuta
                     if c.buy.pair.right.value == valuta:
-                        #print "DDD usd", valuta
                         # usd
                         _s += c.buy._debit_right
             cache.set(_md5key, _s)
-        print "total:", _s, valuta
         return _s
     @classmethod
     def min_buy_rate(cls, pair):
@@ -214,7 +208,6 @@ class Orders(models.Model):
     @property
     def _keys(self):
         s = "key2" + str(self.pk) + str(self.updated) + str(getattr(self, "%s_%s" % (self.action,) * 2).count()) + self.action
-        #print "s"
         return s
     @property
     def action(self):
@@ -317,7 +310,6 @@ class Buy(Orders, Prop):
         a = _Zero
         if self._status:
             if self.cancel:
-                print self.pk, self._part_amo_sum * self._rate, "EEE"
                 pass
             else:
                 a = self._part_amo_sum * self._rate
@@ -328,7 +320,6 @@ class Buy(Orders, Prop):
         if buy.exists():
             for c in buy.exclude():
                 a += c._part_amo_sum * c._rate
-        print "ss", self.pk, a
         return a
     @property
     def _debit_left(self):
