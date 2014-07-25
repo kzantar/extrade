@@ -123,15 +123,13 @@ class Orders(models.Model):
                 if c.is_action('sale'):
                     if c.sale.pair.left.value == valuta:
                         _s += c.sale._debit_left
-                    elif c.sale.pair.right.value == valuta:
+                    elif c.sale.pair.right.value == valuta and c.el._status:
                         _s -= c.sale._debit_right
-                        #print "-", c.sale._debit_right, c.pk
                 if c.is_action('buy'):
                     if c.buy.pair.left.value == valuta:
                         _s -= c.buy._debit_left
-                    elif c.buy.pair.right.value == valuta:
+                    elif c.buy.pair.right.value == valuta and c.el._status:
                         _s += c.buy._debit_right
-                        #print "+", c.buy._debit_right, c.pk
             cache.set(_md5key, _s)
         return _s
     @classmethod
