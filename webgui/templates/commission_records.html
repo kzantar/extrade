@@ -1,0 +1,32 @@
+{% extends "profile.html" %}
+{% load i18n widget_tweaks %}
+
+{% block head %}
+<style type="text/css">
+.content 
+    { padding-right: 0px; }
+.logInfo
+    { width:70%; }
+</style>
+{% endblock %}
+
+{% block content_profile %}
+            <h3>учет комиссий</h3>
+
+            <table width="100%" class="activeOrderTabb" style="widht:100%;">
+                <tbody><tr class="tableheadTr">
+                        <td>Валюта</td>
+                        <td>Всего</td>
+                        <td></td>
+                    </tr></tbody>
+    {% for valuta, balance, pk in object_list %}
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <td>{{ valuta }}</td>
+                        <td>{{ balance }}</td>
+                        <td style="text-align:right">
+                        {#<input type="button" value="вывести" class="buyBtcbut" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {'valuta':'{{ valuta.pk }}' });">#}</td>
+                    </tr>
+    {% endfor %}
+    </table>
+    <div id="balance_form_content"></div>
+{% endblock %}
