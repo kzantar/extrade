@@ -38,7 +38,7 @@
                     </tr>
 {% for object in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}" id="active_orders_list-{{ object.pk }}">
-                        <td>{{ object.pair }}</td>
+                        <td>{{ forloop.counter }}:{{ object.pk }} {{ object.pair }}</td>
                         <td><span class="{% if object.sale %}buyGreen{% else %}buyRed{% endif %}">{% if object.sale %}Sale{% else %}Buy{% endif %}</span></td>
                         <td>{{ object.rate|floatformat:-8 }} {{ object.pair.right }}</td>
                         <td>{{ object.amount|floatformat:-8 }} {{ object.pair.left }}</td>
