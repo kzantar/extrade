@@ -289,7 +289,7 @@ function set_price(amount, rate, act) {
                     </tr>
 {% for updated, type, rate, amount, total, pk in order_history %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td class="tiptdd">{{ updated }}</td>
+                        <td class="tiptdd">{{ forloop.counter }}:{{ pk }} {{ updated }}</td>
                         <td class="costTdd"><span class="{% if type == 'sell' %}buyGreen{% else %}buyRed{% endif %}">{{ type }}</span></td>
                         <td class="therdTdd">{{ rate|floatformat:-8 }} {{ object.right }}</td>
                         <td>{{ amount|floatformat:-8 }} {{ object.left }}</td>

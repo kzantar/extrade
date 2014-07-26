@@ -196,15 +196,23 @@ class Orders(models.Model):
         for o in cls.objects.filter(
                     pair=pair
                 ).filter(
-                    Q(cancel=True, buy__buy_buy__gte=1) |
-                    Q(cancel=True, sale__sale_sale__gte=1) |
-                    Q(completed=True)
-                ).only('updated', 'rate', 'amount').distinct(
+                Q(
+                    sale__buy__completed=True,
+                ) | Q(
+                    buy__sale__completed=True,
+                ) | Q(
+                    completed=True,
+                ), Q(
+                    sale__buy__gte=1,
+                ) | Q(
+                    buy__sale__gte=1,
+                )
+            ).only('updated', 'rate', 'amount').distinct(
                 ).order_by('-updated')[:40]:
             if o.is_action('sale'):
-                yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.rate, o.amount, o.total, o.pk
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "sell", o.el._rate, o.el._part_amo_sum, (o.el._part_amo_sum * o.el._rate), o.pk
             if o.is_action('buy'):
-                yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.rate, o.amount, o.total, o.pk
+                yield o.updated.strftime("%d.%m.%y %H:%M"), "buy", o.el._rate, o.el._part_amo_sum, (o.el._part_amo_sum * o.el._rate), o.pk
     @property
     def _keys(self):
         s = "key2" + str(self.pk) + str(self.updated) + str(getattr(self, "%s_%s" % (self.action,) * 2).count()) + self.action
