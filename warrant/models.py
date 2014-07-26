@@ -374,7 +374,7 @@ class Buy(Orders, Prop):
     def getForSale(self):
         ex = Q(buy__gte=0) | Q(cancel=True) | Q(completed=True) | Q(user=self.user)
         fl = {"pair": self.pair, "rate__lte": self.rate}
-        return Sale.objects.select_for_update().filter(**fl).exclude(ex).only('amount', 'rate')
+        return Sale.objects.select_for_update().filter(**fl).exclude(ex).only('amount', 'rate').order_by('rate')
     def _exchange(self):
         if self._completed or self.cancel or self.completed: return True
         s = self.getForSale()
@@ -537,7 +537,7 @@ class Sale(Orders, Prop):
     def getForBuy(self):
         ex = Q(sale__gte=0) | Q(cancel=True) | Q(completed=True) | Q(user=self.user)
         fl = {"pair": self.pair, "rate__gte": self.rate}
-        return Buy.objects.select_for_update().filter(**fl).exclude(ex).only('amount', 'rate')
+        return Buy.objects.select_for_update().filter(**fl).exclude(ex).only('amount', 'rate').order_by('-rate')
     def _exchange(self):
         if self._completed or self.cancel or self.completed: return True
         s = self.getForBuy()
