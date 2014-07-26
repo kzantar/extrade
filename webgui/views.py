@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.views.generic.edit import FormMixin
 from django.views.generic import ListView, DetailView, RedirectView, TemplateView
 from django.shortcuts import get_object_or_404
-from common.mixin import LoginRequiredMixin
+from common.mixin import LoginRequiredMixin, StaffRequiredMixin
 from django.db.models import Sum, Count, F, Q
 
 
@@ -13,6 +13,9 @@ from news.models import News
 from warrant.forms import OrdersForm
 from users.models import ProfileBalance
 from users.forms import AddBalanceForm
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponseRedirect, Http404
 
 from django.contrib.auth import login, get_user_model
 
@@ -95,3 +98,10 @@ class ProfileFinancesView(LoginRequiredMixin, ListView):
     template_name = "balance_list.html"
     def get_queryset(self):
         return self.request.user.finances()
+
+class CommissionRecordsView(LoginRequiredMixin, StaffRequiredMixin, ListView):
+    template_name = "commission_records.html"
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return self.request.user.commission_records()
+        raise Http404

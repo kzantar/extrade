@@ -107,13 +107,24 @@ class Profile(AbstractBaseUser, PermissionsMixin):
             b = balance_plus - balance_minus
             cache.set(md5key, b)
         return b
+
     def finances(self):
         for v in Valuta.objects.all():
             yield v, floatformat(self.orders_balance(v.value), -8), v.pk
+
+    def commission_records(self):
+        for v in Valuta.objects.all():
+            yield v, floatformat(self._commission_records(v.value), -8), v.pk    
+
     def _user_balance_val(self, valuta):
         return self._user_balance(valuta)
+
+    def _commission_records(self, valuta):
+        return Orders.sum_from_commission(valuta=valuta)
+
     def orders_balance(self, valuta):
         return self._user_balance_val(valuta=valuta) - Orders.sum_from_user_buy_sale(user=self, valuta=valuta)
+
     def _update_pair(self, pair):
         if not pair == self.pair:
             self.pair = pair

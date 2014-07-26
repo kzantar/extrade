@@ -103,6 +103,39 @@ class Orders(models.Model):
         if self.is_action('buy'): res = self.buy._ret_amount
         return floatformat(res, -8)
     @classmethod
+    def sum_from_commission(cls, valuta):
+        _c1 = cls.objects.filter(cancel=False).count()
+        _c2 = cls.objects.filter(completed=True).count()
+        _md5key = strmd5sum("sum cr" + str(_c1) + str(_c2) + str(valuta))
+        _s = cache.get(_md5key)
+        if _s is None:
+            obj = cls.objects.filter(
+                    Q(pair__left__value=valuta) |
+                    Q(pair__right__value=valuta)
+                ).only('pair', 'rate', 'amount').distinct()
+            _s=_Zero
+            for c in obj:
+                if c.is_action('sale'):
+                    #if c.sale.pair.left.value == valuta:
+                        #_s += c.sale._commission_debit
+                        # btc
+                        #pass
+                    if c.sale.pair.right.value == valuta:
+                        _s += c.sale._commission_debit
+                        # usd
+                        pass
+                if c.is_action('buy'):
+                    if c.buy.pair.left.value == valuta:
+                        # btc
+                        _s += c.buy._commission_debit
+                        pass
+                    #if c.buy.pair.right.value == valuta:
+                        # usd
+                        #_s += c.buy._commission_debit
+                        #pass
+            cache.set(_md5key, _s)
+        return _s
+    @classmethod
     def sum_from_user_buy_sale(cls, user, valuta):
         _c1 = cls.objects.filter(user=user).count()
         _c2 = cls.objects.filter(Q(buy__user=user) | Q(sale__user=user)).count()
