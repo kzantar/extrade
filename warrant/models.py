@@ -315,7 +315,7 @@ class Buy(Orders, Prop):
                 a = self._part_amo_sum * self._rate
         else:
             a = self._ret_amount * self.rate
-        if not a and buy.exists() and self.sale is None:
+        if self._status and buy.exists() and self.sale is None:
             a=_Zero
         if buy.exists():
             for c in buy.exclude():
@@ -471,7 +471,7 @@ class Sale(Orders, Prop):
             a = self._part_amo_sum * self._rate
         #else:
         #    a = self.amount * self.rate
-        if sale.exists() and self.buy is None:
+        if self._status and sale.exists() and self.buy is None:
             a = _Zero
         if sale.exists():
             for c in sale.exclude():
