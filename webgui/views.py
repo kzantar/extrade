@@ -103,5 +103,5 @@ class CommissionRecordsView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     template_name = "commission_records.html"
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return self.request.user.commission_records()
+            return self.request.user.commission_records_orders()
         raise Http404
