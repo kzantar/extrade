@@ -12,6 +12,7 @@ from warrant.models import Orders
 from django.core.cache import cache
 from common.lib import strmd5sum
 from django.utils.safestring import mark_safe
+from common.numeric import normalized
 
 
 
@@ -102,8 +103,12 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta) + str(self.pk))
         b = cache.get(md5key)
         if b is None:
-            balance_plus = q.filter(action="+").distinct().aggregate(Sum('value')).values()[0] or _Zero
-            balance_minus = q.filter(action="-").distinct().aggregate(Sum('value')).values()[0] or _Zero
+            #balance_plus = q.filter(action="+").distinct().aggregate(Sum('value')).values()[0] or _Zero
+            balance_plus = q.filter(action="+").distinct().extra(select={'total':"sum((users_profilebalance.value * (1 - users_profilebalance.commission / 100)) )"},).get().total or _Zero
+            balance_plus = normalized(balance_plus, where="DOWN")
+            balance_minus = q.filter(action="-").distinct().extra(select={'total':"sum(users_profilebalance.value * (1 - users_profilebalance.commission / 100) )"},).get().total or _Zero
+            balance_minus = normalized(balance_minus, where="DOWN")
+            #balance_minus = q.filter(action="-").distinct().aggregate(Sum('value')).values()[0] or _Zero
             b = balance_plus - balance_minus
             cache.set(md5key, b)
         return b
@@ -120,7 +125,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return self._user_balance(valuta)
 
     def _commission_records(self, valuta):
-        return Orders.sum_from_commission(valuta=valuta)
+        return (ProfileBalance.sum_from_commission(valuta=valuta) + Orders.sum_from_commission(valuta=valuta))
 
     def orders_balance(self, valuta):
         return self._user_balance_val(valuta=valuta) - Orders.sum_from_user_buy_sale(user=self, valuta=valuta)
@@ -158,12 +163,29 @@ class ProfileBalance(models.Model):
     bank = models.CharField((u'номер счета на вывод'), max_length=255, blank=True, null=True)
     accept = models.BooleanField(verbose_name=(u'Подтвердить'), default=False)
     cancel = models.BooleanField(verbose_name=(u'Отменить'), default=False)
+    commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
+    def save(self, *args, **kwargs):
+        if not self.commission:
+            if self.action == '+':
+                self.commission = self.valuta.commission_inp
+            elif self.action == '+':
+                self.commission = self.valuta.commission_out
+        super(ProfileBalance, self).save(*args, **kwargs)
     @classmethod
     def exists_input(cls, valuta, user):
         cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta)
         if cb.exists():
             return cb[0]
         return None
+    @classmethod
+    def sum_from_commission(cls, valuta):
+        return cls.objects.filter(accept=True, cancel=False, valuta__value=valuta).distinct().extra(select={'total':"sum(users_profilebalance.value * users_profilebalance.commission / 100)"},).get().total or _Zero
+    @property
+    def _commission_debit(self):
+        return (self.value * self.commission / D(100))
+    @property
+    def _total(self):
+        return normalized(self.value - self._commission_debit, where="DOWN")
     @classmethod
     def exists_output(cls, valuta, user):
         cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="-", valuta=valuta)
