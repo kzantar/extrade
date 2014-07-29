@@ -162,6 +162,8 @@ EMAIL_HOST_USER = 'bot@artela.net'
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_CHANGE_FROM_EMAIL = 'bot@artela.net'
 
 
+ACCOUNT_ACTIVATION_DAYS=1
+
 try:
     from settings_local import *
 except ImportError:
