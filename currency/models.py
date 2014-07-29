@@ -107,6 +107,8 @@ class TypePair(models.Model):
         return ret
     def min_max_avg(self, to_int=None, to_round=None):
         return self.warrant_orders_related.model.min_max_avg_rate(self, to_int, to_round)
+    def min_max_avg_hour(self, to_int=None, to_round=None):
+        return self.warrant_orders_related.model.min_max_avg_rate_hour(self, to_int, to_round)
     def sum_amount(self, to_int=None, to_round=None):
         return self.warrant_orders_related.model.sum_amount(self, to_int, to_round)
     def sum_total(self, to_int=None, to_round=None):

@@ -1,12 +1,12 @@
 #-*- coding:utf-8 -*-
 from django.db import models
 from common.numeric import normalized
-from datetime import datetime
+from datetime import date, timedelta, datetime
 from django.db.models import Sum, Count, F, Q
 from django.utils.html import format_html
 from decimal import Decimal as D, _Zero
 from django.core.cache import cache
-from common.lib import strmd5sum
+from common.lib import strmd5sum, _last_hour
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db.models import Avg, Max, Min
@@ -170,6 +170,9 @@ class Orders(models.Model):
             cache.set(_md5key, _s)
         return _s
     @classmethod
+    def last_24_hour(cls):
+        return cls.objects.filter(created__gte=_last_hour()[0])
+    @classmethod
     def min_buy_rate(cls, pair):
         return cls.objects.filter(
             pair=pair, sale__gte=1
@@ -184,6 +187,20 @@ class Orders(models.Model):
             Q(cancel=True) | Q(completed=True)
             ).aggregate(Max('rate')).values()[0] or _Zero
     @classmethod
+    def min_buy_rate_hour(cls, pair):
+        return cls.last_24_hour().filter(
+            pair=pair).filter(sale__gte=1
+            ).exclude(
+            Q(cancel=True) | Q(completed=True)
+            ).aggregate(Min('rate')).values()[0] or _Zero
+    @classmethod
+    def max_sale_rate_hour(cls, pair):
+        return cls.last_24_hour().filter(
+            pair=pair, buy__gte=1
+            ).exclude(
+            Q(cancel=True) | Q(completed=True)
+            ).aggregate(Max('rate')).values()[0] or _Zero
+    @classmethod
     def min_max_avg_rate(cls, pair, to_int=None, to_round=None):
         r = cls.objects.filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Avg('rate'))
         v=[cls.min_buy_rate(pair), cls.max_sale_rate(pair), r.get('rate__avg')]
@@ -192,8 +209,16 @@ class Orders(models.Model):
         if to_round: return [round(x, to_round) for x in v]
         return v
     @classmethod
+    def min_max_avg_rate_hour(cls, pair, to_int=None, to_round=None):
+        r = cls.last_24_hour().filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Avg('rate'))
+        v=[cls.min_buy_rate_hour(pair), cls.max_sale_rate_hour(pair), r.get('rate__avg')]
+        v = [x if not x is None else _Zero for x in v]
+        if to_int: return [x.__int__() for x in v]
+        if to_round: return [round(x, to_round) for x in v]
+        return v
+    @classmethod
     def sum_amount(cls, pair, to_int=None, to_round=None):
-        q = cls.objects.filter(pair=pair, buy__gte=1)
+        q = cls.last_24_hour().filter(pair=pair, buy__gte=1)
         v = q.filter(completed=True).aggregate(Sum('amount')).values()[0] or _Zero
         for v1 in q.filter(completed=False).only('amount', 'rate'):
             v += v1.el._total
@@ -203,7 +228,7 @@ class Orders(models.Model):
         return v
     @classmethod
     def sum_total(cls, pair, to_int=None, to_round=None):
-        q = cls.objects.filter(pair=pair).filter(sale__gte=1)
+        q = cls.last_24_hour().filter(pair=pair).filter(sale__gte=1)
         v = q.filter(completed=True).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
         for v1 in q.filter(completed=False).only('amount', 'rate'):
             v += v1.el._total
