@@ -157,6 +157,11 @@ class TypePair(models.Model):
     def avg_rate(self):
         return self.min_max_avg(to_round=6)[2]
     @property
+    def last_rate(self):
+        if self.last_order:
+            return float('{0:.7g}'.format(self.last_order.rate))
+        return _Zero
+    @property
     def last_order(self):
         o = self.warrant_orders_related.filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(completed=True)).filter(buy__gte=1).only('updated', 'rate', 'amount').order_by('-updated')
         if o.exists():

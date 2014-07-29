@@ -42,7 +42,7 @@ function set_price(amount, rate, act) {
         	<ul>
 {% for pair in pair_list %}
                 <li{% if object.pk == pair.pk %} class="activeLi"{% endif %}>
-                    <a href="{% url 'exchange' pair.slug %}">{{ pair.tpair }} {{ pair.avg_rate }}</a>
+                    <a href="{% url 'exchange' pair.slug %}">{{ pair.tpair }} {{ pair.last_rate }}</a>
                 </li>
 {% endfor %}
         	</ul>
