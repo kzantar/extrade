@@ -68,6 +68,18 @@ class ProfileOrderHistoryView(LoginRequiredMixin, ListView):
         self.queryset = q
         return super(ProfileOrderHistoryView, self).get_queryset()
 
+class ProfileTransactionView(LoginRequiredMixin, ListView):
+    template_name = "transactions.html"
+    paginate_by = 41
+    model = ProfileBalance
+    def get_queryset(self):
+        self.queryset = self.model._default_manager.filter(
+            profile = self.request.user
+        ).filter(
+            
+        ).filter(
+        ).order_by()
+        return super(ProfileTransactionView, self).get_queryset()
 class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     template_name = "transactions_history.html"
     model = Orders

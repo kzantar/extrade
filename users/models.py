@@ -13,7 +13,7 @@ from django.core.cache import cache
 from common.lib import strmd5sum
 from django.utils.safestring import mark_safe
 from common.numeric import normalized
-
+from datetime import datetime
 
 
 
@@ -154,6 +154,8 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return mark_safe("<span>{amo}</span> {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right}))
 
 class ProfileBalance(models.Model):
+    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
+    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
     ACTIONS=(
         ('+', '+пополнение'),
         ('-', '-списание'),
