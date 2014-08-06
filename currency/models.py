@@ -7,39 +7,90 @@ from django.template.defaultfilters import floatformat
 from common.numeric import normalized
 from django.db.models import Sum, Count, F, Q
 from django.core.cache import cache
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from common.lib import strmd5sum
 
 
 
 # Create your models here.
 
+class PaymentMethod(models.Model):
+    ACTIONS=(
+        ('+', 'пополнение'),
+        ('-', 'списание'),
+    )
+    method = models.CharField((u'Метод оплаты'), max_length=255)
+    action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
+    commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)])
+    min_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма", validators=[MinValueValidator(_Zero)])
+    max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма", validators=[MinValueValidator(_Zero)])
+    valuta = models.ForeignKey("currency.Valuta", related_name="payment_method")
+    bank = models.TextField((u'номер счета / описание'), blank=True, null=True)
+    @property
+    def validators(self):
+        v = []
+        if self.min_amount: v += [MinValueValidator(self.min_amount),]
+        if self.max_amount: v += [MaxValueValidator(self.max_amount),]
+        return v
+    @classmethod
+    def commission_default_inp(cls):
+        if cls.inp().exists():
+            return cls.inp()[0].commission
+        return _Zero
+    @classmethod
+    def commission_default_out(cls):
+        if cls.out().exists():
+            return cls.out()[0].commission
+        return _Zero
+    @classmethod
+    def validators_default_inp(cls):
+        if cls.inp().exists():
+            return cls.inp()[0].validators
+        return [MinValueValidator(_Zero)]
+    @classmethod
+    def validators_default_out(cls):
+        if cls.out().exists():
+            return cls.out()[0].validators
+        return [MinValueValidator(_Zero)]
+    @classmethod
+    def inp(cls):
+        return cls.objects.filter(action="+")
+    @classmethod
+    def out(cls):
+        return cls.objects.filter(action="-")
+    def __unicode__(self):
+        return u"{action} {method}".format(**{"action": self.get_action_display(), "method": self.method})
+    class Meta:
+        verbose_name = u'метод оплаты'
+        verbose_name_plural = u'методы оплаты'
+
 class Valuta(models.Model):
     value = models.SlugField(unique=True)
-    bank = models.TextField((u'номер счета на ввод'), blank=True, null=True)
-    
-    commission_inp = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name=u"коммиссия на ввод")
-    commission_out = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name=u"коммиссия на вывод")
-
-    out_min_amount = models.DecimalField(max_digits=10, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма на вывод", validators=[MinValueValidator(_Zero)])
-    out_max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма на вывод", validators=[MinValueValidator(_Zero)])
-
-    inp_min_amount = models.DecimalField(max_digits=10, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма на ввод", validators=[MinValueValidator(_Zero)])
-    inp_max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма на ввод", validators=[MinValueValidator(_Zero)])
     def save(self, *args, **kwargs):
         self.value = self.value.lower()
         super(Valuta, self).save(*args, **kwargs)
     @property
-    def validators_inp(self):
-        v = []
-        if self.inp_min_amount: v += [MinValueValidator(self.inp_min_amount),]
-        if self.inp_max_amount: v += [MaxValueValidator(self.inp_max_amount),]
-        return v
+    def paymethods_inp(self):
+        p = self.payment_method.filter(action="+")
+        if self.payment_method.exists() and p.exists():
+            return p
+        return self.payment_method.none()
     @property
-    def validators_out(self):
-        v = []
-        if self.out_min_amount: v += [MinValueValidator(self.out_min_amount),]
-        if self.out_max_amount: v += [MaxValueValidator(self.out_max_amount),]
-        return v
+    def paymethods_out(self):
+        p = self.payment_method.filter(action="-")
+        if self.payment_method.exists() and p.exists():
+            return p
+        return self.payment_method.none()
+    def default_paymethod(self, action):
+        if self.payment_method.filter(action=action).exists():
+            return self.payment_method.filter(action=action)[0]
+        return self.payment_method.none()
+    @property
+    def default_paymethod_inp(self):
+        return self.default_paymethod("+")
+    @property
+    def default_paymethod_out(self):
+        return self.default_paymethod("-")
     @property
     def val(self):
         return self.value

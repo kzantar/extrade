@@ -1,16 +1,38 @@
 {% load static %}
+
+{% if save_now %}
+    <p>Заявка на {{ action }} средств успешно создана.</p>
+    <div>{{ instance.paymethod.bank }}</div>
+{% endif %}
+{% if cancel_or_edit %}
+<p>Вы уже создали заявку на ввод средств.</p>
+<div>{{ instance.paymethod.bank }}</div>
+<p><a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">Подтвердить оплату</a>,
+<a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1'});return false;">отредактировать</a>
+заново или <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">отменить</a></p>
+{% endif %}
+
+{% if form %}
 <form action="{{ url }}" method="post" onsubmit="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta':'{{ form.valuta.value }}', 'form':$(this).serialize(true)});$('#ajax-loader').show();$(this).hide();return false;">
 <div>
 <fieldset>
   <legend>{{ submit }}</legend>
-  {%  if functions == 'get_form_input_balance' %}<div>{{ valuta.bank|default:""|safe }}</div>{% endif %}
+  {% if paymethods.count > 1 %}<select name="paymethod" onchange="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ valuta.pk }}', 'paymethod':$(this).val() });">
+  {% for pay in paymethods %}
+    <option value="{{ pay.pk }}"{% if paymethod.pk == pay.pk %} selected="selected"{% endif %}>{{ pay }}</option>
+  {% endfor %}
+  </select>{% endif %}
   {%  if functions == 'get_form_input_balance' %}
-  {% if valuta.commission_inp %}<div>Коммиссия на ввод составляет {{ valuta.commission_inp|floatformat:-2 }}%</div>{% endif %}
-  {% if valuta.inp_min_amount %}<div>Минимальная сумма на ввода {{ valuta.inp_min_amount|floatformat:-2 }} {{ valuta }}</div>{% endif %}
+    {% if form.instance.pk %}<div>{{ paymethod.bank|default:""|safe }}</div>{% endif %}
+  {% if paymethod.commission %}<div>Коммиссия на ввод составляет {{ paymethod.commission|floatformat:-2 }}%</div>{% endif %}
+  {% if paymethod.min_amount %}<div>Минимальная сумма на ввода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
+  {% if paymethod.max_amount %}<div>Максимальная сумма на ввода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
   {% endif %}
   {%  if functions == 'get_form_output_balance' %}
-  {% if valuta.commission_out %}<div>Коммиссия на вывод составляет {{ valuta.commission_out|floatformat:-2 }}%</div>{% endif %}
-  {% if valuta.out_min_amount %}<div>Минимальная сумма на вывода {{ valuta.out_min_amount|floatformat:-2 }} {{ valuta }}</div>{% endif %}
+  <div>{{ paymethod.bank|default:""|safe }}</div>
+  {% if paymethod.commission %}<div>Коммиссия на вывод составляет {{ paymethod.commission|floatformat:-2 }}%</div>{% endif %}
+  {% if paymethod.min_amount %}<div>Минимальная сумма на вывода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
+  {% if paymethod.max_amount %}<div>Максимальная сумма на вывода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
   {% endif %}
 {% csrf_token %}
 <table>
@@ -21,3 +43,4 @@
 <input type="submit" value="{{ submit }}">
 </form>
 <img src="{% static 'img/ajax-loader.gif' %}" style="display:none;" id="ajax-loader">
+{% endif %}

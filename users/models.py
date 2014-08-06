@@ -99,16 +99,15 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         return super(Profile, self).save(*args, **kwargs)
     def _user_balance(self, valuta):
-        q=self.profilebalance_set.filter(valuta__value=valuta, profile=self, accept=True, cancel=False)
+        q=self.profilebalance_set.filter(valuta__value=valuta, profile=self, cancel=False, confirm=True)
+        _c1 = q.filter(accept=True).count()
         md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta) + str(self.pk))
         b = cache.get(md5key)
         if b is None:
-            #balance_plus = q.filter(action="+").distinct().aggregate(Sum('value')).values()[0] or _Zero
-            balance_plus = q.filter(action="+").distinct().extra(select={'total':"sum((users_profilebalance.value * (1 - users_profilebalance.commission / 100)) )"},).get().total or _Zero
+            balance_plus = q.filter(action="+", accept=True).distinct().extra(select={'total':"sum(users_profilebalance.value * (1 - users_profilebalance.commission / 100))"},).get().total or _Zero
             balance_plus = normalized(balance_plus, where="DOWN")
-            balance_minus = q.filter(action="-").distinct().extra(select={'total':"sum(users_profilebalance.value * (1 - users_profilebalance.commission / 100) )"},).get().total or _Zero
+            balance_minus = q.filter(action="-").distinct().extra(select={'total':"sum(users_profilebalance.value)"},).get().total or _Zero
             balance_minus = normalized(balance_minus, where="DOWN")
-            #balance_minus = q.filter(action="-").distinct().aggregate(Sum('value')).values()[0] or _Zero
             b = balance_plus - balance_minus
             cache.set(md5key, b)
         return b
@@ -163,16 +162,17 @@ class ProfileBalance(models.Model):
     valuta = models.ForeignKey("currency.Valuta", verbose_name=u"валюта")
     profile = models.ForeignKey("users.Profile", verbose_name=(u'Профиль'))
     action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
-    bank = models.CharField((u'номер счета на вывод'), max_length=255, blank=True, null=True)
+    paymethod = models.ForeignKey("currency.PaymentMethod")
+    bank = models.TextField((u'номер счета на вывод'), max_length=255, blank=True, null=True)
     accept = models.BooleanField(verbose_name=(u'Подтвердить'), default=False)
+    confirm = models.BooleanField(verbose_name=(u'Подтверждено пользователем'), default=True)
     cancel = models.BooleanField(verbose_name=(u'Отменить'), default=False)
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
     def save(self, *args, **kwargs):
+        if not self.action:
+            self.action = self.paymethod.action
         if not self.commission:
-            if self.action == '+':
-                self.commission = self.valuta.commission_inp
-            elif self.action == '+':
-                self.commission = self.valuta.commission_out
+            self.commission = self.paymethod.commission
         super(ProfileBalance, self).save(*args, **kwargs)
     @classmethod
     def exists_input(cls, valuta, user):
