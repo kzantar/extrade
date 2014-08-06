@@ -10,7 +10,7 @@ Profile = get_user_model()
 class ProfileBalanceAdmin(admin.ModelAdmin):
     list_display=('value', 'valuta', 'profile', 'action', 'bank', 'accept', 'cancel')
     list_editable = ('accept', 'cancel')
-    list_filter = ('action', 'accept', 'cancel')
+    list_filter = ('action', 'accept', 'cancel', 'confirm')
 
 class ProfileRoleAdminInline(admin.TabularInline):
     model = ProfileRole
