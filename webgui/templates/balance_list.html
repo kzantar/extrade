@@ -20,14 +20,12 @@
                         <td></td>
                     </tr></tbody>
     {% for valuta, balance, pk in object_list %}
-                    {% if balance > 0 %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
                         <td>{{ valuta }}</td>
                         <td>{{ balance|floatformat:-8 }}</td>
                         <td style="text-align:right"><input type="button" value="пополнить" class="podschBut" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'valuta': '{{ valuta.pk }}'});">
                         <input type="button" value="вывести" class="buyBtcbut" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {'valuta':'{{ valuta.pk }}' });"></td>
                     </tr>
-                    {% endif %}
     {% endfor %}
     </table>
     <div id="balance_form_content"></div>
