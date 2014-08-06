@@ -114,7 +114,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
     def finances(self):
         for v in Valuta.objects.all():
-            yield v, floatformat(self.orders_balance(v.value), -8), v.pk
+            yield v, self.orders_balance(v.value), v.pk
 
     def commission_records_orders(self):
         for v in Valuta.objects.all():
