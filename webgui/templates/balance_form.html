@@ -21,7 +21,10 @@
   {% for pay in paymethods %}
     <option value="{{ pay.pk }}"{% if paymethod.pk == pay.pk %} selected="selected"{% endif %}>{{ pay }}</option>
   {% endfor %}
-  </select>{% endif %}
+  </select>
+  {% else %}
+    {{ paymethods.0 }}
+  {% endif %}
   {%  if functions == 'get_form_input_balance' %}
     {% if form.instance.pk %}<div>{{ paymethod.bank|default:""|safe }}</div>{% endif %}
   {% if paymethod.commission %}<div>Коммиссия на ввод составляет {{ paymethod.commission|floatformat:-2 }}%</div>{% endif %}
