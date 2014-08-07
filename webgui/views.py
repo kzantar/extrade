@@ -21,6 +21,8 @@ from django.contrib.auth import login, get_user_model
 
 Profile = get_user_model()
 
+from itertools import chain
+
 
 class ExchangeView(DetailView):
     template_name = 'exchange.html'
@@ -70,15 +72,30 @@ class ProfileOrderHistoryView(LoginRequiredMixin, ListView):
 
 class ProfileTransactionView(LoginRequiredMixin, ListView):
     template_name = "transactions.html"
-    paginate_by = 41
+    paginate_by = 10
     model = ProfileBalance
     def get_queryset(self):
-        self.queryset = self.model._default_manager.filter(
-            profile = self.request.user
-        ).filter(
-            
-        ).filter(
-        ).order_by()
+        o = Orders.objects.filter(
+                Q(
+                    user=self.request.user,
+                ) | Q(
+                    sale__buy__user=self.request.user,
+                ) | Q(
+                    buy__sale__user=self.request.user,
+                ), Q(
+                    sale__buy__completed=True,
+                ) | Q(
+                    buy__sale__completed=True,
+                ) | Q(
+                    completed=True,
+                ), Q(
+                    sale__buy__gte=1,
+                ) | Q(
+                    buy__sale__gte=1,
+                )
+            ).order_by('-updated')
+        b = ProfileBalance.objects.filter(cancel=False, accept=True, confirm=True, profile=self.request.user)
+        self.queryset = sorted(chain(o, b), key=lambda instance: instance.updated, reverse=True)
         return super(ProfileTransactionView, self).get_queryset()
 class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     template_name = "transactions_history.html"

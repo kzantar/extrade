@@ -14,7 +14,7 @@ from common.lib import strmd5sum
 from django.utils.safestring import mark_safe
 from common.numeric import normalized
 from datetime import datetime
-
+import ctypes
 
 
 
@@ -176,6 +176,10 @@ class ProfileBalance(models.Model):
         if not self.commission:
             self.commission = self.paymethod.commission
         super(ProfileBalance, self).save(*args, **kwargs)
+    @property
+    def number_id(self):
+        s = "P" + str(self.commission) + str(self.value) + str(self.pk) + str(self.profile.pk)
+        return ctypes.c_size_t(hash(s)).value
     @classmethod
     def exists_input(cls, valuta, user):
         cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta)

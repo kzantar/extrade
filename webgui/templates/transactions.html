@@ -18,21 +18,19 @@
             <h3>История транзакций</h3>
             <table width="100%" class="activeOrderTabb">
                 <tbody width="100%"><tr class="tableheadTr">
-                        <td>Пара</td>
-                        <td>Тип</td>
-                        <td>Кол-во</td>
-                        <td>Цена</td>
-                        <td>Всего</td>
-                        <td>Дата</td>
+                        <td>ID</td>
+                        <td>сумма транзакции</td>
+                        <td>описание</td>
+                        <td>дата и время</td>
+                        <td>статус</td>
                     </tr>
 {% for object in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{{ forloop.counter }}:{{ object.pk }} {{ object.pair }}</td>
-                        <td><span class="{% get_action user object %}">{% get_action user object %}</span></td>
-                        <td>{{ object.el.w_amo_sum|floatformat:-8 }} {{ object.el.pair.left }}</td>
+                        <td>{{ object.number_id }} {{ object.pair }}</td>
                         <td>{{ object.profitable.rate|floatformat:-8 }} {{ object.el.pair.right }}</td>
-                        <td>{{ object.el.w_total|floatformat:-8 }} {{ object.el.pair.right }}</td>
                         <td>{{ object.updated|date:"d.m.y H:i" }}</td>
+                        <td></td>
+                        <td></td>
                     </tr>
 {% endfor %}
             </tbody></table>

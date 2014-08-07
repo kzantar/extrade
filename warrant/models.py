@@ -12,6 +12,7 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.db.models import Avg, Max, Min
 from django.contrib.auth.models import User
 from django.template.defaultfilters import floatformat
+import ctypes
 
 from time import sleep
 
@@ -60,6 +61,10 @@ class Orders(models.Model):
     rate = models.DecimalField(u"Стоимость", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -7)])
     cancel = models.BooleanField(u"отменен | отменен частично", default=False)
     completed = models.BooleanField(u"Завершен", default=False)
+    @property
+    def number_id(self):
+        s = "O" + str(self.commission) + str(self.amount) + str(self.pk) + str(self.user.pk)
+        return ctypes.c_size_t(hash(s)).value
     @property
     def w_status(self):
         if self.el.completed: return "Исполнен"
