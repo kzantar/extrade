@@ -102,7 +102,7 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
     if form: form=deserialize_form(form)
     if form: paymethod = form.get('paymethod')
 
-    if paymethod: paymethod = get_object_or_404(PaymentMethod, pk=paymethod)
+    if paymethod: paymethod = get_object_or_404(PaymentMethod, pk=paymethod, disable=False)
     if not paymethod: paymethod = v.default_paymethod_inp
     if cb and cb.paymethod: paymethod = cb.paymethod
     if paymethod:
@@ -154,7 +154,7 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
     if form: form=deserialize_form(form)
 
     if form: paymethod = form.get('paymethod')
-    if paymethod: paymethod = get_object_or_404(PaymentMethod, pk=paymethod)
+    if paymethod: paymethod = get_object_or_404(PaymentMethod, pk=paymethod, disable=False)
     if not paymethod: paymethod = v.default_paymethod_out
     if cb and cb.paymethod: paymethod = cb.paymethod
     if paymethod:
@@ -193,7 +193,7 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
 @dajaxice_register
 def calc_paymethod(request, value, paymethod, act="-"):
     dajax = Dajax()
-    v = get_object_or_404(PaymentMethod, pk=paymethod)
+    v = get_object_or_404(PaymentMethod, pk=paymethod, disable=False)
 
     calc_value = normalized(D(value) * (D(1) - v.commission / D(100) ), where="DOWN") or _Zero
     calc_value1 = normalized(D(value) / (D(1) - v.commission / D(100) ), where="C") or _Zero

@@ -19,6 +19,7 @@ class PaymentMethod(models.Model):
         ('+', 'пополнение'),
         ('-', 'списание'),
     )
+    disable = models.BooleanField(verbose_name=(u'отключить'), default=False)
     method = models.CharField((u'Метод оплаты'), max_length=255)
     action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)])
@@ -54,10 +55,10 @@ class PaymentMethod(models.Model):
         return [MinValueValidator(_Zero)]
     @classmethod
     def inp(cls):
-        return cls.objects.filter(action="+")
+        return cls.objects.filter(action="+", disable=False)
     @classmethod
     def out(cls):
-        return cls.objects.filter(action="-")
+        return cls.objects.filter(action="-", disable=False)
     def __unicode__(self):
         return u"{action} {method}".format(**{"action": self.get_action_display(), "method": self.method})
     class Meta:
@@ -71,19 +72,19 @@ class Valuta(models.Model):
         super(Valuta, self).save(*args, **kwargs)
     @property
     def paymethods_inp(self):
-        p = self.payment_method.filter(action="+")
+        p = self.payment_method.filter(action="+", disable=False)
         if self.payment_method.exists() and p.exists():
             return p
         return self.payment_method.none()
     @property
     def paymethods_out(self):
-        p = self.payment_method.filter(action="-")
+        p = self.payment_method.filter(action="-", disable=False)
         if self.payment_method.exists() and p.exists():
             return p
         return self.payment_method.none()
     def default_paymethod(self, action):
-        if self.payment_method.filter(action=action).exists():
-            return self.payment_method.filter(action=action)[0]
+        if self.payment_method.filter(action=action, disable=False).exists():
+            return self.payment_method.filter(action=action, disable=False)[0]
         return self.payment_method.none()
     @property
     def default_paymethod_inp(self):
