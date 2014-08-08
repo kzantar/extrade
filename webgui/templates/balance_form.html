@@ -3,13 +3,17 @@
 {% if save_now %}
     <p>Заявка на {{ action }} средств успешно создана.</p>
     <div>{{ instance.paymethod.bank }}</div>
+    <p><a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">Подтвердить оплату</a>,
+    <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1'});return false;">отредактировать</a>
+    заново или <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">отменить</a></p>
 {% endif %}
+
 {% if cancel_or_edit %}
-<p>Вы уже создали заявку на ввод средств.</p>
-<div>{{ instance.paymethod.bank }}</div>
-<p><a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">Подтвердить оплату</a>,
-<a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1'});return false;">отредактировать</a>
-заново или <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">отменить</a></p>
+    <p>Вы уже создали заявку на ввод средств.</p>
+    <div>{{ instance.paymethod.bank }}</div>
+    <p><a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">Подтвердить оплату</a>,
+    <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1'});return false;">отредактировать</a>
+    заново или <a href="#" onclick="Dajaxice.warrant.get_form_input_balance(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">отменить</a></p>
 {% endif %}
 
 {% if form %}

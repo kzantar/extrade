@@ -178,7 +178,7 @@ class ProfileBalance(models.Model):
         super(ProfileBalance, self).save(*args, **kwargs)
     @classmethod
     def exists_input(cls, valuta, user):
-        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta)
+        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta, confirm=False)
         if cb.exists():
             return cb[0]
         return None
