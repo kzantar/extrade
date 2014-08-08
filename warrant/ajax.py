@@ -190,9 +190,8 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
 def calc_paymethod(request, value, paymethod, act="-"):
     dajax = Dajax()
     v = get_object_or_404(PaymentMethod, pk=paymethod, disable=False)
-
-    calc_value = normalized(D(value) * (D(1) - v.commission / D(100) ), where="DOWN") or _Zero
-    calc_value1 = normalized(D(value) / (D(1) - v.commission / D(100) ), where="C") or _Zero
+    calc_value = v.calc_commission(D(value))
+    calc_value1 = v.calc_commission(D(value), True)
     if act == "-":
         dajax.assign('#calc-value-result', 'value', floatformat(calc_value, -8).replace(",", "."))
     else:

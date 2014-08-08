@@ -23,10 +23,50 @@ class PaymentMethod(models.Model):
     method = models.CharField((u'Метод оплаты'), max_length=255)
     action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)])
+    min_commission = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Минимальная комиссия", validators=[MinValueValidator(_Zero)])
+    max_commission = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная комиссия", validators=[MinValueValidator(_Zero)])
     min_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма", validators=[MinValueValidator(_Zero)])
     max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма", validators=[MinValueValidator(_Zero)])
     valuta = models.ForeignKey("currency.Valuta", related_name="payment_method")
     bank = models.TextField((u'номер счета / описание'), blank=True, null=True)
+    def calc_commission(self, amount, rev=False):
+        if self.min_commission > _Zero and (amount * self.commission / D(100)) < self.min_commission:
+            if rev: return amount + self.min_commission
+            return amount - self.min_commission
+        elif self.max_commission > _Zero and (amount * self.commission / D(100)) > self.max_commission:
+            if rev:return amount + self.max_commission
+            return amount - self.max_commission
+        else:
+            if rev: return amount / (D(1) - self.commission / D(100))
+            return amount * (D(1) - self.commission / D(100))
+    @property
+    def w_min_commission(self):
+        return u"мин. {amount} {valuta}".format(**{ "amount":floatformat(self.min_commission, -8), "valuta":self.valuta })
+    @property
+    def w_max_commission(self):
+        return u"макс. {amount} {valuta}".format(**{ "amount":floatformat(self.max_commission, -8), "valuta":self.valuta })
+    @property
+    def w_commission(self):
+        if self.commission > _Zero:
+            return u"{commission}% ".format(**{"commission": floatformat(self.commission, -2)})
+        return ""
+    @property
+    def w_is_commission(self):
+        return self.max_commission > _Zero or self.min_commission > _Zero or self.commission > _Zero
+    @property
+    def w_commissions(self):
+        if self.w_is_commission:
+            s, st=[], ""
+            if self.min_commission > _Zero:
+                s += [(self.w_min_commission),]
+            if self.max_commission > _Zero:
+                s += [(self.w_max_commission),]
+            if s:
+                st = u", ".join(s)
+                if self.commission > _Zero:
+                    st = "(" + st + ")"
+            return u"Комиссия {commission}{min_max}.".format(**{"min_max": st, "commission": self.w_commission})
+        return ""
     @property
     def validators(self):
         v = []
