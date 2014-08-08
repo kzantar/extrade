@@ -177,8 +177,8 @@ class ProfileBalance(models.Model):
             self.commission = self.paymethod.commission
         super(ProfileBalance, self).save(*args, **kwargs)
     @classmethod
-    def exists_input(cls, valuta, user):
-        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta, confirm=False)
+    def exists_input(cls, valuta, user, paymethod):
+        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta, confirm=False, paymethod=paymethod)
         if cb.exists():
             return cb[0]
         return None
@@ -192,8 +192,8 @@ class ProfileBalance(models.Model):
     def _total(self):
         return normalized(self.value - self._commission_debit, where="DOWN")
     @classmethod
-    def exists_output(cls, valuta, user):
-        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="-", valuta=valuta)
+    def exists_output(cls, valuta, user, paymethod):
+        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="-", valuta=valuta, paymethod=paymethod)
         if cb.exists():
             return cb[0]
         return None

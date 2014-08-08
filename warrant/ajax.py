@@ -96,7 +96,6 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
     dajax = Dajax()
     args, initial = { }, { 'valuta':valuta }
     v = get_object_or_404(Valuta, pk=valuta)
-    cb = ProfileBalance.exists_input(valuta, request.user)
 
     if form: edit = 1
     if form: form=deserialize_form(form)
@@ -104,7 +103,8 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
 
     if paymethod: paymethod = get_object_or_404(PaymentMethod, pk=paymethod, disable=False)
     if not paymethod: paymethod = v.default_paymethod_inp
-    if cb and cb.paymethod: paymethod = cb.paymethod
+    cb = ProfileBalance.exists_input(valuta, request.user, paymethod=paymethod)
+    #if cb and cb.paymethod: paymethod = cb.paymethod
     if paymethod:
         args.update({ "commission": paymethod.commission, "validators": paymethod.validators })
         initial.update({ "paymethod":paymethod })
@@ -123,12 +123,12 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
         form.instance.confirm=False
         form.save()
         if cb and not (cb.confirm or cb.cancel): obj = "<p>Заявка на ввод средств успешно отредактированна.</p>"
-        if not cb: obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "ввод", "save_now": True})
+        if not cb: obj = render_to_string("balance_form.html", {"confirm":True, "instance": form.instance, "action": "ввод", "save_now": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
     elif cb and cb.confirm:
         obj = "<p>Заявка ожидает подтверждения.</p>" # if exists_input confirm=True
     else:
         if not edit and form.instance and form.instance.pk:
-            obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "ввод", "cancel_or_edit": True})
+            obj = render_to_string("balance_form.html", {"confirm":True, "instance": form.instance, "action": "ввод", "cancel_or_edit": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
         elif v.paymethods_inp.exists():
             c = {"form": form, "url": ".", "paymethods": v.paymethods_inp, "paymethod":paymethod, "submit": "пополнить %s" % v, "functions": "get_form_input_balance", "valuta": v}
             c.update(csrf(request))
@@ -149,13 +149,13 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
     args, initial = { }, { 'valuta':valuta }
     v = get_object_or_404(Valuta, pk=valuta)
 
-    cb = ProfileBalance.exists_output(valuta, request.user)
     if form: edit = 1
     if form: form=deserialize_form(form)
 
     if form: paymethod = form.get('paymethod')
     if paymethod: paymethod = get_object_or_404(PaymentMethod, pk=paymethod, disable=False)
     if not paymethod: paymethod = v.default_paymethod_out
+    cb = ProfileBalance.exists_output(valuta, request.user, paymethod=paymethod)
     if cb and cb.paymethod: paymethod = cb.paymethod
     if paymethod:
         args.update({ "commission": paymethod.commission, "validators": paymethod.validators })
@@ -170,14 +170,10 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
         form.instance.action="-"
         form.save()
         if cb: obj = "<p>Заявка на вывод средств успешно отредактированна.</p>"
-        if not cb: obj = "<p>Заявка на вывод средств успешно создана.</p>"
+        if not cb: obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "вывод", "save_now": True, "paymethods": v.paymethods_out, "paymethod":paymethod, "functions": "get_form_output_balance", "valuta": v})
     else:
         if not edit and form.instance and form.instance.pk:
-            obj = """
-<p>Вы уже создали заявку на вывод средств.</p>
-<p>Её можно <a href="#" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {{'valuta': '{valuta}', 'edit':'1'}});return false;">отредактировать</a>
-заново или <a href="#" onclick="Dajaxice.warrant.get_form_output_balance(Dajax.process, {{'cancel': 1, 'valuta': '{valuta}'}});return false;">отменить</a></p>
-""".format(**{"valuta": form.instance.valuta.pk})
+            obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "вывод", "cancel_or_edit": True, "paymethods": v.paymethods_out, "paymethod":paymethod, "functions": "get_form_output_balance", "valuta": v})
         elif v.paymethods_out.exists():
             c = {"form": form, "url": ".", "paymethods": v.paymethods_out, "paymethod":paymethod, "submit": "вывести %s" % v, "functions": "get_form_output_balance", "valuta": v}
             c.update(csrf(request))
