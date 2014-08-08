@@ -155,6 +155,7 @@ class GetBalanceForm(forms.ModelForm):
         super(GetBalanceForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         initial = getattr(self, 'initial', None)
+        self.fields['bank'].label = u"Номер счета на вывод"
         self.user = user
         self.fields['bank'].required = True
         if validators: self.fields['value'].validators = validators

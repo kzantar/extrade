@@ -104,7 +104,21 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta) + str(self.pk))
         b = cache.get(md5key)
         if b is None:
-            balance_plus = q.filter(action="+", accept=True).distinct().extra(select={'total':"sum(users_profilebalance.value * (1 - users_profilebalance.commission / 100))"},).get().total or _Zero
+            balance_plus = q.filter(
+                    action="+", accept=True
+                ).distinct(
+                ).extra(
+                    select={
+                        'total':"""sum(
+                            CASE
+                                WHEN users_profilebalance.min_commission and (users_profilebalance.value * users_profilebalance.commission / 100) < users_profilebalance.min_commission THEN users_profilebalance.value - users_profilebalance.min_commission
+                                WHEN users_profilebalance.max_commission > 0 and (users_profilebalance.value * users_profilebalance.commission / 100) > users_profilebalance.max_commission THEN users_profilebalance.value - users_profilebalance.max_commission
+                                ELSE (users_profilebalance.value * (1 - users_profilebalance.commission / 100))
+                            END
+                            )"""
+                        },
+                ).get(
+                ).total or _Zero
             balance_plus = normalized(balance_plus, where="DOWN")
             balance_minus = q.filter(action="-").distinct().extra(select={'total':"sum(users_profilebalance.value)"},).get().total or _Zero
             balance_minus = normalized(balance_minus, where="DOWN")
@@ -170,9 +184,15 @@ class ProfileBalance(models.Model):
     confirm = models.BooleanField(verbose_name=(u'Подтверждено пользователем'), default=True)
     cancel = models.BooleanField(verbose_name=(u'Отменить'), default=False)
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
+    min_commission = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Минимальная комиссия", validators=[MinValueValidator(_Zero)], editable=False)
+    max_commission = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная комиссия", validators=[MinValueValidator(_Zero)], editable=False)
     def save(self, *args, **kwargs):
         if not self.action:
             self.action = self.paymethod.action
+        if not self.min_commission:
+            self.min_commission = self.paymethod.min_commission
+        if not self.max_commission:
+            self.max_commission = self.paymethod.max_commission
         if not self.commission:
             self.commission = self.paymethod.commission
         super(ProfileBalance, self).save(*args, **kwargs)
@@ -181,23 +201,42 @@ class ProfileBalance(models.Model):
         s = "P" + str(self.commission) + str(self.value) + str(self.pk) + str(self.profile.pk)
         return ctypes.c_size_t(hash(s)).value
     @classmethod
-    def exists_input(cls, valuta, user):
-        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta)
+    def exists_input(cls, valuta, user, paymethod):
+        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta, confirm=False, paymethod=paymethod)
         if cb.exists():
             return cb[0]
         return None
     @classmethod
     def sum_from_commission(cls, valuta):
-        return cls.objects.filter(accept=True, cancel=False, valuta__value=valuta).distinct().extra(select={'total':"sum(users_profilebalance.value * users_profilebalance.commission / 100)"},).get().total or _Zero
+        return cls.objects.filter(
+                accept=True, cancel=False, valuta__value=valuta
+            ).distinct(
+            ).extra(
+                select={
+                    'total':"""sum(
+                    CASE
+                        WHEN users_profilebalance.min_commission and (users_profilebalance.value * users_profilebalance.commission / 100) < users_profilebalance.min_commission THEN users_profilebalance.min_commission
+                        WHEN users_profilebalance.max_commission > 0 and (users_profilebalance.value * users_profilebalance.commission / 100) > users_profilebalance.max_commission THEN users_profilebalance.max_commission
+                        ELSE (users_profilebalance.value * users_profilebalance.commission / 100)
+                    END
+                    )""",
+                },
+            ).get(
+            ).total or _Zero
     @property
     def _commission_debit(self):
-        return (self.value * self.commission / D(100))
+        if self.min_commission > _Zero and (self.value * self.commission / D(100)) < self.min_commission:
+            return self.min_commission
+        elif self.max_commission > _Zero and (self.value * self.commission / D(100)) > self.max_commission:
+            return self.max_commission
+        else:
+            return (self.value * self.commission / D(100))
     @property
     def _total(self):
         return normalized(self.value - self._commission_debit, where="DOWN")
     @classmethod
-    def exists_output(cls, valuta, user):
-        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="-", valuta=valuta)
+    def exists_output(cls, valuta, user, paymethod):
+        cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="-", valuta=valuta, paymethod=paymethod)
         if cb.exists():
             return cb[0]
         return None
