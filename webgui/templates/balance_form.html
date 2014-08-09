@@ -39,16 +39,16 @@
 {% if save_now %}
     <p>Заявка на {{ action }} средств успешно создана.</p>
     <div>{{ instance.paymethod.bank }}</div>
-    {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
-    <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1'});return false;">отредактировать</a>
-    заново или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">отменить</a></p>
+    {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
+    <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">отредактировать</a>
+    заново или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">отменить</a></p>
 {% endif %}
 
 {% if cancel_or_edit %}
     <p>Вы уже создали заявку на {{ action }} средств.</p>
     <div>{{ instance.paymethod.bank }}</div>
-    {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
-    <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1'});return false;">отредактировать</a>
-    заново или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}'});return false;">отменить</a></p>
+    {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
+    <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">отредактировать</a>
+    заново или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">отменить</a></p>
 {% endif %}
 <img src="{% static 'img/ajax-loader.gif' %}" style="display:none;" id="ajax-loader">
