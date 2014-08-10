@@ -197,6 +197,12 @@ class ProfileBalance(models.Model):
             self.commission = self.paymethod.commission
         super(ProfileBalance, self).save(*args, **kwargs)
     @property
+    def _total_transaction(self):
+        return self._total
+    @property
+    def w_total_transaction(self):
+        return "%s%s %s" % (self.action, floatformat(self._total_transaction, -8), self.valuta)
+    @property
     def number_id(self):
         s = "P" + str(self.commission) + str(self.value) + str(self.pk) + str(self.profile.pk)
         return ctypes.c_size_t(hash(s)).value

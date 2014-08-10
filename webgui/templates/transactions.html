@@ -25,13 +25,26 @@
                         <td>статус</td>
                     </tr>
 {% for object in object_list %}
+    {% for o in object.transactions %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{{ object.number_id }} {{ object.pair }}</td>
-                        <td>{{ object.profitable.rate|floatformat:-8 }} {{ object.el.pair.right }}</td>
-                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
+                        <td>{{ o.number_id }} {{ o.pair }}</td>
+                        {#<td><span class="{% get_action user object %}">{% get_action user object %}</span></td>#}
+                        {#<td>{{ object.el.w_amo_sum|floatformat:-8 }} {{ object.el.pair.left }}</td>#}
+                        {#<td>{{ object.profitable.rate|floatformat:-8 }} {{ object.el.pair.right }}</td>#}
+                        <td>{{ o.w_total_transaction }} : {{ o.el.w_total|floatformat:-8 }} {{ o.el.pair.right }}</td>
                         <td></td>
+                        <td>{{ o.updated|date:"d.m.y H:i" }}</td>
                         <td></td>
                     </tr>
+    {% empty %}
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <td>{{ object.number_id }} {{ object.pair }}</td>
+                        <td>{{ object.w_total_transaction }}</td>
+                        <td></td>
+                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
+                        <td></td>
+                    </tr>
+    {% endfor %}
 {% endfor %}
             </tbody></table>
 {% include "paginate.html" %}
