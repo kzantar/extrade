@@ -99,7 +99,7 @@ class ProfileForm(forms.ModelForm):
         }
 
 class AddBalanceForm(forms.ModelForm):
-    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"вы получите", required=False)
+    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"step":"1e-8", "id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"вы получите", required=False)
     class Meta:
         model = ProfileBalance
         fields = ('value', 'valuta', 'calc_value', 'paymethod')
@@ -142,7 +142,7 @@ class AddBalanceForm(forms.ModelForm):
         return super(AddBalanceForm, self).save(*args, **kwargs)
 
 class GetBalanceForm(forms.ModelForm):
-    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"вы получите", required=False)
+    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"step":"1e-8", "id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"вы получите", required=False)
     class Meta:
         model = ProfileBalance
         fields = ('bank', 'value', 'valuta', 'calc_value', 'paymethod')
