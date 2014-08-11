@@ -102,7 +102,7 @@ class PaymentMethod(models.Model):
     def out(cls):
         return cls.objects.filter(action="-", disable=False)
     def __unicode__(self):
-        return u"{action} {method}".format(**{"action": self.get_action_display(), "method": self.method})
+        return u"{action} {method} [{commission}%]".format(**{"commission": self.commission, "action": self.get_action_display(), "method": self.method})
     class Meta:
         verbose_name = u'метод оплаты'
         verbose_name_plural = u'методы оплаты'

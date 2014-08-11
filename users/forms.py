@@ -108,7 +108,7 @@ class AddBalanceForm(forms.ModelForm):
                 'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
                 'value': NumberInput(attrs={"id": "balance-value", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val()});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val()});"}),
             }
-    def __init__(self, user=None, validators=None, commission=_Zero, *args, **kwargs):
+    def __init__(self, user=None, validators=None, commission=False, *args, **kwargs):
         super(AddBalanceForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         initial = getattr(self, 'initial', None)
@@ -119,7 +119,7 @@ class AddBalanceForm(forms.ModelForm):
             self.fields['paymethod'].queryset = initial.get('paymethod').valuta.paymethods_inp
         else:
             self.fields['paymethod'].queryset = PaymentMethod.objects.none()
-        if not commission > _Zero:
+        if not commission:
             del self.fields['calc_value']
     def save(self, *args, **kwargs):
         self.instance.profile = self.user
@@ -151,7 +151,7 @@ class GetBalanceForm(forms.ModelForm):
                 'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
                 'value': NumberInput(attrs={"id": "balance-value", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val()});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val()});"}),
             }
-    def __init__(self, user=None, validators=None, commission=_Zero, *args, **kwargs):
+    def __init__(self, user=None, validators=None, commission=False, *args, **kwargs):
         super(GetBalanceForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         initial = getattr(self, 'initial', None)
@@ -164,7 +164,7 @@ class GetBalanceForm(forms.ModelForm):
             self.fields['paymethod'].queryset = initial.get('paymethod').valuta.paymethods_out
         else:
             self.fields['paymethod'].queryset = PaymentMethod.objects.none()
-        if not commission > _Zero:
+        if not commission:
             del self.fields['calc_value']
     def is_valid(self):
         valid = super(GetBalanceForm, self).is_valid()
