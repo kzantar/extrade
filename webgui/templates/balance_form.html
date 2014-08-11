@@ -17,14 +17,14 @@
   {%  if functions == 'get_form_input_balance' %}
     {% if form.instance.pk %}<div>{{ paymethod.bank|default:""|safe }}</div>{% endif %}
   {% if paymethod.w_is_commission %}<div>{{ paymethod.w_commissions }}</div>{% endif %}
-  {% if paymethod.min_amount %}<div>Минимальная сумма на ввода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
-  {% if paymethod.max_amount %}<div>Максимальная сумма на ввода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
+  {% if paymethod.min_amount %}<div>Минимальная сумма ввода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
+  {% if paymethod.max_amount %}<div>Максимальная сумма ввода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
   {% endif %}
   {%  if functions == 'get_form_output_balance' %}
   <div>{{ paymethod.bank|default:""|safe }}</div>
   {% if paymethod.w_is_commission %}<div>{{ paymethod.w_commissions }}</div>{% endif %}
-  {% if paymethod.min_amount %}<div>Минимальная сумма на вывода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
-  {% if paymethod.max_amount %}<div>Максимальная сумма на вывода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
+  {% if paymethod.min_amount %}<div>Минимальная сумма вывода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
+  {% if paymethod.max_amount %}<div>Максимальная сумма вывода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
   {% endif %}
 {% csrf_token %}
 <table>

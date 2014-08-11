@@ -1,5 +1,8 @@
+#-*- coding:utf-8 -*-
 from decimal import Context, setcontext, Decimal
 from decimal import ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_DOWN, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP, ROUND_05UP
+from django.core.validators import BaseValidator
+
 
 def normalized(d, where=None, place=8):
     amo_pla = (Decimal("10") ** -place)
@@ -30,3 +33,8 @@ def format_number(num):
         return '-' + val
     return val
 
+class MinValidator(BaseValidator):
+    compare = lambda self, a, b: a < b
+    clean = lambda self, x: x - (Decimal(10) ** -8)
+    message = (u'Убедитесь, что это значение больше %(limit_value)s.')
+    code = 'min_values'

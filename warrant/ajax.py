@@ -106,7 +106,7 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
     cb = ProfileBalance.exists_input(valuta, request.user, paymethod=paymethod)
     #if cb and cb.paymethod: paymethod = cb.paymethod
     if paymethod:
-        args.update({ "commission": paymethod.commission, "validators": paymethod.validators })
+        args.update({ "commission": paymethod.w_is_commission, "validators": paymethod.validators })
         initial.update({ "paymethod":paymethod })
 
     if cb and not cb.confirm and confirm:
@@ -158,7 +158,7 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
     cb = ProfileBalance.exists_output(valuta, request.user, paymethod=paymethod)
     if cb and cb.paymethod: paymethod = cb.paymethod
     if paymethod:
-        args.update({ "commission": paymethod.commission, "validators": paymethod.validators })
+        args.update({ "commission": paymethod.w_is_commission, "validators": paymethod.validators })
         initial.update({ "paymethod":paymethod })
 
     if cancel:
