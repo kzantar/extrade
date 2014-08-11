@@ -63,9 +63,9 @@ class Orders(models.Model):
     completed = models.BooleanField(u"Завершен", default=False)
     @property
     def transactions(self):
-        yield self.el
+        yield self.amount, self.el
         for i in self.el._opposites:
-            yield i
+            yield i.amount, i
     @property
     def number_id(self):
         s = "O" + str(self.commission) + str(self.amount) + str(self.pk) + str(self.user.pk)

@@ -76,9 +76,28 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
     model = ProfileBalance
     def get_queryset(self):
         user = self.request.user
-        o = Orders.objects.filter(user=user).order_by('-created')
-        b = ProfileBalance.objects.filter(cancel=False, accept=True, confirm=True, profile=user)
-        self.queryset = sorted(chain(o, b), key=lambda instance: instance.updated, reverse=True)
+        write = Orders.objects.filter(user=user).order_by('-created')
+        deals = Orders.objects.filter(
+                Q(
+                    user=self.request.user,
+                ) | Q(
+                    sale__buy__user=self.request.user,
+                ) | Q(
+                    buy__sale__user=self.request.user,
+                ), Q(
+                    sale__buy__completed=True,
+                ) | Q(
+                    buy__sale__completed=True,
+                ) | Q(
+                    completed=True,
+                ), Q(
+                    sale__buy__gte=1,
+                ) | Q(
+                    buy__sale__gte=1,
+                )
+            ).order_by('-updated')
+        balance = ProfileBalance.objects.filter(cancel=False, accept=True, confirm=True, profile=user)
+        self.queryset = sorted(chain(balance, deals, write), key=lambda instance: instance.updated, reverse=True)
         return super(ProfileTransactionView, self).get_queryset()
 class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     template_name = "transactions_history.html"
