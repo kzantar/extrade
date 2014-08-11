@@ -8,6 +8,7 @@ from common.numeric import normalized
 from django.db.models import Sum, Count, F, Q
 from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from common.numeric import MinValidator
 from common.lib import strmd5sum
 
 
@@ -70,8 +71,9 @@ class PaymentMethod(models.Model):
     @property
     def validators(self):
         v = []
-        if self.min_amount: v += [MinValueValidator(self.min_amount),]
-        if self.max_amount: v += [MaxValueValidator(self.max_amount),]
+        if self.min_amount <= self.min_commission and self.min_commission: v+= [MinValidator(self.min_commission), ]
+        if self.min_amount > self.min_commission and self.min_amount: v += [MinValueValidator(self.min_amount), ]
+        if self.max_amount: v += [MaxValueValidator(self.max_amount), ]
         return v
     @classmethod
     def commission_default_inp(cls):
@@ -100,7 +102,7 @@ class PaymentMethod(models.Model):
     def out(cls):
         return cls.objects.filter(action="-", disable=False)
     def __unicode__(self):
-        return u"{action} {method}".format(**{"action": self.get_action_display(), "method": self.method})
+        return u"{action} {method} [{commission}%]".format(**{"commission": self.commission, "action": self.get_action_display(), "method": self.method})
     class Meta:
         verbose_name = u'метод оплаты'
         verbose_name_plural = u'методы оплаты'

@@ -15,3 +15,5 @@ def _last_hour(n=24):
     startdate = today - timedelta(hours=n)
     enddate = today
     return startdate, enddate
+
+
