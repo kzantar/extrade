@@ -171,8 +171,8 @@ class ProfileBalance(models.Model):
     created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
     updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
     ACTIONS=(
-        ('+', '+пополнение'),
-        ('-', '-списание'),
+        ('+', 'пополнение'),
+        ('-', 'списание'),
     )
     value = models.DecimalField(u"количество", max_digits=14, decimal_places=8, validators=[MinValueValidator(_Zero)])
     valuta = models.ForeignKey("currency.Valuta", verbose_name=u"валюта")
@@ -211,6 +211,17 @@ class ProfileBalance(models.Model):
         if not self.confirm: return "в ожидании"
         if self.accept: return "выполнено"
         if not self.accept and not self.accept: return "в ожидании"
+    @property
+    def w_is_commission(self):
+        return self.max_commission > _Zero or self.min_commission > _Zero or self.commission > _Zero
+    @property
+    def w_commission(self):
+        if self.min_commission > _Zero and (self.value * self.commission / D(100)) < self.min_commission:
+            return self.min_commission
+        elif self.max_commission > _Zero and (self.value * self.commission / D(100)) > self.max_commission:
+            return self.max_commission
+        else:
+            return self.commission
     @property
     def number_id(self):
         s = "P" + str(self.commission) + str(self.value) + str(self.pk) + str(self.profile.pk)
