@@ -77,6 +77,7 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         ctx = super(ProfileTransactionView, self).get_context_data(**kwargs)
         ctx['change_transaction_user'] = Profile.objects.extra(select={"selected": "users_profile.id=%s" % self.kwargs.get('user_id', self.request.user.pk) })
+        ctx['user_view'] = get_object_or_404(Profile, pk=self.kwargs.get('user_id', self.request.user.pk))
         return ctx
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')

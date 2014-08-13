@@ -49,8 +49,8 @@
 
     {% elif object.deals %}
                         {# ID #}<td>#{% get_id object 'deals' %}</td>
-                        {# сумма транзакции #}<td>{% get_action_deals user object %}{{ object.el.w_total|floatformat:-8 }} {{ object.el.pair.right }}</span></td>
-                        {# описание #}<td>{% get_description_deals user object %}</td>
+                        {# сумма транзакции #}<td>{% get_action_deals user_view object %}{{ object.el.w_total|floatformat:-8 }} {{ object.el.pair.right }}</span></td>
+                        {# описание #}<td>{% get_description_deals user_view object %}</td>
                         {# дата и время #}<td>{{ object.date_time|date:"d.m.y H:i" }}</td>
                         {# статус #}<td>выполнено</td>
 
