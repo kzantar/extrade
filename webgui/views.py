@@ -74,8 +74,19 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
     template_name = "transactions.html"
     paginate_by = 101
     model = ProfileBalance
+    def get_context_data(self, **kwargs):
+        ctx = super(ProfileTransactionView, self).get_context_data(**kwargs)
+        ctx['change_transaction_user'] = Profile.objects.extra(select={"selected": "users_profile.id=%s" % self.kwargs.get('user_id', self.request.user.pk) })
+        return ctx
     def get_queryset(self):
-        user = self.request.user
+        user_id = self.kwargs.get('user_id')
+        if user_id:
+            if self.request.user.is_superuser:
+                user = get_object_or_404(Profile, pk=user_id)
+            else:
+                raise Http404
+        else:
+            user = self.request.user
         write = Orders.objects.filter(
                 user=user
             ).extra(

@@ -8,6 +8,10 @@ from django.template.defaultfilters import floatformat
 from decimal import Decimal as D
 import ctypes
 
+from django.contrib.auth import login, get_user_model
+
+Profile = get_user_model()
+
 register = template.Library()
 
 @register.simple_tag
