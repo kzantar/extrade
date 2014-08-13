@@ -72,11 +72,28 @@ class ProfileOrderHistoryView(LoginRequiredMixin, ListView):
 
 class ProfileTransactionView(LoginRequiredMixin, ListView):
     template_name = "transactions.html"
-    paginate_by = 10
+    paginate_by = 101
     model = ProfileBalance
     def get_queryset(self):
         user = self.request.user
-        write = Orders.objects.filter(user=user).order_by('-created')
+        write = Orders.objects.filter(
+                user=user
+            ).extra(
+                select={
+                    "write": True,
+                    "date_time": "warrant_orders.created",
+                },
+            ).order_by('-date_time')
+        canceleld = Orders.objects.filter(
+                user=user
+            ).filter(
+                cancel=True
+            ).extra(
+                select={
+                    "canceleld": True,
+                    "date_time": "warrant_orders.updated",
+                },
+            ).order_by('-date_time')
         deals = Orders.objects.filter(
                 Q(
                     user=self.request.user,
@@ -95,9 +112,26 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
                 ) | Q(
                     buy__sale__gte=1,
                 )
-            ).order_by('-updated')
-        balance = ProfileBalance.objects.filter(cancel=False, accept=True, confirm=True, profile=user)
-        self.queryset = sorted(chain(balance, deals, write), key=lambda instance: instance.updated, reverse=True)
+            ).extra(
+                select={
+                    "deals": True,
+                    "date_time": "warrant_orders.updated",
+                },
+            ).order_by('-date_time')
+        balance = ProfileBalance.objects.filter(
+                #cancel=False,
+                #accept=True,
+            ).filter(
+                confirm=True,
+            ).filter(
+                profile=user,
+            ).extra(
+                select={
+                    "balance": True,
+                    "date_time": "users_profilebalance.updated",
+                },
+            ).order_by('-date_time')
+        self.queryset = sorted(chain(balance, canceleld, deals, write), key=lambda instance: instance.date_time, reverse=True)
         return super(ProfileTransactionView, self).get_queryset()
 class ProfileTransactionHistoryView(LoginRequiredMixin, ListView):
     template_name = "transactions_history.html"

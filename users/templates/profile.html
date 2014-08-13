@@ -29,6 +29,9 @@
                 <li>
                 	<a href="{% url 'history_order' %}">История ордеров</a>
                 </li>
+                <li>
+                	<a href="{% url 'transactions' %}">История транзакций</a>
+                </li>
                 {% if user.is_superuser %}
                 <li>
                 	<a href="{% url 'commission_records' %}">Учет комиссии</a>

@@ -203,6 +203,15 @@ class ProfileBalance(models.Model):
     def w_total_transaction(self):
         return "%s%s %s" % (self.action, floatformat(self._total_transaction, -8), self.valuta)
     @property
+    def w_transaction(self):
+        return "%s%s %s" % (self.action, floatformat(self.value, -8), self.valuta)
+    @property
+    def w_status(self):
+        if self.cancel: return "отменен"
+        if not self.confirm: return "в ожидании"
+        if self.accept: return "выполнено"
+        if not self.accept and not self.accept: return "в ожидании"
+    @property
     def number_id(self):
         s = "P" + str(self.commission) + str(self.value) + str(self.pk) + str(self.profile.pk)
         return ctypes.c_size_t(hash(s)).value

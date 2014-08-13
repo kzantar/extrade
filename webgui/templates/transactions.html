@@ -25,26 +25,36 @@
                         <td>статус</td>
                     </tr>
 {% for object in object_list %}
-    {% for amount, o in object.transactions %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{{ o.number_id }} {{ o.pair }}</td>
-                        {#<td><span class="{% get_action user object %}">{% get_action user object %}</span></td>#}
-                        {#<td>{{ object.el.w_amo_sum|floatformat:-8 }} {{ object.el.pair.left }}</td>#}
-                        {#<td>{{ object.profitable.rate|floatformat:-8 }} {{ object.el.pair.right }}</td>#}
-                        <td>{{ amount|floatformat:-8 }} . {{ o.w_total_transaction }} : {{ o.el.w_total|floatformat:-8 }} {{ o.el.pair.right }}</td>
-                        <td></td>
-                        <td>{{ o.updated|date:"d.m.y H:i" }}</td>
-                        <td></td>
+    {% if object.balance %}
+                        {# ID #}<td>{{ object.number_id }}</td>
+                        {# сумма транзакции #}<td>{{ object.w_transaction }}</td>
+                        {# описание #}<td>{{ object.paymethod }} {{ object.w_total_transaction }}</td>
+                        {# дата и время #}<td>{{ object.date_time|date:"d.m.y H:i" }}</td>
+                        {# статус #}<td>{{ object.w_status }}</td>
+
+    {% elif object.canceleld %}
+                        {# ID #}<td>{% get_id user object 'canceleld' %}</td>
+                        {# сумма транзакции #}<td>{% get_action_cancel object %}{{ object.trans_return }}</td>
+                        {# описание #}<td>Отмена ордера #{{ object.pk }}</td>
+                        {# дата и время #}<td>{{ object.date_time|date:"d.m.y H:i" }}</td>
+                        {# статус #}<td>выполнено</td>
+
+    {% elif object.deals %}
+                        {# ID #}<td>{% get_id user object 'deals' %}</td>
+                        {# сумма транзакции #}<td>{% get_action_deals user object %}{{ object.el.w_total|floatformat:-8 }} {{ object.el.pair.right }}</span></td>
+                        {# описание #}<td>{% get_description_deals user object %}</td>
+                        {# дата и время #}<td>{{ object.date_time|date:"d.m.y H:i" }}</td>
+                        {# статус #}<td>выполнено</td>
+
+    {% elif object.write %}
+                        {# ID #}<td>{% get_id user object 'write' %}</td>
+                        {# сумма транзакции #}<td>-{{ object.trans_write|floatformat:-8 }} {{ object.trans_pos }}</td>
+                        {# описание #}<td>В счет оплаты создания ордера #{{ object.pk }}</td>
+                        {# дата и время #}<td>{{ object.date_time|date:"d.m.y H:i" }}</td>
+                        {# статус #}<td>выполнено</td>
+    {% endif %}
                     </tr>
-    {% empty %}
-                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{{ object.number_id }} {{ object.pair }}</td>
-                        <td>{{ object.w_total_transaction }}</td>
-                        <td></td>
-                        <td>{{ object.updated|date:"d.m.y H:i" }}</td>
-                        <td></td>
-                    </tr>
-    {% endfor %}
 {% endfor %}
             </tbody></table>
 {% include "paginate.html" %}

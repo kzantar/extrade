@@ -62,11 +62,6 @@ class Orders(models.Model):
     cancel = models.BooleanField(u"отменен | отменен частично", default=False)
     completed = models.BooleanField(u"Завершен", default=False)
     @property
-    def transactions(self):
-        yield self.amount, self.el
-        for i in self.el._opposites:
-            yield i.amount, i
-    @property
     def number_id(self):
         s = "O" + str(self.commission) + str(self.amount) + str(self.pk) + str(self.user.pk)
         return ctypes.c_size_t(hash(s)).value
@@ -297,7 +292,6 @@ class Orders(models.Model):
         return a
     def is_action(self, action):
         return self.action == action
-
     @property
     def total(self):
         return self.amount * self.rate
@@ -307,21 +301,21 @@ class Orders(models.Model):
     @property
     def _right(self):
         return self.pair.right
+    @property
+    def trans_return(self):
+        if self.is_action('sale'): return "%s %s" % (floatformat(self.el._part_amo_sum or self.amount, -8), self.pair.left)
+        if self.is_action('buy'): return "%s %s" % (floatformat(self.el._part_amo_sum * self.el._rate or self.amount * self.rate, -8), self.pair.right)
+    @property
+    def trans_write(self):
+        if self.is_action('sale'): return self.amount
+        if self.is_action('buy'): return self.rate * self.amount
+    @property
+    def trans_pos(self):
+        if self.is_action('sale'): return self.pair.left
+        if self.is_action('buy'): return self.pair.right
 
 class Buy(Orders, Prop):
     sale = models.ForeignKey("warrant.Sale", verbose_name=u"Продажа", blank=True, null=True, related_name="sale_sale")
-    @property
-    def transaction_action(self):
-        return "-"
-    @property
-    def _total_transaction(self):
-        return "%s%s %s" % (self.transaction_action, floatformat(self._debit_right, -8), self._pos)
-    @property
-    def w_total_transaction(self):
-        return self._total_transaction
-    @property
-    def _opposites(self):
-        return self.buy_buy.all()
     @property
     def _md5key_total(self):
         s = "Buy _md5key_total" + self._keys
@@ -437,6 +431,12 @@ class Buy(Orders, Prop):
     @property
     def w_total(self):
         return self.w_amo_sum * self._rate
+    @property
+    def w_total_total(self):
+        return self.w_amo_sum * self._rate
+    @property
+    def w_amo_sum_total(self):
+        return self._part_amo_sum * (1 - self.commission / D(100))
     # buy
     @property
     def _subtotal(self):
@@ -486,18 +486,6 @@ class Buy(Orders, Prop):
 
 class Sale(Orders, Prop):
     buy = models.ForeignKey("warrant.Buy", verbose_name=u"Покупка", blank=True, null=True, related_name="buy_buy")
-    @property
-    def transaction_action(self):
-        return "+"
-    @property
-    def _total_transaction(self):
-        return "%s%s %s" % (self.transaction_action, floatformat(self._debit_left, -8), self._pos)
-    @property
-    def w_total_transaction(self):
-        return self._total_transaction
-    @property
-    def _opposites(self):
-        return self.sale_sale.all()
     @property
     def _md5key_total(self):
         s = "Sale _md5key_total" + self._keys
@@ -612,6 +600,12 @@ class Sale(Orders, Prop):
     @property
     def w_total(self):
         return self.w_amo_sum * self._rate
+    @property
+    def w_total_total(self):
+        return self.w_amo_sum * self._rate * (1 - self.commission / D(100))
+    @property
+    def w_amo_sum_total(self):
+        return self._part_amo_sum
     # sale
     @property
     def _subtotal(self):

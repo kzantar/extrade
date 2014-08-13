@@ -20,6 +20,9 @@ from django.shortcuts import get_object_or_404
 from decimal import Decimal as D, _Zero
 from common.numeric import normalized
 
+from datetime import datetime
+
+
 @dajaxice_register
 def calc(request, form):
     dajax = Dajax()
@@ -82,7 +85,7 @@ def cancel(request, pk):
         o = Orders.is_active_order(user=user, pk=pk)
         if o.exists():
             _o=o[0]
-            if o.update(cancel=True) > 0:
+            if o.update(cancel=True, updated=datetime.today()) > 0:
                 dajax.script("$('#active_orders_list-{pk}').remove()".format(**{"pk": pk,}))
                 #dajax.script("alert('ордер на сумму {sum} отменен успешно')".format(**{"sum": _o.sum_order_current}))
                 dajax.script("location.reload();")
