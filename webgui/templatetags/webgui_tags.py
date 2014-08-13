@@ -5,6 +5,7 @@ from warrant.models import Orders
 from currency.models import TypePair
 from django.template import RequestContext
 from django.template.defaultfilters import floatformat
+from decimal import Decimal as D
 import ctypes
 
 register = template.Library()
@@ -28,22 +29,21 @@ def get_action_deals(user, obj):
 def get_description_deals(user, obj):
     if obj.w_action(user) == 'sale':
         return u"Продажа {w_amo_sum_total} {left} с вашего ордера #{pk} по цене {rate} {right} всего {w_total_total} {right} (-{commission}%)".format(**{
-            "w_amo_sum_total": floatformat(obj.el.w_amo_sum_total, -8),
+            "w_amo_sum_total": floatformat(obj.el._part_amo_sum, -8),
             "left": obj.el.pair.left,
             "pk": obj.pk,
             "rate": floatformat(obj.profitable.rate, -8),
             "right": obj.el.pair.right,
-            "w_total_total": floatformat(obj.el.w_total_total, -8),
+            "w_total_total": floatformat(obj.el._part_amo_sum * obj.el._rate * (1 - obj.commission / D(100)), -8),
             "commission": obj.commission,
             })
     if obj.w_action(user) == 'buy':
         return u"Покупка {w_amo_sum_total} {left} (-{commission}%) с вашего ордера #{pk} по цене {rate} {right}".format(**{
-            "w_amo_sum_total": floatformat(obj.el.w_amo_sum_total, -8),
+            "w_amo_sum_total": floatformat(obj.el._part_amo_sum * (1 - obj.commission / D(100)), -8),
             "left": obj.el.pair.left,
             "pk": obj.pk,
             "rate": floatformat(obj.profitable.rate, -8),
             "right": obj.el.pair.right,
-            "w_total_total": floatformat(obj.el.w_total_total, -8),
             "commission": obj.commission,
             })
 

@@ -434,9 +434,6 @@ class Buy(Orders, Prop):
     @property
     def w_total_total(self):
         return self.w_amo_sum * self._rate
-    @property
-    def w_amo_sum_total(self):
-        return self._part_amo_sum * (1 - self.commission / D(100))
     # buy
     @property
     def _subtotal(self):
@@ -600,12 +597,6 @@ class Sale(Orders, Prop):
     @property
     def w_total(self):
         return self.w_amo_sum * self._rate
-    @property
-    def w_total_total(self):
-        return self.w_amo_sum * self._rate * (1 - self.commission / D(100))
-    @property
-    def w_amo_sum_total(self):
-        return self._part_amo_sum
     # sale
     @property
     def _subtotal(self):
