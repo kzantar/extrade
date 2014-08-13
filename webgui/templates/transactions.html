@@ -36,7 +36,7 @@
     {% if object.balance %}
                         {# ID #}<td>#{{ object.number_id }}</td>
                         {# сумма транзакции #}<td>{{ object.w_transaction }}</td>
-                        {# описание #}<td>{{ object.get_action_display }} {{ object.paymethod.method }} (-{{ object.w_commission|floatformat:-2 }}%) {{ object.w_total_transaction }}</td>
+                        {# описание #}<td>{{ object.get_action_display }} {% if object.action == '-' and object.bank %} на счет "{{ object.bank }}"{% endif %} {{ object.paymethod.method }} (-{{ object.w_commission|floatformat:-2 }}%) {{ object.w_total_transaction }}</td>
                         {# дата и время #}<td>{{ object.date_time|date:"d.m.y H:i" }}</td>
                         {# статус #}<td>{{ object.w_status }}</td>
 
