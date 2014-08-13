@@ -108,11 +108,11 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
             ).order_by('-date_time')
         deals = Orders.objects.filter(
                 Q(
-                    user=self.request.user,
+                    user=user,
                 ) | Q(
-                    sale__buy__user=self.request.user,
+                    sale__buy__user=user,
                 ) | Q(
-                    buy__sale__user=self.request.user,
+                    buy__sale__user=user,
                 ), Q(
                     sale__buy__completed=True,
                 ) | Q(
