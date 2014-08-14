@@ -84,7 +84,7 @@ def get_total_deals(user, obj):
             "pk": order_id,
             "rate": floatformat(obj.profitable.rate, -8),
             "right": obj.el.pair.right,
-            "w_total_total": floatformat(obj.el._part_amo_sum * obj.el._rate * (1 - obj.commission / D(100)), -8),
+            "w_total_total": floatformat(obj.el._part_amo_sum * (1 - obj.commission / D(100)), -8),
             "commission": obj.commission,
             })
 
