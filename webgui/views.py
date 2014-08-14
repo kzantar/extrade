@@ -90,7 +90,7 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
             user = self.request.user
         write = Orders.objects.filter(
                 user=user
-            ).extra(
+            ).exclude(buy__sale__gte=1).extra(
                 select={
                     "write": True,
                     "date_time": "warrant_orders.created",

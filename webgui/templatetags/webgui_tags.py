@@ -31,11 +31,17 @@ def get_action_deals(user, obj):
 
 @register.simple_tag
 def get_description_deals(user, obj):
+    order_id = obj.pk
+    if not user == obj.user:
+        if obj.el.sale.user == user:
+            order_id = obj.el.sale.pk
+        if obj.el.buy.user == user:
+            order_id = obj.el.sale.pk
     if obj.w_action(user) == 'sale':
         return u"Продажа {w_amo_sum_total} {left} с вашего ордера #{pk} по цене {rate} {right} всего {w_total_total} {right} (-{commission}%)".format(**{
             "w_amo_sum_total": floatformat(obj.el._part_amo_sum, -8),
             "left": obj.el.pair.left,
-            "pk": obj.pk,
+            "pk": order_id,
             "rate": floatformat(obj.profitable.rate, -8),
             "right": obj.el.pair.right,
             "w_total_total": floatformat(obj.el._part_amo_sum * obj.el._rate * (1 - obj.commission / D(100)), -8),
@@ -45,7 +51,7 @@ def get_description_deals(user, obj):
         return u"Покупка {w_amo_sum_total} {left} (-{commission}%) с вашего ордера #{pk} по цене {rate} {right}".format(**{
             "w_amo_sum_total": floatformat(obj.el._part_amo_sum * (1 - obj.commission / D(100)), -8),
             "left": obj.el.pair.left,
-            "pk": obj.pk,
+            "pk": order_id,
             "rate": floatformat(obj.profitable.rate, -8),
             "right": obj.el.pair.right,
             "commission": obj.commission,
