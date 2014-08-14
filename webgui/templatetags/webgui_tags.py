@@ -15,8 +15,8 @@ Profile = get_user_model()
 register = template.Library()
 
 @register.simple_tag
-def get_id(obj, action):
-    s = str(obj.pk) + str(obj.user.pk) + str(action)
+def get_id(user, obj, action):
+    s = str(obj.pk) + str(user.pk) + str(action)
     return ctypes.c_size_t(hash(s)).value
 
 @register.simple_tag
