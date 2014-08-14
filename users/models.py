@@ -224,7 +224,7 @@ class ProfileBalance(models.Model):
             return self.commission
     @property
     def number_id(self):
-        s = "P" + str(self.commission) + str(self.value) + str(self.pk) + str(self.profile.pk)
+        s = str(self.pk) + str(self.profile.pk) + 'b'
         return ctypes.c_size_t(hash(s)).value
     @classmethod
     def exists_input(cls, valuta, user, paymethod):
