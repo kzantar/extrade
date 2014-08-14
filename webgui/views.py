@@ -91,11 +91,11 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
         write = Orders.objects.filter(
                 user=user
             ).exclude(
-                    Q(
-                        buy__sale__gte=1
-                    ) | Q(
-                        buy__buy_buy__gte=1
-                    )
+                    #Q(
+                    #    buy__sale__gte=1
+                    #) | Q(
+                    #    buy__buy_buy__gte=1
+                    #)
                 ).exclude(Q(buy__sale__user=user) | Q(sale__buy__user=user)).extra(
                 select={
                     "write": True,
