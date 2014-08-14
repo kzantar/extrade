@@ -36,7 +36,7 @@ def get_description_deals(user, obj):
         if obj.el.sale.user == user:
             order_id = obj.el.sale.pk
         if obj.el.buy.user == user:
-            order_id = obj.el.sale.pk
+            order_id = obj.el.buy.pk
     if obj.w_action(user) == 'sale':
         return u"Продажа {w_amo_sum_total} {left} с вашего ордера #{pk} по цене {rate} {right} всего {w_total_total} {right} (-{commission}%)".format(**{
             "w_amo_sum_total": floatformat(obj.el._part_amo_sum, -8),
