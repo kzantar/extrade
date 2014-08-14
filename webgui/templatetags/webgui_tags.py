@@ -68,7 +68,7 @@ def get_total_deals(user, obj):
         if obj.el.buy.user == user:
             order_id = obj.el.buy.pk
     if obj.w_action(user) == 'sale':
-        return u"-{w_total_total} {right}".format(**{
+        return u"+{w_total_total} {right}".format(**{
             "w_amo_sum_total": floatformat(obj.el._part_amo_sum, -8),
             "left": obj.el.pair.left,
             "pk": order_id,
