@@ -188,3 +188,37 @@ class CommissionRecordsView(LoginRequiredMixin, StaffRequiredMixin, ListView):
         if self.request.user.is_superuser:
             return self.request.user.commission_records_orders()
         raise Http404
+
+class CountersTotalView(LoginRequiredMixin, StaffRequiredMixin, ListView):
+    template_name = "counters_total.html"
+    model = ProfileBalance
+    def get_queryset(self):
+        if not self.request.user.is_superuser:
+            raise Http404
+        pb = ProfileBalance.objects.filter(accept=True, cancel=False)
+        b = pb.extra(
+                select={
+                    "valuta":"select value from currency_valuta where id=valuta_id",
+                    'all':True,
+                }
+            ).values(
+                'valuta',
+                'action',
+            ).annotate(
+                dcount=Sum('value')
+            )
+        b1 = pb.extra(
+                select={
+                    "paymethod":"select method from currency_paymentmethod where id=paymethod_id",
+                    "valuta":"select value from currency_valuta where id=valuta_id",
+                    'method':True,
+                }
+            ).values(
+                'valuta',
+                'paymethod',
+                'action',
+            ).annotate(
+                dcount=Sum('value')
+            )
+        self.queryset = sorted(chain(b, b1))
+        return super(CountersTotalView, self).get_queryset()

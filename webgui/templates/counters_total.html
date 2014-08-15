@@ -1,0 +1,37 @@
+{% extends "profile.html" %}
+{% load i18n widget_tweaks webgui_tags %}
+
+{% block meta %}
+<title>{% trans 'история сделок' %}</title>
+{% endblock %}
+{% block head %}
+<style type="text/css">
+.content 
+    { padding-right: 0px; }
+.logInfo
+    { width:80%; }
+</style>
+{% endblock %}
+
+{% block content_profile %}
+
+            <h3></h3>
+            <table width="100%" class="activeOrderTabb">
+                <tbody width="100%"><tr class="tableheadTr">
+                        <td>Валюта</td>
+                        <td>действие</td>
+                        <td>метод пополнения</td>
+                        <td>Сумма</td>
+                    </tr>
+{% for object in object_list %}
+                    <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
+                        <td>{{ object.valuta }}</td>
+                        <td>{{ object.action }}</td>
+                        <td>{{ object.paymethod|default:"все способы" }}</td>
+                        <td>{{ object.dcount|floatformat:-8 }}</td>
+                    </tr>
+{% endfor %}
+            </tbody></table>
+{% include "paginate.html" %}
+
+{% endblock %}

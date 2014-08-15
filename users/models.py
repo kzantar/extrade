@@ -186,6 +186,7 @@ class ProfileBalance(models.Model):
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
     min_commission = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Минимальная комиссия", validators=[MinValueValidator(_Zero)], editable=False)
     max_commission = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная комиссия", validators=[MinValueValidator(_Zero)], editable=False)
+
     def save(self, *args, **kwargs):
         if not self.action:
             self.action = self.paymethod.action

@@ -4,7 +4,8 @@ from webgui.views import ExchangeView, ProfileOrderHistoryView,\
                             ProfileTransactionHistoryView,\
                             ProfileTransactionView,\
                             ProfileFinancesView, \
-                            CommissionRecordsView
+                            CommissionRecordsView, \
+                            CountersTotalView
 from django.views.generic import TemplateView
 from currency.models import TypePair
 
@@ -18,5 +19,6 @@ urlpatterns = patterns('',
     url(r'^profile/order/history/(?P<sort_by>active|executed|part_executed|cancel)/$', ProfileOrderHistoryView.as_view(), name='history_order'),
     url(r'^profile/finances/$', ProfileFinancesView.as_view(), name='finances'),
     url(r'^profile/commission_records/$', CommissionRecordsView.as_view(), name='commission_records'),
+    url(r'^profile/counters_total/$', CountersTotalView.as_view(), name='counters_total'),
     url(r'^rules/$', TemplateView.as_view(template_name="rules.html"), name='rules'),
 )
