@@ -134,9 +134,9 @@ class AddBalanceForm(forms.ModelForm):
         message = u"оформлена новая заявка на пополнение средств"
         from_email = settings.DEFAULT_FROM_EMAIL
         try:
-            #pass
-            send_mail(subject, message, from_email, e1)
-            send_mail(subject, message, from_email, e2)
+            pass
+            #send_mail(subject, message, from_email, e1)
+            #send_mail(subject, message, from_email, e2)
         except:
             pass
         return super(AddBalanceForm, self).save(*args, **kwargs)
@@ -190,9 +190,9 @@ class GetBalanceForm(forms.ModelForm):
         message = u"оформлена новая заявка на вывод средств"
         from_email = settings.DEFAULT_FROM_EMAIL
         try:
-            #pass
-            send_mail(subject, message, from_email, e1)
-            send_mail(subject, message, from_email, e2)
+            pass
+            #send_mail(subject, message, from_email, e1)
+            #send_mail(subject, message, from_email, e2)
         except:
             pass
         return super(GetBalanceForm, self).save(*args, **kwargs)
