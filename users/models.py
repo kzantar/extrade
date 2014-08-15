@@ -260,7 +260,10 @@ class ProfileBalance(models.Model):
             return (self.value * self.commission / D(100))
     @property
     def _total(self):
-        return normalized(self.value - self._commission_debit, where="DOWN")
+        if self.action == "+":
+            return normalized(self.value - self._commission_debit, where="DOWN")
+        elif self.action == "-":
+            return self.value
     @classmethod
     def exists_output(cls, valuta, user, paymethod):
         cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="-", valuta=valuta, paymethod=paymethod)
