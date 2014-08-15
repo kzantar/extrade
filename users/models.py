@@ -218,12 +218,11 @@ class ProfileBalance(models.Model):
     @property
     def w_commission(self):
         if self.min_commission > _Zero and (self.value * self.commission / D(100)) < self.min_commission:
-            return self.min_commission
-            return "{commission} {valuta}".format(**{"commission":self.min_commission, "valuta": self.valuta})
+            return u"{commission} {valuta}".format(**{"commission":floatformat(self.min_commission, -8), "valuta": self.valuta})
         elif self.max_commission > _Zero and (self.value * self.commission / D(100)) > self.max_commission:
-            return "{commission} {valuta}".format(**{"commission":self.max_commission, "valuta": self.valuta})
+            return u"{commission} {valuta}".format(**{"commission":floatformat(self.max_commission, -8), "valuta": self.valuta})
         else:
-            return "{commission}%".format(**{"commission":self.commission,})
+            return u"{commission}%".format(**{"commission":self.commission,})
     @property
     def number_id(self):
         s = str(self.pk) + str(self.profile.pk) + 'b'
