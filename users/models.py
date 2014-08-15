@@ -205,7 +205,11 @@ class ProfileBalance(models.Model):
         return "%s%s %s" % (self.action, floatformat(self._total_transaction, -8), self.valuta)
     @property
     def w_transaction(self):
-        return "%s %s" % (floatformat(self.value, -8), self.valuta)
+        if self.action == "+":
+            value = self.value
+        elif self.action== "-":
+            value = self._total
+        return "%s %s" % (floatformat(value, -8), self.valuta)
     @property
     def w_status(self):
         if self.cancel: return "отменен"
