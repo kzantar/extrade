@@ -208,7 +208,7 @@ class ProfileBalance(models.Model):
         if self.action == "+":
             value = self.value
         elif self.action== "-":
-            value = self._total
+            value = normalized(self.value - self._commission_debit, where="DOWN")
         return "%s %s" % (floatformat(value, -8), self.valuta)
     @property
     def w_status(self):
