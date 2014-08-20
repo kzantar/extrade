@@ -238,6 +238,21 @@ class ProfileBalance(models.Model):
             return cb[0]
         return None
     @classmethod
+    def sum_commission(cls, flr={}, ex={}):
+        return cls.objects.filter(**flr).distinct(
+            ).extra(
+                select={
+                    'total':"""sum(
+                    CASE
+                        WHEN users_profilebalance.min_commission and (users_profilebalance.value * users_profilebalance.commission / 100) < users_profilebalance.min_commission THEN users_profilebalance.min_commission
+                        WHEN users_profilebalance.max_commission > 0 and (users_profilebalance.value * users_profilebalance.commission / 100) > users_profilebalance.max_commission THEN users_profilebalance.max_commission
+                        ELSE (users_profilebalance.value * users_profilebalance.commission / 100)
+                    END
+                    )""",
+                },
+            ).get(
+            ).total or _Zero
+    @classmethod
     def sum_from_commission(cls, valuta):
         return cls.objects.filter(
                 accept=True, cancel=False, valuta__value=valuta

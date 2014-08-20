@@ -22,6 +22,7 @@
                         <td>действие</td>
                         <td>метод пополнения</td>
                         <td>Сумма</td>
+                        <td>Комиссия</td>
                     </tr>
 {% for object in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
@@ -29,6 +30,7 @@
                         <td>{{ object.action }}</td>
                         <td>{{ object.paymethod|default:"все способы" }}</td>
                         <td>{{ object.dcount|floatformat:-8 }}</td>
+                        <td>{% get_commission object %}</td>
                     </tr>
 {% endfor %}
             </tbody></table>

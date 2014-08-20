@@ -203,6 +203,7 @@ class CountersTotalView(LoginRequiredMixin, StaffRequiredMixin, ListView):
                 }
             ).values(
                 'valuta',
+                'valuta_id',
                 'action',
             ).annotate(
                 dcount=Sum('value')
@@ -215,7 +216,9 @@ class CountersTotalView(LoginRequiredMixin, StaffRequiredMixin, ListView):
                 }
             ).values(
                 'valuta',
+                'valuta_id',
                 'paymethod',
+                'paymethod_id',
                 'action',
             ).annotate(
                 dcount=Sum('value')

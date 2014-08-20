@@ -7,6 +7,7 @@ from django.template import RequestContext
 from django.template.defaultfilters import floatformat
 from decimal import Decimal as D
 import ctypes
+from users.models import ProfileBalance
 
 from django.contrib.auth import login, get_user_model
 
@@ -88,6 +89,13 @@ def get_total_deals(user, obj):
             "commission": obj.commission,
             })
 
+@register.simple_tag
+def get_commission(obj):
+    flr={}
+    if obj.get('valuta_id'): flr.update({"valuta":obj.get('valuta_id')})
+    if obj.get('paymethod_id'): flr.update({"paymethod":obj.get('paymethod_id')})
+    if obj.get('action'): flr.update({"action":obj.get('action')})
+    return ProfileBalance.sum_commission(flr)
 
 @register.simple_tag
 def get_action_write(obj):
