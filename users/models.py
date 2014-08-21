@@ -239,7 +239,7 @@ class ProfileBalance(models.Model):
         return None
     @classmethod
     def sum_commission(cls, flr={}, ex={}):
-        return cls.objects.filter(**flr).distinct(
+        return cls.objects.filter(**flr).filter(accept=True, cancel=False, confirm=True).distinct(
             ).extra(
                 select={
                     'total':"""sum(

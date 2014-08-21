@@ -199,7 +199,6 @@ class CountersTotalView(LoginRequiredMixin, StaffRequiredMixin, ListView):
         b = pb.extra(
                 select={
                     "valuta":"select value from currency_valuta where id=valuta_id",
-                    'all':True,
                 }
             ).values(
                 'valuta',
@@ -210,9 +209,8 @@ class CountersTotalView(LoginRequiredMixin, StaffRequiredMixin, ListView):
             )
         b1 = pb.extra(
                 select={
-                    "paymethod":"select method from currency_paymentmethod where id=paymethod_id",
+                    "paymethod":"select if(disable, concat('off ', method), method) from currency_paymentmethod where id=paymethod_id",
                     "valuta":"select value from currency_valuta where id=valuta_id",
-                    'method':True,
                 }
             ).values(
                 'valuta',
