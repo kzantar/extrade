@@ -137,9 +137,6 @@ class ProfileTransactionView(LoginRequiredMixin, ListView):
                 },
             ).order_by('-date_time')
         balance = ProfileBalance.objects.filter(
-                #cancel=False,
-                #accept=True,
-            ).filter(
                 confirm=True,
             ).filter(
                 profile=user,
@@ -195,7 +192,7 @@ class CountersTotalView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     def get_queryset(self):
         if not self.request.user.is_superuser:
             raise Http404
-        pb = ProfileBalance.objects.filter(accept=True, cancel=False)
+        pb = ProfileBalance.objects.filter(accept=True, cancel=False, confirm=True)
         b = pb.extra(
                 select={
                     "valuta":"select value from currency_valuta where id=valuta_id",

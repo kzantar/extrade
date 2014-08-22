@@ -98,6 +98,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         return super(Profile, self).save(*args, **kwargs)
+
     def _user_balance(self, valuta):
         q=self.profilebalance_set.filter(valuta__value=valuta, profile=self, cancel=False, confirm=True)
         _c1 = q.filter(accept=True).count()
@@ -255,7 +256,7 @@ class ProfileBalance(models.Model):
     @classmethod
     def sum_from_commission(cls, valuta):
         return cls.objects.filter(
-                accept=True, cancel=False, valuta__value=valuta
+                accept=True, cancel=False, confirm=True, valuta__value=valuta
             ).distinct(
             ).extra(
                 select={
