@@ -205,3 +205,4 @@ class UserAdminForm(UserChangeForm):
     def __init__(self, *args, **kwargs):
         super(UserAdminForm, self).__init__(*args, **kwargs)
         self.fields['username'].required = True
+

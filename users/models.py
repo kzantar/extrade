@@ -16,6 +16,7 @@ from common.numeric import normalized
 from datetime import datetime
 import ctypes
 
+from django.core.exceptions import ValidationError
 
 
 # Create your models here.
@@ -199,6 +200,11 @@ class ProfileBalance(models.Model):
         if not self.commission:
             self.commission = self.paymethod.commission
         super(ProfileBalance, self).save(*args, **kwargs)
+    def clean(self):
+        if self.pk:
+            old = ProfileBalance.objects.get(pk=self.pk)
+            if old.cancel and self.accept and not old.accept == self.accept:
+                raise ValidationError(u'Изменения не сохранены. Так как эта заявка была отменена.')
     @property
     def _total_transaction(self):
         return self._total
@@ -233,6 +239,7 @@ class ProfileBalance(models.Model):
     def number_id(self):
         s = str(self.pk) + str(self.profile.pk) + 'b'
         return ctypes.c_size_t(hash(s)).value
+
     @classmethod
     def exists_input(cls, valuta, user, paymethod):
         cb = cls.objects.filter(accept=False, cancel=False, profile=user, action="+", valuta=valuta, confirm=False, paymethod=paymethod)
