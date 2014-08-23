@@ -203,8 +203,11 @@ class ProfileBalance(models.Model):
     def clean(self):
         if self.pk:
             old = ProfileBalance.objects.get(pk=self.pk)
-            if old.cancel and self.accept and not old.accept == self.accept:
+            if (old.cancel and self.accept and not old.accept == self.accept) or \
+                (old.cancel and not old.value == self.value) or \
+                (old.cancel and not old.confirm == self.confirm):
                 raise ValidationError(u'Изменения не сохранены. Так как эта заявка была отменена.')
+
     @property
     def _total_transaction(self):
         return self._total
