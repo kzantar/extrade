@@ -171,8 +171,8 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return mark_safe("<span>{amo}</span> {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right}))
 
 class ProfileBalance(models.Model):
-    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
-    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
+    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now, verbose_name=u"дата создания")
+    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now, verbose_name=u"дата изменения")
     ACTIONS=(
         ('+', 'пополнение'),
         ('-', 'списание'),
