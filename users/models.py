@@ -296,7 +296,7 @@ class ProfileBalance(models.Model):
         elif self.action == "-":
             return self.value
     def total_admin(self):
-        return floatformat(self._total, -8)
+        return floatformat(normalized(self.value - self._commission_debit, where="DOWN"), -8)
     total_admin.short_description = u'итого'
     @classmethod
     def exists_output(cls, valuta, user, paymethod):
