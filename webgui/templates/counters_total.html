@@ -19,14 +19,14 @@
             <table width="100%" class="activeOrderTabb">
                 <tbody width="100%"><tr class="tableheadTr">
                         <td>Валюта</td>
-                        <td>действие</td>
-                        <td>метод пополнения</td>
+                        <td>Действие</td>
+                        <td>Метод пополнения</td>
                         <td>Сумма</td>
                         <td>Комиссия</td>
                     </tr>
 {% for object in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{{ object.valuta }}</td>
+                        <td>{{ object.valuta|upper }}</td>
                         <td>{{ object.action }}</td>
                         <td>{{ object.paymethod|default:"все способы" }}</td>
                         <td>{{ object.dcount|floatformat:-8 }}</td>

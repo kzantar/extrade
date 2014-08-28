@@ -66,8 +66,11 @@ class PaymentMethod(models.Model):
                 st = u", ".join(s)
                 if self.commission > _Zero:
                     st = "(" + st + ")"
-            return u"Комиссия {commission}{min_max}.".format(**{"min_max": st, "commission": self.w_commission})
+            return u"Комиссия {commission}{min_max}".format(**{"min_max": st, "commission": self.w_commission})
         return ""
+    @property
+    def w_method(self):
+        return u"{method} [{commission}%]".format(**{"commission": self.commission, "action": self.get_action_display(), "method": self.method})
     @property
     def validators(self):
         v = []

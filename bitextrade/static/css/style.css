@@ -238,7 +238,10 @@ body {
 	width: 428px;
 	float: left;
 	margin-top: 22px;
+    margin-left:38px;
 }
+.newsBarr
+    { margin-left:-38px; }
 .newsBlock h3, .orderBlock h3, .activeOrderBlock h3 {
 	color: #174f82;
 	font-size: 14px;
@@ -474,6 +477,8 @@ body {
 	vertical-align: middle;
 	color: #040404;
 }
+table.activeOrderTabb
+    { border-spacing: 1px; border-collapse: separate; }
 
 .tiptdd {
 	width: 147px;
@@ -699,3 +704,11 @@ body {
 	cursor: pointer;
 	background-repeat: no-repeat;
 }
+
+.payment-form
+    { text-align:left; }
+.p-text p,
+.p-text div,
+.p-text pre,
+.p-text legend
+    { margin:5px 0;text-align:left;  }

@@ -241,7 +241,7 @@ function set_price(amount, rate, act) {
 <div class="clr"></div>
 
 <div class="activeOrderBlock">
-        	<h3>Ваши активные ордеры:</h3>
+        	<h3>Ваши активные ордера:</h3>
             <table width="100%" class="activeOrderTabb">
                 <tbody><tr class="tableheadTr">
                         <td class="tiptdd">Тип</td>
@@ -310,8 +310,9 @@ function set_price(amount, rate, act) {
         <div class="newsBarr">
     {% for n in news %}
         {% include "news/news_item.html" with object=n link=n.pk %}
+        {% cycle '' '<div class="clr"></div>' %}
     {% endfor %}
-        </div>
         <div class="clr"></div>
+        </div>
 {% endif %}
 {% endblock %}

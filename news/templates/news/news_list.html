@@ -11,6 +11,7 @@
         <div class="newsBarr">
     {% for object in object_list %}
         {% include "news/news_item.html" with link=object.pk %}
+        {% cycle '' '<div class="clr"></div>' %}
     {% endfor %}
         </div>
 {% endblock %}

@@ -8,13 +8,14 @@
 {% block content_profile %}
 <div class="page-header">
     <h1>{% trans 'Сменить e-mail' %}</h1>
+<br>
 </div>
 {#{% if messages %}{% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}{% endif %}#}
 <form action="." method="post" class="form-horizontal" role="form" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in form %}
         <div class="form-group">
-            <label for="id_{{ field.html_name }}" class="col-lg-2 control-label">{{ field.label_tag }}</label>
+            <label for="id_{{ field.html_name }}" class="col-lg-2 control-label">{% if field.name == 'new_email' %}Новый e-mail:{% else %}{{ field.label_tag }}{% endif %}</label>
             <div class="col-lg-10">{{ field|add_class:"form-control" }}</div>
             {% if field.errors %}<div class="alert alert-error">{{ field.errors|striptags }}</div>{% endif %}
         </div>
@@ -27,7 +28,7 @@
 </form>
 <br>
 <div class="page-header">
-<h1>сменить пароль</h1>
+<h1>Сменить пароль</h1>
 </div>
 <br>
     <form action="{% url 'profile_password' %}" method="post" class="form-horizontal" role="form">

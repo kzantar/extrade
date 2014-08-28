@@ -131,14 +131,14 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
         obj = "<p>Заявка ожидает подтверждения.</p>" # if exists_input confirm=True
     else:
         if not edit and form.instance and form.instance.pk:
-            obj = render_to_string("balance_form.html", {"confirm":True, "instance": form.instance, "action": "ввод", "cancel_or_edit": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
+            obj = render_to_string("balance_form.html", {"confirm":True, "instance": form.instance, "action": "Ввод", "cancel_or_edit": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
         elif v.paymethods_inp.exists():
-            c = {"form": form, "url": ".", "paymethods": v.paymethods_inp, "paymethod":paymethod, "submit": "пополнить %s" % v, "functions": "get_form_input_balance", "valuta": v}
+            c = {"form": form, "url": ".", "paymethods": v.paymethods_inp, "paymethod":paymethod, "submit": "Ввод %s" % v, "functions": "get_form_input_balance", "valuta": v}
             c.update(csrf(request))
             obj = render_to_string("balance_form.html", c)
         else:
             obj = """
-<p>Ввод средств для {valuta} не установлен.</p>
+<p>Способ ввода {valuta} не установлен.</p>
 """.format(**{"valuta": v})
     dajax.assign('#balance_form_content', 'innerHTML', obj)
     return dajax.json()
@@ -178,12 +178,12 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
         if not edit and form.instance and form.instance.pk:
             obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "вывод", "cancel_or_edit": True, "paymethods": v.paymethods_out, "paymethod":paymethod, "functions": "get_form_output_balance", "valuta": v})
         elif v.paymethods_out.exists():
-            c = {"form": form, "url": ".", "paymethods": v.paymethods_out, "paymethod":paymethod, "submit": "вывести %s" % v, "functions": "get_form_output_balance", "valuta": v}
+            c = {"form": form, "url": ".", "paymethods": v.paymethods_out, "paymethod":paymethod, "submit": "Вывод %s" % v, "functions": "get_form_output_balance", "valuta": v}
             c.update(csrf(request))
             obj = render_to_string("balance_form.html", c)
         else:
             obj = """
-<p>Вывод средств для {valuta} не установлен.</p>
+<p>Способ вывода {valuta} не установлен.</p>
 """.format(**{"valuta": v})
     dajax.assign('#balance_form_content', 'innerHTML', obj)
     return dajax.json()

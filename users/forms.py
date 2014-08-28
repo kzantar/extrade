@@ -31,7 +31,7 @@ class Email(forms.EmailField):
 
 class UserRegistrationForm(forms.Form):
 
-    username = forms.CharField(label=u"Имя пользователя")
+    username = forms.CharField(label=u"Имя пользователя", max_length=20)
 
     email = Email()
     password1 = forms.CharField(
@@ -99,10 +99,13 @@ class ProfileForm(forms.ModelForm):
         }
 
 class AddBalanceForm(forms.ModelForm):
-    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"step":"1e-8", "id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"вы получите", required=False)
+    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"step":"1e-8", "id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"Вы получите", required=False)
     class Meta:
         model = ProfileBalance
         fields = ('value', 'valuta', 'calc_value', 'paymethod')
+        labels = {
+                "value": u"Сумма к оплате",
+            }
         widgets = {
                 'paymethod': HiddenInput(attrs={"id": "balance-paymethod"}),
                 'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
@@ -142,9 +145,13 @@ class AddBalanceForm(forms.ModelForm):
         return super(AddBalanceForm, self).save(*args, **kwargs)
 
 class GetBalanceForm(forms.ModelForm):
-    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"step":"1e-8", "id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"вы получите", required=False)
+    calc_value = forms.CharField(widget=forms.NumberInput(attrs={"step":"1e-8", "id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"Вы получите", required=False)
     class Meta:
         model = ProfileBalance
+        labels = {
+            'bank': u"Реквизиты",
+            'value': u"Сумма на вывод",
+        }
         fields = ('bank', 'value', 'valuta', 'calc_value', 'paymethod')
         widgets = {
                 'paymethod': HiddenInput(attrs={"id": "balance-paymethod"}),
@@ -155,7 +162,6 @@ class GetBalanceForm(forms.ModelForm):
         super(GetBalanceForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         initial = getattr(self, 'initial', None)
-        self.fields['bank'].label = u"Номер счета на вывод"
         self.user = user
         self.fields['bank'].required = True
         if validators: self.fields['value'].validators = validators
