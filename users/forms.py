@@ -168,12 +168,13 @@ class GetBalanceForm(forms.ModelForm):
             del self.fields['calc_value']
     def is_valid(self):
         valid = super(GetBalanceForm, self).is_valid()
+        init_val = self.initial.get('value', _Zero)
         if not valid:
             return valid
         value = self.cleaned_data['value']
         valuta = self.cleaned_data['valuta']
         balance = self.user.orders_balance(valuta.value)
-        _sum = balance - value
+        _sum = (balance + init_val) - value
         if not _sum >= _Zero:
             self._errors['value'] = (u'Недостаточно средств на счете',)
             return False
