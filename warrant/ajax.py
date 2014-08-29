@@ -172,7 +172,7 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
     if form.is_valid():
         form.instance.action="-"
         form.save()
-        if cb: obj = "<p>Заявка на вывод средств успешно отредактированна.</p>"
+        if cb: obj = "<p>Заявка на вывод средств успешно изменена.</p>"
         if not cb: obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "вывод", "save_now": True, "paymethods": v.paymethods_out, "paymethod":paymethod, "functions": "get_form_output_balance", "valuta": v})
     else:
         if not edit and form.instance and form.instance.pk:

@@ -27,7 +27,7 @@
                     </tr>
 {% for object in object_list %}
                     <tr class="{% cycle 'tableTrrFirst' 'tableTrrSecond' %}">
-                        <td>{{ forloop.counter }}:{{ object.pk }} {{ object.pair }}</td>
+                        <td>{{ object.pair }}</td>
                         <td><span class="{% get_action user object %}">{% get_action user object %}</span></td>
                         <td>{{ object.el.w_amo_sum|floatformat:-8 }} {{ object.el.pair.left }}</td>
                         <td>{{ object.profitable.rate|floatformat:-8 }} {{ object.el.pair.right }}</td>

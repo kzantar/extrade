@@ -477,8 +477,8 @@ body {
 	vertical-align: middle;
 	color: #040404;
 }
-table.activeOrderTabb
-    { border-spacing: 1px; border-collapse: separate; }
+table.activeOrderTabb td
+    { padding:0px 5px; }
 
 .tiptdd {
 	width: 147px;
