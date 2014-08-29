@@ -2,7 +2,7 @@
 {% load i18n widget_tweaks %}
 
 {% block meta %}
-<title>{% trans 'история ордеров' %}</title>
+<title>{% trans 'История ордеров' %}</title>
 {% endblock %}
 {% block head %}
 <style type="text/css">
@@ -18,10 +18,10 @@
             <h3>История ордеров</h3>
             <br>
             <p>
-            <a href="{% url 'history_order' 'active' %}">активные</a>,
-            <a href="{% url 'history_order' 'executed' %}">выполненые</a>, 
-            <a href="{% url 'history_order' 'part_executed' %}">частично выполненые</a>,
-            <a href="{% url 'history_order' 'cancel' %}">отмененные</a>
+            <a href="{% url 'history_order' 'active' %}">Активные</a>,
+            <a href="{% url 'history_order' 'executed' %}">Выполненные</a>, 
+            <a href="{% url 'history_order' 'part_executed' %}">Частично выполненные</a>,
+            <a href="{% url 'history_order' 'cancel' %}">Отмененные</a>
             </p>
             <br>
             <table width="100%" class="activeOrderTabb">
