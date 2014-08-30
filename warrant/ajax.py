@@ -125,7 +125,7 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
         form.instance.action="+"
         form.instance.confirm=False
         form.save()
-        if cb and not (cb.confirm or cb.cancel): obj = "<p>Заявка на ввод средств успешно отредактированна.</p>"
+        if cb and not (cb.confirm or cb.cancel): obj = "<p>Заявка на ввод средств успешно изменена.</p>"
         if not cb: obj = render_to_string("balance_form.html", {"confirm":True, "instance": form.instance, "action": "ввод", "save_now": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
     elif cb and cb.confirm:
         obj = "<p>Заявка ожидает подтверждения.</p>" # if exists_input confirm=True
