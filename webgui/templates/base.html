@@ -39,6 +39,12 @@
 .enterPasslImg
     { background-image: url({% static 'img/sprAvtorizat.png' %}); }
         </style>
+
+        <script type="text/javascript">
+        $( document ).ready(function() {
+            $("input[type='number']").prop("type", "text");
+        });
+        </script>
         {% block head %}{% endblock %}
 </head>
 <body>
@@ -97,7 +103,6 @@
 	</div><!-- .footer -->
 {% endblock %}
 </div><!-- .wrapper -->
-
 
 
 
