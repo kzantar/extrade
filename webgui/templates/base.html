@@ -42,7 +42,10 @@
 
         <script type="text/javascript">
         $( document ).ready(function() {
-            $("input[type='number']").prop("type", "text");
+            $("input[type='number']").prop("type", "text").bind('change onkeyup', function () {
+                v=$(this).val();
+                if(v.indexOf(',')) {$(this).val(v.replace(',', '.'));}
+            });
         });
         </script>
         {% block head %}{% endblock %}
