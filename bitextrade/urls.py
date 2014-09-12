@@ -34,7 +34,6 @@ urlpatterns = patterns('',
 urlpatterns += staticfiles_urlpatterns()
 
 if settings.DEBUG_T:
-    import debug_toolbar
     urlpatterns += patterns('',
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        url(r'^__debug__/', include("debug_toolbar.urls")),
     )
