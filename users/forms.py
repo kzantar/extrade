@@ -11,6 +11,7 @@ from django.conf import settings
 from decimal import Decimal as D, _Zero
 from common.numeric import normalized
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
+from users.models import AddressBook
 
 
 
@@ -135,13 +136,7 @@ class AddBalanceForm(forms.ModelForm):
         e2 = Profile.objects.filter(is_active=True, is_staff=True).values_list('email', flat=True)
         subject = u"оформлена новая заявка на пополнение средств"
         message = u"оформлена новая заявка на пополнение средств"
-        from_email = settings.DEFAULT_FROM_EMAIL
-        try:
-            #pass
-            send_mail(subject, message, from_email, e1)
-            send_mail(subject, message, from_email, e2)
-        except:
-            pass
+        AddressBook.send_action(subject, message)
         return super(AddBalanceForm, self).save(*args, **kwargs)
 
 class GetBalanceForm(forms.ModelForm):
@@ -188,20 +183,11 @@ class GetBalanceForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         self.instance.profile = self.user
 
-        #self.instance.value *= ( 1 - self.instance.paymethod.commission / D(100))
-        #self.instance.value = normalized(self.instance.value, where="DOWN")
-
         e1 = Profile.objects.filter(pk=self.user.pk).values_list('email', flat=True)
         e2 = Profile.objects.filter(is_active=True, is_staff=True).values_list('email', flat=True)
         subject = u"оформлена новая заявка на вывод средств"
         message = u"оформлена новая заявка на вывод средств"
-        from_email = settings.DEFAULT_FROM_EMAIL
-        try:
-            #pass
-            send_mail(subject, message, from_email, e1)
-            send_mail(subject, message, from_email, e2)
-        except:
-            pass
+        AddressBook.send_action(subject, message)
         return super(GetBalanceForm, self).save(*args, **kwargs)
 
 class UserAdminForm(UserChangeForm):

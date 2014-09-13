@@ -156,10 +156,10 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "collected_static")
 
 EMAIL_HOST = 'mx.artela.net'
 EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = 'fuObtixtait0'
+EMAIL_HOST_PASSWORD = 'KfeJG75G49'
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'bot@artela.net'
-SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_CHANGE_FROM_EMAIL = 'bot@artela.net'
+EMAIL_HOST_USER = 'noreply@bitextrade.com'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_CHANGE_FROM_EMAIL = 'noreply@bitextrade.com'
 
 
 ACCOUNT_ACTIVATION_DAYS=1
@@ -168,7 +168,7 @@ try:
     from settings_local import *
 except ImportError:
     pass
-DEBUG_T=True
+DEBUG_T=False
 
 if DEBUG_T:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)

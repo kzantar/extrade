@@ -1,11 +1,14 @@
 #-*- coding:utf-8 -*-
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from users.models import ProfileRole, ProfileBalance
+from users.models import ProfileRole, ProfileBalance, AddressBook
 from django.contrib.auth.admin import UserAdmin
 from users.forms import UserAdminForm
 
 Profile = get_user_model()
+
+class AddressBookAdmin(admin.ModelAdmin):
+    list_display=('email',)
 
 class ProfileBalanceAdmin(admin.ModelAdmin):
     list_display=('value', 'total_admin', 'valuta', 'action', 'profile', 'bank', 'accept', 'cancel', 'confirm', 'updated', 'created')
@@ -49,3 +52,4 @@ class ProfileAdmin(UserAdmin):
 
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(ProfileBalance, ProfileBalanceAdmin)
+admin.site.register(AddressBook, AddressBookAdmin)

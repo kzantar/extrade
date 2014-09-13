@@ -18,8 +18,27 @@ import ctypes
 
 from django.core.exceptions import ValidationError
 
+from django.conf import settings
 
 # Create your models here.
+
+class AddressBook(models.Model):
+    email = models.EmailField(verbose_name=u"E-Mail", unique=True)
+    def __unicode__(self):
+        return self.email
+    @classmethod
+    def lslr(cls, user):
+        return cls.objects.filter(user=user)
+    @classmethod
+    def send_action(cls, subject, message):
+        emails = cls.objects.values_list('email', flat=True)
+        try:
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, emails)
+        except:
+            pass
+    class Meta:
+        verbose_name = u"получателя"
+        verbose_name_plural = u"получатели"
 
 
 class MyCustomUserManager(BaseUserManager):
