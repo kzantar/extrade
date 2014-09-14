@@ -23,8 +23,8 @@ AUTH_USER_MODEL = 'users.Profile'
 SECRET_KEY = 'mc7=8$!ep*g45qaj^ocm+@+b+8g1-f#!c5eqlg!wbj&(-!i*1h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 GEOIP_PATH = os.path.join(PROJECT_ROOT, 'geoip')
+DEBUG = False
 
 TEMPLATE_DEBUG = False
 

@@ -95,7 +95,7 @@ def get_commission(obj):
     if obj.get('valuta_id'): flr.update({"valuta":obj.get('valuta_id')})
     if obj.get('paymethod_id'): flr.update({"paymethod":obj.get('paymethod_id')})
     if obj.get('action'): flr.update({"action":obj.get('action')})
-    return ProfileBalance.sum_commission(flr)
+    return floatformat(ProfileBalance.sum_commission(flr), -8)
 
 @register.simple_tag
 def get_action_write(obj):
