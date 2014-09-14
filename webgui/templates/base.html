@@ -1,4 +1,4 @@
-{% load staticfiles i18n chunks webgui_tags dajaxice_templatetags %}
+{% load staticfiles i18n chunks webgui_tags dajaxice_templatetags compress %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,13 +10,27 @@
         {#<link rel="stylesheet" href="{% static 'css/custom.css' %}">#}
         {#<script type="text/javascript" src="{% static 'js/jquery-1.10.2.min.js' %}"></script>#}
     <!--[if lt IE 9]>
+{% compress js %}
       <script src="{% static 'js/html5shiv.js' %}"></script>
       <script src="{% static 'js/respond.min.js' %}"></script>
+{% endcompress %}
     <![endif]-->
+{% compress js %}
         <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
         <script type="text/javascript" src="{% static 'dajax/jquery.dajax.core.js' %}"></script>
         {% dajaxice_js_import %}
-        <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" />
+
+        <script type="text/javascript">
+        $( document ).ready(function() {
+            $("input[type='number']").prop("type", "text").bind('change onkeyup', function () {
+                v=$(this).val();
+                if(v.indexOf(',')) {$(this).val(v.replace(',', '.'));}
+            });
+        });
+        </script>
+{% endcompress %}
+{% compress css %}
+        <link rel="stylesheet" href="{% static '/static/css/style.css' %}" type="text/css">
         <style type="text/css">
 .subD input
     { background-image: url({% static 'img/enterSub.png' %}); }
@@ -39,15 +53,9 @@
 .enterPasslImg
     { background-image: url({% static 'img/sprAvtorizat.png' %}); }
         </style>
+{% endcompress %}
 
-        <script type="text/javascript">
-        $( document ).ready(function() {
-            $("input[type='number']").prop("type", "text").bind('change onkeyup', function () {
-                v=$(this).val();
-                if(v.indexOf(',')) {$(this).val(v.replace(',', '.'));}
-            });
-        });
-        </script>
+
         {% block head %}{% endblock %}
 </head>
 <body>

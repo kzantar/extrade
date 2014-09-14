@@ -23,12 +23,12 @@ AUTH_USER_MODEL = 'users.Profile'
 SECRET_KEY = 'mc7=8$!ep*g45qaj^ocm+@+b+8g1-f#!c5eqlg!wbj&(-!i*1h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 GEOIP_PATH = os.path.join(PROJECT_ROOT, 'geoip')
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 SITE_ID=1
 
@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'chunks',
     'dajaxice',
     'dajax',
+    'compressor',
 
     'webgui',  # ордера
     'warrant',  # ордера
@@ -70,6 +71,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'dajaxice.finders.DajaxiceFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 

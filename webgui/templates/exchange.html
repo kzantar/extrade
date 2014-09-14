@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static compress %}
 
 {% block meta %}
 <title>{% trans 'Обмен BitCoin, Покупка BitCoin, Продажа BitCoin, Биржа BitCoin, Обменник BitCoin, BitCoin на WMZ, BitCoin Exchange' %}</title>
@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block head %}
+{% compress js %}
 <script type="text/javascript">
 function a_calc(el, act) {
     balance=Number(el.children.item().textContent.replace(',', '.').replace(/[^0-9\.]+/g,''))
@@ -26,6 +27,8 @@ function set_price(amount, rate, act) {
     Dajaxice.warrant.calc(Dajax.process, {'form':$('#'+act+'_form').serialize(true)});
 }
 </script>
+{% endcompress %}
+{% compress css %}
 <style type="text/css">
 .usdOrange,
 .cursor-pointer
@@ -33,6 +36,7 @@ function set_price(amount, rate, act) {
 .usdOrange:hover
     { text-decoration:underline; }
 </style>
+{% endcompress %}
 {% endblock %}
 
 
