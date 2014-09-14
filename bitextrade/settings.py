@@ -26,9 +26,9 @@ SECRET_KEY = 'mc7=8$!ep*g45qaj^ocm+@+b+8g1-f#!c5eqlg!wbj&(-!i*1h'
 DEBUG = False
 GEOIP_PATH = os.path.join(PROJECT_ROOT, 'geoip')
 
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['bitextrade.artela.ru', 'bitextrade.com', '127.0.0.1']
 
 SITE_ID=1
 
