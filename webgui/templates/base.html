@@ -6,14 +6,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="{{ STATIC_URL }}images/favicon.png">
-        {#<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">#}
-        {#<link rel="stylesheet" href="{% static 'css/custom.css' %}">#}
-        {#<script type="text/javascript" src="{% static 'js/jquery-1.10.2.min.js' %}"></script>#}
     <!--[if lt IE 9]>
-{% compress js %}
       <script src="{% static 'js/html5shiv.js' %}"></script>
       <script src="{% static 'js/respond.min.js' %}"></script>
-{% endcompress %}
     <![endif]-->
 {% compress js %}
         <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
