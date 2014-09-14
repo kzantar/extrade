@@ -122,23 +122,11 @@ class Orders(models.Model):
             _s=_Zero
             for c in obj:
                 if c.is_action('sale'):
-                    #if c.sale.pair.left.value == valuta:
-                        #_s += c.sale._commission_debit
-                        # btc
-                        #pass
                     if c.sale.pair.right.value == valuta:
                         _s += c.sale._commission_debit
-                        # usd
-                        pass
                 if c.is_action('buy'):
                     if c.buy.pair.left.value == valuta:
-                        # btc
                         _s += c.buy._commission_debit
-                        pass
-                    #if c.buy.pair.right.value == valuta:
-                        # usd
-                        #_s += c.buy._commission_debit
-                        #pass
             cache.set(_md5key, _s)
         return _s
     @classmethod
