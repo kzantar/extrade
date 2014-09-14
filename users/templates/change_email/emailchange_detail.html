@@ -1,14 +1,21 @@
-{% extends "base.html" %}
+{% extends "profile.html" %}
 {% load i18n %}
 
 {% block meta %}
 <title>{% trans 'Сменить e-mail' %}</title>
 {% endblock %}
 
-{% block content %}
-<div class="page-header">
-    <h1>{% trans 'Сменить e-mail' %}</h1>
-</div>
-{% if messages %}{% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}{% endif %}
+{% block head %}
+<style type="text/css">
+.content 
+    { padding-right: 0px; }
+.logInfo
+    { width:70%; }
+</style>
+{% endblock %}
+
+{% block content_profile %}
+    <h3>{% trans 'Сменить e-mail' %}</h3>
+    <br>
 <p>{% trans 'Вы успешно сменили e-mail адрес. Для подтверждения пожалуйста пройдите по ссылке, отправленной на ваш новый e-mail' %}</p>
 {% endblock %}
