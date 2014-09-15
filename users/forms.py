@@ -103,7 +103,7 @@ class AddBalanceForm(forms.ModelForm):
     calc_value = forms.CharField(widget=forms.NumberInput(attrs={"step":"1e-8", "id":"calc-value-result", "onkeyup": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});", "onchange": "Dajaxice.warrant.calc_paymethod(Dajax.process, {'value':$(this).val(), 'paymethod':$('#balance-paymethod').val(), 'act': '+'});"}), label=u"Вы получите", required=False)
     class Meta:
         model = ProfileBalance
-        fields = ('value', 'valuta', 'calc_value', 'paymethod')
+        fields = ('user_bank', 'value', 'valuta', 'calc_value', 'paymethod')
         labels = {
                 "value": u"Сумма к оплате",
             }
@@ -119,6 +119,10 @@ class AddBalanceForm(forms.ModelForm):
         self.user = user
         if validators: self.fields['value'].validators = validators
         if initial and initial.get('paymethod'): self.fields['value'].validators = initial.get('paymethod').validators
+        if (initial and initial.get('paymethod') and not initial.get('paymethod').enable_user_bank) or not (initial and initial.get('paymethod')):
+            del self.fields['user_bank']
+        else:
+            self.fields['user_bank'].required = True
         if initial and initial.get('paymethod'):
             self.fields['paymethod'].queryset = initial.get('paymethod').valuta.paymethods_inp
         else:
@@ -128,9 +132,6 @@ class AddBalanceForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         self.instance.profile = self.user
         self.instance.bank = self.instance.paymethod.bank
-
-        #self.instance.value *= ( 1 - self.instance.paymethod.commission / D(100))
-        #self.instance.value = normalized(self.instance.value, where="DOWN")
 
         e1 = Profile.objects.filter(pk=self.user.pk).values_list('email', flat=True)
         e2 = Profile.objects.filter(is_active=True, is_staff=True).values_list('email', flat=True)
@@ -144,10 +145,10 @@ class GetBalanceForm(forms.ModelForm):
     class Meta:
         model = ProfileBalance
         labels = {
-            'bank': u"Реквизиты",
+            'user_bank': u"Реквизиты",
             'value': u"Сумма на вывод",
         }
-        fields = ('bank', 'value', 'valuta', 'calc_value', 'paymethod')
+        fields = ('user_bank', 'value', 'valuta', 'calc_value', 'paymethod')
         widgets = {
                 'paymethod': HiddenInput(attrs={"id": "balance-paymethod"}),
                 'valuta': HiddenInput(attrs={"id": "balance-valuta"}),
@@ -158,7 +159,7 @@ class GetBalanceForm(forms.ModelForm):
         instance = getattr(self, 'instance', None)
         initial = getattr(self, 'initial', None)
         self.user = user
-        self.fields['bank'].required = True
+        self.fields['user_bank'].required = True
         if validators: self.fields['value'].validators = validators
         if initial and initial.get('paymethod'): self.fields['value'].validators = initial.get('paymethod').validators
         if initial and initial.get('paymethod'):

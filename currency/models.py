@@ -21,6 +21,7 @@ class PaymentMethod(models.Model):
         ('-', 'списание'),
     )
     disable = models.BooleanField(verbose_name=(u'отключить'), default=False)
+    enable_user_bank = models.BooleanField(verbose_name=(u'Включить пользовательские реквизиты'), default=False)
     method = models.CharField((u'Метод оплаты'), max_length=255)
     action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)])

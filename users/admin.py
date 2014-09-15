@@ -11,7 +11,7 @@ class AddressBookAdmin(admin.ModelAdmin):
     list_display=('email',)
 
 class ProfileBalanceAdmin(admin.ModelAdmin):
-    list_display=('value', 'total_admin', 'valuta', 'action', 'profile', 'bank', 'accept', 'cancel', 'confirm', 'updated', 'created')
+    list_display=('value', 'total_admin', 'valuta', 'action', 'profile', 'user_bank', 'accept', 'cancel', 'confirm', 'updated', 'created')
     list_editable = ('accept', 'cancel')
     list_filter = ('action', 'accept', 'cancel', 'confirm')
 

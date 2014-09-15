@@ -202,6 +202,7 @@ class ProfileBalance(models.Model):
     action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
     paymethod = models.ForeignKey("currency.PaymentMethod")
     bank = models.TextField((u'номер счета на ввод / вывод'), max_length=255, blank=True, null=True)
+    user_bank = models.TextField((u'Реквизиты'), max_length=255, blank=True, null=True)
     accept = models.BooleanField(verbose_name=(u'Подтвердить'), default=False)
     confirm = models.BooleanField(verbose_name=(u'Подтверждено пользователем'), default=True)
     cancel = models.BooleanField(verbose_name=(u'Отменить'), default=False)
