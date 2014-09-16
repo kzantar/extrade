@@ -10,6 +10,26 @@ class TypePairAdmin(admin.ModelAdmin):
 class PaymentMethodInline(admin.StackedInline):
     model = PaymentMethod
     extra = 0
+    fieldsets = (
+        (None, {'fields': (
+            'disable',
+            'enable_user_bank',
+            'method',
+            'action',
+            'commission',
+                (
+                    'min_commission',
+                    'max_commission'
+                ),
+                (
+                    'min_amount',
+                    'max_amount'
+                ),
+                (
+                    'bank', 'description_bank'
+                ),
+            )}),
+    )
 
 class ValutaAdmin(admin.ModelAdmin):
     inlines = (PaymentMethodInline, )
