@@ -12,10 +12,14 @@ class PaymentMethodInline(admin.StackedInline):
     extra = 0
     fieldsets = (
         (None, {'fields': (
-            'disable',
-            'enable_user_bank',
-            'method',
-            'action',
+            (
+                'disable',
+                'enable_user_bank',
+            ),
+            (
+                'action',
+                'method'
+            ),
             'commission',
                 (
                     'min_commission',
