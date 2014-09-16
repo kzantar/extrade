@@ -162,6 +162,10 @@ class GetBalanceForm(forms.ModelForm):
         self.fields['user_bank'].required = True
         if validators: self.fields['value'].validators = validators
         if initial and initial.get('paymethod'): self.fields['value'].validators = initial.get('paymethod').validators
+        if (initial and initial.get('paymethod') and not initial.get('paymethod').enable_user_bank) or not (initial and initial.get('paymethod')):
+            del self.fields['user_bank']
+        else:
+            self.fields['user_bank'].required = True
         if initial and initial.get('paymethod'):
             self.fields['paymethod'].queryset = initial.get('paymethod').valuta.paymethods_out
         else:

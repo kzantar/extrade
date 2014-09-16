@@ -7,7 +7,7 @@ from currency.models import Valuta, TypePair, PaymentMethod
 class TypePairAdmin(admin.ModelAdmin):
     pass
 
-class PaymentMethodInline(admin.TabularInline):
+class PaymentMethodInline(admin.StackedInline):
     model = PaymentMethod
     extra = 0
 

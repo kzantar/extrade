@@ -15,13 +15,13 @@
   {% endif %}
 {% if form %}
   {%  if functions == 'get_form_input_balance' %}
-    {% if form.instance.pk %}<pre>{{ paymethod.bank|default:""|safe }}</pre>{% endif %}
+  <pre>{{ paymethod.description_bank|default:""|safe }}</pre>
   {% if paymethod.w_is_commission %}<div>{{ paymethod.w_commissions }}</div>{% endif %}
   {% if paymethod.min_amount %}<div>Минимальная сумма ввода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
   {% if paymethod.max_amount %}<div>Максимальная сумма ввода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
   {% endif %}
   {%  if functions == 'get_form_output_balance' %}
-  <pre>{{ paymethod.bank|default:""|safe }}</pre>
+  <pre>{{ paymethod.description_bank|default:""|safe }}</pre>
   {% if paymethod.w_is_commission %}<div>{{ paymethod.w_commissions }}</div>{% endif %}
   {% if paymethod.min_amount %}<div>Минимальная сумма вывода {{ paymethod.min_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
   {% if paymethod.max_amount %}<div>Максимальная сумма вывода {{ paymethod.max_amount|floatformat:-8 }} {{ valuta }}</div>{% endif %}
@@ -38,7 +38,7 @@
 
 {% if save_now %}
     <p>Заявка на {{ action }} средств успешно создана.</p>
-    {% if not functions == 'get_form_output_balance' %}<pre>{{ instance.paymethod.bank }}</pre>{% endif %}
+    <pre>{{ instance.paymethod.bank }}</pre>
     {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
     <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Изменить</a>
     или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Отменить</a></p>
@@ -46,7 +46,7 @@
 
 {% if cancel_or_edit %}
     <p>Вы уже создали заявку на {{ action }} средств.</p>
-    {% if not functions == 'get_form_output_balance' %}<pre>{{ instance.paymethod.bank }}</pre>{% endif %}
+    <pre>{{ instance.paymethod.bank }}</pre>
     {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
     <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Изменить</a>
     или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Отменить</a></p>

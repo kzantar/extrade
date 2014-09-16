@@ -30,7 +30,8 @@ class PaymentMethod(models.Model):
     min_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма", validators=[MinValueValidator(_Zero)])
     max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма", validators=[MinValueValidator(_Zero)])
     valuta = models.ForeignKey("currency.Valuta", related_name="payment_method")
-    bank = models.TextField((u'номер счета / описание'), blank=True, null=True)
+    bank = models.TextField((u'номер счета'), blank=True, null=True, help_text=u"виден после создания заявки")
+    description_bank = models.TextField((u'описание'), blank=True, null=True, help_text=u"видно до создания заявки")
     def calc_commission(self, amount, rev=False):
         if self.min_commission > _Zero and (amount * self.commission / D(100)) < self.min_commission:
             if rev: return amount + self.min_commission
