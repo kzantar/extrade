@@ -5,7 +5,7 @@ from warrant.models import Orders
 from currency.models import TypePair
 from django.template import RequestContext
 from django.template.defaultfilters import floatformat
-from decimal import Decimal as D
+from decimal import Decimal as D, _Zero
 import ctypes
 from users.models import ProfileBalance
 
@@ -125,7 +125,7 @@ def information(context):
         'min': _min,
         'max': _max,
         'avg': _avg,
-        'last_order': pair.last_order.rate,
+        'last_order': pair.last_order.rate if pair.last_order else _Zero,
         'sum_amount': sum_amount,
         'sum_total': sum_total,
         'pair': pair,

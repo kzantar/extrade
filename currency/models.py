@@ -281,7 +281,7 @@ class TypePair(models.Model):
 
         #o = self.warrant_orders_related.filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(completed=True)).filter(buy__gte=1).only('updated', 'rate', 'amount').order_by('-updated', '-created')
         if o.exists():
-            print o[0].el.get_rate.rate
             return o[0]
+        return o.none()
     class Meta:
         unique_together = (("left", "right",),)
