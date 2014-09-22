@@ -125,9 +125,8 @@ def information(context):
         'min': _min,
         'max': _max,
         'avg': _avg,
-        'last_order': pair.last_order,
+        'last_order': pair.last_order.rate,
         'sum_amount': sum_amount,
         'sum_total': sum_total,
         'pair': pair,
     }
-    return {}

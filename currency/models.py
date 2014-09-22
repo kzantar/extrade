@@ -264,8 +264,24 @@ class TypePair(models.Model):
         return _Zero
     @property
     def last_order(self):
-        o = self.warrant_orders_related.filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(completed=True)).filter(buy__gte=1).only('updated', 'rate', 'amount').order_by('-updated')
+        o = self.warrant_orders_related.filter(
+                Q(
+                    sale__buy__completed=True,
+                ) | Q(
+                    buy__sale__completed=True,
+                ) | Q(
+                    completed=True,
+                ), Q(
+                    sale__buy__gte=1,
+                ) | Q(
+                    buy__sale__gte=1,
+                )
+            ).only('updated', 'rate', 'amount').distinct(
+                ).order_by('-updated')
+
+        #o = self.warrant_orders_related.filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(completed=True)).filter(buy__gte=1).only('updated', 'rate', 'amount').order_by('-updated', '-created')
         if o.exists():
+            print o[0].el.get_rate.rate
             return o[0]
     class Meta:
         unique_together = (("left", "right",),)
