@@ -187,6 +187,9 @@ class TypePair(models.Model):
     def cache_tpair_key(self):
         return 'typepair_tpair' + str(self.id)
     @property
+    def cache_lastorder_key(self):
+        return 'lastorder' + str(self.id)
+    @property
     def cache_unicode_key(self):
         return 'typepair__unicode__' + str(self.id)
     def __unicode__(self):
@@ -264,22 +267,26 @@ class TypePair(models.Model):
         return _Zero
     @property
     def last_order(self):
-        o = self.warrant_orders_related.filter(
-                Q(
-                    sale__buy__completed=True,
-                ) | Q(
-                    buy__sale__completed=True,
-                ) | Q(
-                    completed=True,
-                ), Q(
-                    sale__buy__gte=1,
-                ) | Q(
-                    buy__sale__gte=1,
-                )
-            ).only('updated', 'rate', 'amount').distinct(
-                ).order_by('-updated')
-
-        #o = self.warrant_orders_related.filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(completed=True)).filter(buy__gte=1).only('updated', 'rate', 'amount').order_by('-updated', '-created')
+        c = self.warrant_orders_related.count()
+        key = self.cache_lastorder_key + str(c)
+        o = cache.get(key)
+        if o is None:
+            o = self.warrant_orders_related.filter(
+                    Q(
+                        sale__buy__completed=True,
+                    ) | Q(
+                        buy__sale__completed=True,
+                    ) | Q(
+                        completed=True,
+                    ), Q(
+                        sale__buy__gte=1,
+                    ) | Q(
+                        buy__sale__gte=1,
+                    )
+                ).only('updated', 'rate', 'amount').distinct(
+                    ).order_by('-updated')
+            cache.set(key, o)
+            #o = self.warrant_orders_related.filter(Q(cancel=True, buy__buy_buy__gte=1) | Q(completed=True)).filter(buy__gte=1).only('updated', 'rate', 'amount').order_by('-updated', '-created')
         if o.exists():
             return o[0]
         return o.none()
