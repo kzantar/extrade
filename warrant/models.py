@@ -10,7 +10,6 @@ from common.lib import strmd5sum, _last_hour
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db.models import Avg, Max, Min
-from django.contrib.auth.models import User
 from django.template.defaultfilters import floatformat
 import ctypes
 

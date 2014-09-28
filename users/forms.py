@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserChangeForm
-from users.models import ProfileBalance
+from users.models import ProfileBalance, ProfilePayNumber
 from currency.models import Valuta, PaymentMethod
 from django.forms.widgets import HiddenInput, TextInput, Textarea, NumberInput, Select
 from django.core.mail import send_mail
@@ -127,11 +127,16 @@ class AddBalanceForm(forms.ModelForm):
             self.fields['paymethod'].queryset = initial.get('paymethod').valuta.paymethods_inp
         else:
             self.fields['paymethod'].queryset = PaymentMethod.objects.none()
+        self.fields['paymethod'].empty_label=None
         if not commission:
             del self.fields['calc_value']
     def save(self, *args, **kwargs):
         self.instance.profile = self.user
-        self.instance.bank = self.instance.paymethod.bank
+        if self.instance.paymethod.enable_account_number:
+            pay_number = ProfilePayNumber.get_or_accept(self.user, self.instance.paymethod)
+            self.instance.bank = pay_number.get_merged_text('bank')
+        else:
+            self.instance.bank = self.instance.paymethod.bank
 
         e1 = Profile.objects.filter(pk=self.user.pk).values_list('email', flat=True)
         e2 = Profile.objects.filter(is_active=True, is_staff=True).values_list('email', flat=True)
@@ -170,6 +175,7 @@ class GetBalanceForm(forms.ModelForm):
             self.fields['paymethod'].queryset = initial.get('paymethod').valuta.paymethods_out
         else:
             self.fields['paymethod'].queryset = PaymentMethod.objects.none()
+        self.fields['paymethod'].empty_label=None
         if not commission:
             del self.fields['calc_value']
     def is_valid(self):

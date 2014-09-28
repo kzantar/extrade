@@ -38,7 +38,7 @@
 
 {% if save_now %}
     <p>Заявка на {{ action }} средств успешно создана.</p>
-    <pre>{{ instance.paymethod.bank }}</pre>
+    <pre>{{ cb.bank|default:""|safe }}</pre>
     {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
     <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Изменить</a>
     или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Отменить</a></p>
@@ -46,7 +46,7 @@
 
 {% if cancel_or_edit %}
     <p>Вы уже создали заявку на {{ action }} средств.</p>
-    <pre>{{ instance.paymethod.bank }}</pre>
+    <pre>{{ cb.bank|default:""|safe }}</pre>
     {% if confirm %}<p><a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'confirm': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Подтвердить оплату</a>,{% endif %}
     <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'valuta': '{{ instance.valuta.pk }}', 'edit':'1', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Изменить</a>
     или <a href="#" onclick="Dajaxice.warrant.{{ functions }}(Dajax.process, {'cancel': 1, 'valuta': '{{ instance.valuta.pk }}', 'paymethod':'{{ instance.paymethod.pk }}'});return false;">Отменить</a></p>

@@ -19,6 +19,7 @@ import ctypes
 from django.core.exceptions import ValidationError
 
 from django.conf import settings
+from django.template import Template, Context
 
 # Create your models here.
 
@@ -188,6 +189,33 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     @property
     def balance_right(self):
         return mark_safe("<span>{amo}</span> {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right}))
+
+class ProfilePayNumber(models.Model):
+    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now, verbose_name=u"дата создания")
+    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now, verbose_name=u"дата изменения")
+    number = models.CharField(u"Номер счета", max_length=255)
+    profile = models.ForeignKey("users.Profile", verbose_name=(u'Профиль'), help_text=u"Присваивается автоматически", blank=True, null=True, related_name="pay_number")
+    paymethod = models.ForeignKey("currency.PaymentMethod", limit_choices_to={"action": "+"}, blank=True, null=True, related_name="pay_number")
+    @classmethod
+    def get_or_accept(cls, profile, paymethod):
+        co = cls.objects.select_for_update().filter(paymethod=paymethod, paymethod__disable=False)
+        pn = co.filter(profile=profile)[:1]
+        if pn.exists():
+            return pn.get()
+        pn = co.filter(profile__isnull=True)[:1]
+        if pn.exists():
+            p = pn.get()
+            p.profile=profile
+            p.save()
+            return p
+        return pn.none()
+    def merge_number(self, text):
+        return Template(text).render(Context({'pay_number': self.number}))
+    def get_merged_text(self, val=None):
+        if self.paymethod is None: return {}
+        if not val: return {"description_bank": self.merge_number(self.paymethod.description_bank),
+                "bank": self.merge_number(self.paymethod.bank)}
+        return self.merge_number(getattr(self.paymethod, val))
 
 class ProfileBalance(models.Model):
     created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now, verbose_name=u"дата создания")

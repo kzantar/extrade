@@ -9,7 +9,7 @@ from currency.models import TypePair, Valuta, PaymentMethod
 from warrant.forms import OrdersForm
 from warrant.models import Orders
 from users.forms import AddBalanceForm, GetBalanceForm
-from users.models import ProfileBalance
+from users.models import ProfileBalance, ProfilePayNumber
 
 from django.template.defaultfilters import floatformat
 from django.template.loader import render_to_string
@@ -108,6 +108,10 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
     if not paymethod: paymethod = v.default_paymethod_inp
     cb = ProfileBalance.exists_input(valuta, request.user, paymethod=paymethod)
     #if cb and cb.paymethod: paymethod = cb.paymethod
+    if paymethod.enable_account_number:
+        pay_number = ProfilePayNumber.get_or_accept(request.user, paymethod)
+    else:
+        pay_number = True
     if paymethod:
         args.update({ "commission": paymethod.w_is_commission, "validators": paymethod.validators })
         initial.update({ "paymethod":paymethod })
@@ -121,19 +125,20 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
         cb.save()
         return get_form_input_balance(request, valuta, form, edit)
     form = AddBalanceForm(user=request.user, instance=cb, data=form, initial=initial, **args)
-    if form.is_valid():
+    if pay_number and form.is_valid():
         form.instance.action="+"
         form.instance.confirm=False
         form.save()
         if cb and not (cb.confirm or cb.cancel): obj = "<p>Заявка на ввод средств успешно изменена.</p>"
-        if not cb: obj = render_to_string("balance_form.html", {"confirm":True, "instance": form.instance, "action": "ввод", "save_now": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
+        if not cb: obj = render_to_string("balance_form.html", {"confirm":True, "cb": form.instance, "instance": form.instance, "action": "ввод", "save_now": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
     elif cb and cb.confirm:
         obj = "<p>Заявка ожидает подтверждения.</p>" # if exists_input confirm=True
     else:
-        if not edit and form.instance and form.instance.pk:
-            obj = render_to_string("balance_form.html", {"confirm":True, "instance": form.instance, "action": "Ввод", "cancel_or_edit": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v})
-        elif v.paymethods_inp.exists():
-            c = {"form": form, "url": ".", "paymethods": v.paymethods_inp, "paymethod":paymethod, "submit": "Ввод %s" % v, "functions": "get_form_input_balance", "valuta": v}
+        if not edit and pay_number and form.instance and form.instance.pk:
+            d = {"confirm":True, "instance": form.instance, "cb":cb, "action": "Ввод", "cancel_or_edit": True, "paymethods": v.paymethods_inp, "paymethod":paymethod, "functions": "get_form_input_balance", "valuta": v}
+            obj = render_to_string("balance_form.html", d)
+        elif pay_number and v.paymethods_inp.exists():
+            c = {"form": form, "url": ".", "paymethods": v.paymethods_inp, "paymethod":paymethod, "submit": "Ввод %s" % v, "functions": "get_form_input_balance", "valuta": v }
             c.update(csrf(request))
             obj = render_to_string("balance_form.html", c)
         else:
@@ -176,7 +181,7 @@ def get_form_output_balance(request, valuta, paymethod=None, form=None, edit=Non
         if not cb: obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "вывод", "save_now": True, "paymethods": v.paymethods_out, "paymethod":paymethod, "functions": "get_form_output_balance", "valuta": v})
     else:
         if not edit and form.instance and form.instance.pk:
-            obj = render_to_string("balance_form.html", {"instance": form.instance, "action": "вывод", "cancel_or_edit": True, "paymethods": v.paymethods_out, "paymethod":paymethod, "functions": "get_form_output_balance", "valuta": v})
+            obj = render_to_string("balance_form.html", {"instance": form.instance, "cb":cb, "action": "вывод", "cancel_or_edit": True, "paymethods": v.paymethods_out, "paymethod":paymethod, "functions": "get_form_output_balance", "valuta": v})
         elif v.paymethods_out.exists():
             c = {"form": form, "url": ".", "paymethods": v.paymethods_out, "paymethod":paymethod, "submit": "Вывод %s" % v, "functions": "get_form_output_balance", "valuta": v}
             c.update(csrf(request))

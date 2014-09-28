@@ -15,6 +15,7 @@ class PaymentMethodInline(admin.StackedInline):
             (
                 'disable',
                 'enable_user_bank',
+                'enable_account_number',
             ),
             (
                 'action',

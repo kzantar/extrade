@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from users.models import ProfileRole, ProfileBalance, AddressBook
+from users.models import ProfileRole, ProfileBalance, AddressBook, ProfilePayNumber
 from django.contrib.auth.admin import UserAdmin
 from users.forms import UserAdminForm
 
@@ -9,6 +9,10 @@ Profile = get_user_model()
 
 class AddressBookAdmin(admin.ModelAdmin):
     list_display=('email',)
+class ProfilePayNumberAdmin(admin.ModelAdmin):
+    list_display=('created', 'number', 'paymethod', 'profile')
+    list_filter = ('paymethod', 'profile')
+    #list_editable = ('number', 'paymethod', 'profile')
 
 class ProfileBalanceAdmin(admin.ModelAdmin):
     list_display=('value', 'total_admin', 'valuta', 'action', 'profile', 'user_bank', 'accept', 'cancel', 'confirm', 'updated', 'created')
@@ -51,5 +55,6 @@ class ProfileAdmin(UserAdmin):
     #    return False
 
 admin.site.register(Profile, ProfileAdmin)
+admin.site.register(ProfilePayNumber, ProfilePayNumberAdmin)
 admin.site.register(ProfileBalance, ProfileBalanceAdmin)
 admin.site.register(AddressBook, AddressBookAdmin)

@@ -22,6 +22,7 @@ class PaymentMethod(models.Model):
     )
     disable = models.BooleanField(verbose_name=(u'отключить'), default=False)
     enable_user_bank = models.BooleanField(verbose_name=(u'Включить пользовательские реквизиты'), default=False)
+    enable_account_number = models.BooleanField(verbose_name=(u'уникальный номер счета из списка'), help_text=u"<a href='../../../users/profilepaynumber/'>cписок</a>", default=False)
     method = models.CharField((u'Метод оплаты'), max_length=255)
     action = models.CharField((u'действие'), choices=ACTIONS, max_length=1, validators=[RegexValidator(regex='^[+-]$', message=u'не допускаются значения кроме [+-]', code='invalid_action')])
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)])
@@ -30,7 +31,7 @@ class PaymentMethod(models.Model):
     min_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Минимальная сумма", validators=[MinValueValidator(_Zero)])
     max_amount = models.DecimalField(max_digits=14, decimal_places=8, default=0.00, verbose_name=u"Максимальная сумма", validators=[MinValueValidator(_Zero)])
     valuta = models.ForeignKey("currency.Valuta", related_name="payment_method")
-    bank = models.TextField((u'номер счета'), blank=True, null=True, help_text=u"виден после создания заявки")
+    bank = models.TextField((u'номер счета'), blank=True, null=True, help_text=u"При включенной опции 'уникальный номер счета из списка', номер подставляется в значение {{ pay_number }}<br>Виден после создания заявки.")
     description_bank = models.TextField((u'описание'), blank=True, null=True, help_text=u"видно до создания заявки")
     def calc_commission(self, amount, rev=False):
         if self.min_commission > _Zero and (amount * self.commission / D(100)) < self.min_commission:
