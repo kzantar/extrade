@@ -108,7 +108,7 @@ def get_form_input_balance(request, valuta, paymethod=None, form=None, edit=None
     if not paymethod: paymethod = v.default_paymethod_inp
     cb = ProfileBalance.exists_input(valuta, request.user, paymethod=paymethod)
     #if cb and cb.paymethod: paymethod = cb.paymethod
-    if paymethod.enable_account_number:
+    if paymethod and paymethod.enable_account_number:
         pay_number = ProfilePayNumber.get_or_accept(request.user, paymethod)
     else:
         pay_number = True
