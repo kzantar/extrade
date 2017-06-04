@@ -69,6 +69,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
 
 class ProfilePasswordView(LoginRequiredMixin, RedirectView):
+    permanent = False
 
     def get_redirect_url(self, **kwargs):
         old_password = self.request.POST.get('old_password', False)

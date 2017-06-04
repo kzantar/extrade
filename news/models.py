@@ -11,7 +11,7 @@ class News(models.Model):
     class Meta:
         verbose_name = u"новость"
         verbose_name_plural = u"Новости"
-    def __unicode__(self):
+    def __str__(self):
         return "%s" % (self.date)
     @classmethod
     def getlast(cls, c=4):

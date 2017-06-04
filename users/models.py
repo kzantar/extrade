@@ -3,7 +3,7 @@ from django.db import models
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from decimal import Decimal as D, _Zero
+from decimal import Decimal as D
 from django.core.validators import RegexValidator, MinValueValidator
 from currency.models import Valuta
 from django.db.models import Avg, Max, Min, Sum
@@ -15,17 +15,19 @@ from django.utils.safestring import mark_safe
 from common.numeric import normalized
 from datetime import datetime
 import ctypes
+from django.db import connection
 
 from django.core.exceptions import ValidationError
 
 from django.conf import settings
 from django.template import Template, Context
 
+_Zero = D(0)
 # Create your models here.
 
 class AddressBook(models.Model):
     email = models.EmailField(verbose_name=u"E-Mail", unique=True)
-    def __unicode__(self):
+    def __str__(self):
         return self.email
     @classmethod
     def lslr(cls, user):
@@ -66,6 +68,7 @@ class MyCustomUserManager(BaseUserManager):
         return u
 
 
+
 class Profile(AbstractBaseUser, PermissionsMixin):
     username = models.CharField((u'Имя пользователя'), max_length=40, unique=True)
     email = models.EmailField('E-mail', unique=True)
@@ -104,7 +107,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
                 [x['role'] for x in self.profilerole_set.all().values('role')] or ['client'])
         return cache.get('get_role_%s' % self.pk) or list()
         """
-        return [x['role'] for x in self.profilerole_set.all().values('role')] or ['customer']
+        return list(self.profilerole_set.all().values_list('role', flat=True)) or ['customer']
 
     def is_performer(self):
         performer = self.get_role()
@@ -114,36 +117,63 @@ class Profile(AbstractBaseUser, PermissionsMixin):
             return True
         return False
 
-    def __unicode__(self):
+    def __str__(self):
         return self.username
 
     def save(self, *args, **kwargs):
         return super(Profile, self).save(*args, **kwargs)
 
+    def balance_plus(sefl, user_id, valuta_value):
+        total = _Zero
+        q="""
+            SELECT
+                (CASE
+                    WHEN min_commission and (value * commission / 100) < min_commission THEN value - min_commission
+                    WHEN max_commission > 0 and (value * commission / 100) > max_commission THEN value - max_commission
+                    ELSE (value * (1 - commission / 100))
+                END
+                ) AS total
+            FROM
+                users_profilebalance
+            WHERE
+                (profile_id = {user_id} AND
+                (valuta_id) IN (SELECT U0.id FROM currency_valuta U0 WHERE U0.value = '{valuta_value}') AND
+                profile_id = {user_id} AND
+                cancel = False AND
+                confirm = True AND
+                action = '+' AND
+                accept = True)
+            """.format(user_id=int(user_id), valuta_value=valuta_value)
+        with connection.cursor() as cursor:
+            cursor.execute(q)
+            total = cursor.fetchone()[0]
+        return total
+
     def _user_balance(self, valuta):
-        q=self.profilebalance_set.filter(valuta__value=valuta, profile=self, cancel=False, confirm=True)
+        q=self.profilebalance_set.filter(valuta=Valuta.objects.filter(value=valuta), profile=self, cancel=False, confirm=True)
+        if not q:
+            return _Zero
         _c1 = q.filter(accept=True).count()
-        _c2 = q.aggregate(Sum('value')).values()[0] or _Zero
+        _c2 = q.aggregate(Sum('value')).get('value__sum') or _Zero
         md5key = strmd5sum("_user_balance" + str(q.count()) + str(valuta) + str(self.pk) + str(_c1) + str(_c2))
         b = cache.get(md5key)
         if b is None:
-            balance_plus = q.filter(
+            balance_plus = sum(q.filter(
                     action="+", accept=True
                 ).distinct(
                 ).extra(
                     select={
-                        'total':"""sum(
+                        'total':"""
                             CASE
                                 WHEN users_profilebalance.min_commission and (users_profilebalance.value * users_profilebalance.commission / 100) < users_profilebalance.min_commission THEN users_profilebalance.value - users_profilebalance.min_commission
                                 WHEN users_profilebalance.max_commission > 0 and (users_profilebalance.value * users_profilebalance.commission / 100) > users_profilebalance.max_commission THEN users_profilebalance.value - users_profilebalance.max_commission
                                 ELSE (users_profilebalance.value * (1 - users_profilebalance.commission / 100))
                             END
-                            )"""
+                            """
                         },
-                ).get(
-                ).total or _Zero
+                ).only('id').values_list('total', flat=True)) or _Zero
             balance_plus = normalized(balance_plus, where="DOWN")
-            balance_minus = q.filter(action="-").distinct().extra(select={'total':"sum(users_profilebalance.value)"},).get().total or _Zero
+            balance_minus = q.filter(action="-").distinct().aggregate(total=Sum('value')).get('total') or _Zero
             balance_minus = normalized(balance_minus, where="DOWN")
             b = balance_plus - balance_minus
             cache.set(md5key, b)
@@ -191,8 +221,8 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return mark_safe("<span>{amo}</span> {pos}".format(**{"amo":floatformat(self.amount_right, -8), "pos":self.pair.right}))
 
 class ProfilePayNumber(models.Model):
-    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now, verbose_name=u"дата создания")
-    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now, verbose_name=u"дата изменения")
+    created = models.DateTimeField(editable=False, auto_now_add=True, verbose_name=u"дата создания")
+    updated = models.DateTimeField(editable=False, auto_now=True, verbose_name=u"дата изменения")
     number = models.CharField(u"Номер счета", max_length=255)
     profile = models.ForeignKey("users.Profile", verbose_name=(u'Профиль'), help_text=u"Присваивается автоматически", blank=True, null=True, related_name="pay_number")
     paymethod = models.ForeignKey("currency.PaymentMethod", limit_choices_to={"action": "+"}, blank=True, null=True, related_name="pay_number")
@@ -218,8 +248,8 @@ class ProfilePayNumber(models.Model):
         return self.merge_number(getattr(self.paymethod, val))
 
 class ProfileBalance(models.Model):
-    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now, verbose_name=u"дата создания")
-    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now, verbose_name=u"дата изменения")
+    created = models.DateTimeField(editable=False, auto_now_add=True, verbose_name=u"дата создания")
+    updated = models.DateTimeField(editable=False, auto_now=True, verbose_name=u"дата изменения")
     ACTIONS=(
         ('+', 'пополнение'),
         ('-', 'списание'),
@@ -299,10 +329,10 @@ class ProfileBalance(models.Model):
         return None
     @classmethod
     def sum_commission(cls, flr={}, ex={}):
-        return cls.objects.filter(**flr).filter(accept=True, cancel=False, confirm=True).distinct(
-            ).extra(
+        qs = cls.objects.filter(**flr).filter(accept=True, cancel=False, confirm=True).distinct()
+        return sum(qs.extra(
                 select={
-                    'total':"""sum(
+                    'total':"""(
                     CASE
                         WHEN users_profilebalance.min_commission and (users_profilebalance.value * users_profilebalance.commission / 100) < users_profilebalance.min_commission THEN users_profilebalance.min_commission
                         WHEN users_profilebalance.max_commission > 0 and (users_profilebalance.value * users_profilebalance.commission / 100) > users_profilebalance.max_commission THEN users_profilebalance.max_commission
@@ -310,16 +340,15 @@ class ProfileBalance(models.Model):
                     END
                     )""",
                 },
-            ).get(
-            ).total or _Zero
+            ).only('id').values_list('total', flat=True)) or _Zero
     @classmethod
     def sum_from_commission(cls, valuta):
-        return cls.objects.filter(
+        return sum(cls.objects.filter(
                 accept=True, cancel=False, confirm=True, valuta__value=valuta
             ).distinct(
             ).extra(
                 select={
-                    'total':"""sum(
+                    'total':"""(
                     CASE
                         WHEN users_profilebalance.min_commission and (users_profilebalance.value * users_profilebalance.commission / 100) < users_profilebalance.min_commission THEN users_profilebalance.min_commission
                         WHEN users_profilebalance.max_commission > 0 and (users_profilebalance.value * users_profilebalance.commission / 100) > users_profilebalance.max_commission THEN users_profilebalance.max_commission
@@ -327,8 +356,7 @@ class ProfileBalance(models.Model):
                     END
                     )""",
                 },
-            ).get(
-            ).total or _Zero
+            ).only('id').values_list('total', flat=True)) or _Zero
     @property
     def _commission_debit(self):
         if self.min_commission > _Zero and (self.value * self.commission / D(100)) < self.min_commission:
@@ -353,7 +381,7 @@ class ProfileBalance(models.Model):
         if cb.exists():
             return cb[0]
         return None
-    def __unicode__(self):
+    def __str__(self):
         return u"{action}{amount}".format(**{"action": self.action, "amount": self.value})
     class Meta:
         verbose_name = u'перевод'
@@ -373,5 +401,5 @@ class ProfileRole(models.Model):
         verbose_name_plural = (u'Роли пользователя')
         unique_together = (('profile', 'role'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.role

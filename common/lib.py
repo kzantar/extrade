@@ -7,7 +7,7 @@ def callMethod(o, name):
 
 def strmd5sum(string):
     m = hashlib.md5()
-    m.update(str(string))
+    m.update(str(string).encode())
     return m.hexdigest()
 
 def _last_hour(n=24):

@@ -1,10 +1,11 @@
 #-*- coding:utf-8 -*-
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from common.numeric import normalized
 from datetime import date, timedelta, datetime
 from django.db.models import Sum, Count, F, Q
 from django.utils.html import format_html
-from decimal import Decimal as D, _Zero
+from decimal import Decimal as D
 from django.core.cache import cache
 from common.lib import strmd5sum, _last_hour
 from django.core.exceptions import ValidationError
@@ -12,14 +13,12 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.db.models import Avg, Max, Min
 from django.template.defaultfilters import floatformat
 import ctypes
-
-from time import sleep
+from django.db import transaction
+import currency.models
+_Zero = D(0)
 
 # Create your models here.
 class Prop:
-    def __unicode__(self):
-        return u"%s %s %s %s %s %s" % (self.pk, self.pair, self.amount, self.amo_sum, self.rate, self.ret_amount)
-
     @property
     def amo_sum(self):
         return self._amo_sum
@@ -51,8 +50,8 @@ class Prop:
         return cls.objects.exclude(Q(cancel=True) | Q(completed=True)).filter(pair=pair)
 
 class Orders(models.Model):
-    created = models.DateTimeField(editable=False, auto_now_add=True, default=datetime.now)
-    updated = models.DateTimeField(editable=False, auto_now=True, default=datetime.now)
+    created = models.DateTimeField(editable=False, auto_now_add=True)
+    updated = models.DateTimeField(editable=False, auto_now=True)
     user = models.ForeignKey('users.Profile', related_name="%(app_label)s_%(class)s_related")
     commission = models.DecimalField(u"Комиссия %", max_digits=5, decimal_places=2, default=0.00, validators=[MinValueValidator(_Zero)], editable=False)
     pair = models.ForeignKey("currency.TypePair", related_name="%(app_label)s_%(class)s_related")
@@ -60,6 +59,7 @@ class Orders(models.Model):
     rate = models.DecimalField(u"Стоимость", max_digits=14, decimal_places=8, validators=[MinValueValidator(D("10") ** -7)])
     cancel = models.BooleanField(u"отменен | отменен частично", default=False)
     completed = models.BooleanField(u"Завершен", default=False)
+
     @property
     def number_id(self):
         s = "O" + str(self.commission) + str(self.amount) + str(self.pk) + str(self.user.pk)
@@ -129,7 +129,7 @@ class Orders(models.Model):
             cache.set(_md5key, _s)
         return _s
     @classmethod
-    def sum_from_user_buy_sale(cls, user, valuta):
+    def sum_from_user_buy_sale(cls, user, valuta): # TODO подсчет переписать на sql или результат писать в отдельную таблицу
         _c1 = cls.objects.filter(user=user).count()
         _c2 = cls.objects.filter(Q(buy__user=user) | Q(sale__user=user)).count()
         _c3 = cls.objects.filter(Q(buy__user=user) | Q(sale__user=user) | Q(sale__sale_sale__user=user) | Q(buy__buy_buy__user=user)).count()
@@ -138,28 +138,50 @@ class Orders(models.Model):
         _md5key = strmd5sum("sum" + str(_c1) + str(_c2) + str(_c3) + str(_c4) + str(_c5) + str(user.pk) + str(valuta))
         _s = cache.get(_md5key)
         if _s is None:
+            value_valuta = currency.models.Valuta.objects.filter(value=valuta)
             obj = cls.objects.filter(
                     user=user
                 ).filter(
-                    Q(pair__left__value=valuta) |
-                    Q(pair__right__value=valuta)
-                ).only('pair', 'rate', 'amount').distinct()
+                    pair = currency.models.TypePair.objects.filter(Q(left=value_valuta) | Q(right=value_valuta))
+                    #Q(pair__left__value=valuta) |
+                    #Q(pair__right__value=valuta)
+                ).distinct()
             _s=_Zero
             for c in obj:
                 if c.is_action('sale'):
+                    # obj.filter(sale = currency.models.TypePair.objects.filter(left=currency.models.Valuta.objects.filter(value=valuta)))
+                    #
+                    # 589
+                    # self.amount if not self.cancel else self._adeudo
                     if c.sale.pair.left.value == valuta:
                         _s += c.sale._debit_left
+                        pass
                         # btc
+                    # obj.filter(sale = currency.models.TypePair.objects.filter(right=currency.models.Valuta.objects.filter(value=valuta)))
+                    #
+                    # 600
+                    # normalized(self._total - self._commission_debit, where="DOWN")
                     if c.sale.pair.right.value == valuta:
                         _s -= c.sale._debit_right
+                        pass
                         # usd
                 if c.is_action('buy'):
+                    # obj.filter(buy = currency.models.TypePair.objects.filter(left=currency.models.Valuta.objects.filter(value=valuta)))
+                    #
+                    # 427
+                    # normalized(self._total - self._commission_debit, where="DOWN")
                     if c.buy.pair.left.value == valuta:
                         # btc
                         _s -= c.buy._debit_left
+                        pass
+                    # obj.filter(buy = currency.models.TypePair.objects.filter(right=currency.models.Valuta.objects.filter(value=valuta)))
+                    #
+                    # 435
+                    # self._adeudo
                     if c.buy.pair.right.value == valuta:
                         # usd
                         _s += c.buy._debit_right
+                        pass
             cache.set(_md5key, _s)
         return _s
     @classmethod
@@ -168,31 +190,31 @@ class Orders(models.Model):
     @classmethod
     def min_buy_rate(cls, pair):
         return cls.objects.filter(
-            pair=pair, sale__gte=1
+                pair=pair, sale__gte=1
             ).exclude(
-            Q(cancel=True) | Q(completed=True)
-            ).aggregate(Min('rate')).values()[0] or _Zero
+                Q(cancel=True) | Q(completed=True)
+            ).aggregate(Min('rate')).get('rate__min') or _Zero
     @classmethod
     def max_sale_rate(cls, pair):
         return cls.objects.filter(
             pair=pair, buy__gte=1
             ).exclude(
             Q(cancel=True) | Q(completed=True)
-            ).aggregate(Max('rate')).values()[0] or _Zero
+            ).aggregate(Max('rate')).get('rate__max') or _Zero
     @classmethod
     def min_buy_rate_hour(cls, pair):
         return cls.last_24_hour().filter(
             pair=pair).filter(sale__gte=1
             ).exclude(
             Q(cancel=True) | Q(completed=True)
-            ).aggregate(Min('rate')).values()[0] or _Zero
+            ).aggregate(Min('rate')).get('rate__min') or _Zero
     @classmethod
     def max_sale_rate_hour(cls, pair):
         return cls.last_24_hour().filter(
             pair=pair, buy__gte=1
             ).exclude(
             Q(cancel=True) | Q(completed=True)
-            ).aggregate(Max('rate')).values()[0] or _Zero
+            ).aggregate(Max('rate')).get('rate__max') or _Zero
     @classmethod
     def min_max_avg_rate(cls, pair, to_int=None, to_round=None):
         r = cls.objects.filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Avg('rate'))
@@ -203,7 +225,10 @@ class Orders(models.Model):
         return v
     @classmethod
     def min_max_avg_rate_hour(cls, pair, to_int=None, to_round=None):
-        r = cls.last_24_hour().filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True)).aggregate(Avg('rate'))
+        obj = cls.last_24_hour().filter(pair=pair).exclude(Q(cancel=True) | Q(completed=True))
+        if not obj:
+            return 0, 0, 0
+        r = obj.aggregate(Avg('rate'))
         v=[cls.min_buy_rate_hour(pair), cls.max_sale_rate_hour(pair), r.get('rate__avg')]
         v = [x if not x is None else _Zero for x in v]
         if to_int: return [x.__int__() for x in v]
@@ -212,7 +237,9 @@ class Orders(models.Model):
     @classmethod
     def sum_amount(cls, pair, to_int=None, to_round=None):
         q = cls.last_24_hour().filter(pair=pair, buy__gte=1)
-        v = q.filter(completed=True).aggregate(Sum('amount')).values()[0] or _Zero
+        if not q:
+            return 0
+        v = q.filter(completed=True).aggregate(Sum('amount')).get('amount__sum') or _Zero
         for v1 in q.filter(completed=False).only('amount', 'rate'):
             v += v1.el._total
         if v is None: v = _Zero
@@ -222,7 +249,9 @@ class Orders(models.Model):
     @classmethod
     def sum_total(cls, pair, to_int=None, to_round=None):
         q = cls.last_24_hour().filter(pair=pair).filter(sale__gte=1)
-        v = q.filter(completed=True).extra(select={'total_sum':"sum(rate * amount)"},).get().total_sum or _Zero
+        if not q:
+            return 0
+        v = q.filter(completed=True).aggregate(total_sum=Sum(F('amount') * F('rate'))).get('total_sum') or _Zero
         for v1 in q.filter(completed=False).only('amount', 'rate'):
             v += v1.el._total
         if v is None: v = _Zero
@@ -301,8 +330,13 @@ class Orders(models.Model):
         if self.is_action('sale'): return self.pair.left
         if self.is_action('buy'): return self.pair.right
 
+@python_2_unicode_compatible
 class Buy(Orders, Prop):
     sale = models.ForeignKey("warrant.Sale", verbose_name=u"Продажа", blank=True, null=True, related_name="sale_sale")
+    def __str__(self):
+        return u"%s %s %s %s %s %s" % (self.pk, self.pair, self.amount, self.amo_sum, self.rate, self.ret_amount)
+    def __init__(self, *args, **kwargs):
+        super(Buy, self).__init__(*args, **kwargs)
     @property
     def _md5key_total(self):
         s = "Buy _md5key_total" + self._keys
@@ -395,11 +429,13 @@ class Buy(Orders, Prop):
     @property
     def _debit_left(self):
         # btc
+        # 427
         #return self._total
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _debit_right(self):
         # usd
+        # 435
         return self._adeudo
     @property
     def _pos(self):
@@ -447,11 +483,13 @@ class Buy(Orders, Prop):
         return not self._completed
     def getForSale(self):
         ex = Q(buy__gte=0) | Q(cancel=True) | Q(completed=True) | Q(user=self.user)
-        fl = {"pair": self.pair, "rate__lte": self.rate}
-        return Sale.objects.select_for_update().filter(**fl).exclude(ex).only('amount', 'rate').order_by('rate')
+        fl = Q(pair=self.pair) & Q(rate__lte=self.rate)
+        return Sale.objects.filter(fl).exclude(ex).only('amount', 'rate').order_by('rate')
+    @transaction.atomic
     def _exchange(self):
         if self._completed or self.cancel or self.completed: return True
         s = self.getForSale()
+        print(s)
         #_amo_buy = self._ret_amount
         for r in s:
             if self._completed or self.cancel or self.completed: return True
@@ -468,8 +506,11 @@ class Buy(Orders, Prop):
                 return True
             return True
 
+@python_2_unicode_compatible
 class Sale(Orders, Prop):
     buy = models.ForeignKey("warrant.Buy", verbose_name=u"Покупка", blank=True, null=True, related_name="buy_buy")
+    def __str__(self):
+        return u"%s %s %s %s %s %s" % (self.pk, self.pair, self.amount, self.amo_sum, self.rate, self.ret_amount)
     @property
     def _md5key_total(self):
         s = "Sale _md5key_total" + self._keys
@@ -558,6 +599,7 @@ class Sale(Orders, Prop):
         return self._amo_sum
     @property
     def _debit_left(self):
+        # 589
         # btc
         if not self.cancel:
             return self.amount
@@ -566,6 +608,7 @@ class Sale(Orders, Prop):
     def _debit_right(self):
         # usd
         #return self._total
+        # 600
         return normalized(self._total - self._commission_debit, where="DOWN")
     @property
     def _pos(self):
@@ -610,11 +653,13 @@ class Sale(Orders, Prop):
         return not self._completed
     def getForBuy(self):
         ex = Q(sale__gte=0) | Q(cancel=True) | Q(completed=True) | Q(user=self.user)
-        fl = {"pair": self.pair, "rate__gte": self.rate}
-        return Buy.objects.select_for_update().filter(**fl).exclude(ex).only('amount', 'rate').order_by('-rate')
+        fl = Q(pair=self.pair) & Q(rate__gte=self.rate)
+        return Buy.objects.filter(fl).exclude(ex).only('amount', 'rate').order_by('-rate')
+    @transaction.atomic
     def _exchange(self):
         if self._completed or self.cancel or self.completed: return True
         s = self.getForBuy()
+        print(s)
         #_amo_sale = self._ret_amount
         for r in s:
             _amo_buy = r._ret_amount

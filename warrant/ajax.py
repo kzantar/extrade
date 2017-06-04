@@ -17,9 +17,9 @@ from django.core.urlresolvers import reverse
 from django.core.context_processors import csrf
 from django.shortcuts import get_object_or_404
 
-from decimal import Decimal as D, _Zero
+from decimal import Decimal as D
 from common.numeric import normalized
-
+_Zero=D(0)
 from datetime import datetime
 
 
@@ -38,6 +38,7 @@ def calc(request, form):
         dajax.script("$('#{type}_total_result').text('{total} {right}');".format(**{"type":ttype, "total": total, "right":pair.right}))
         dajax.script("$('#{type}_commission_result').text('{commission} {pos}');".format(**{"type":ttype, "commission": commission, "pos":pos }))
         dajax.remove_css_class('#{type}_form input'.format(**{"type":ttype}), 'error')
+        dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":"", }))
     else:
         dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":"Неправильно заполнено одно из полей.", }))
         for error in form.errors:
@@ -71,6 +72,13 @@ def order(request, form):
             else:
                 text = "Сумма сделки превышает ваш баланс на {sum} {valuta}".format(**{"sum":floatformat(-_sum, -8), "valuta": pos })
                 dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":text, }))
+        else:
+            pair, amount, rate = c.get('pair'), c.get('amount'), c.get('rate')
+            total, commission, pos = pair.calc(amount, rate, ttype)
+            if ttype == 'buy': _sum = total
+            if ttype == 'sale': _sum = amount
+            text = "Сумма сделки превышает ваш баланс на {sum} {valuta}".format(**{"sum":floatformat(-_sum, -8), "valuta": pos })
+            dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":text, }))
     else:
         dajax.script("$('#info_{type}').text('{text}');".format(**{"type":ttype, "text":"Неправильно заполнено одно из полей.", }))
         for error in form.errors:

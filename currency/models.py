@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 from django.db import models
 
-from decimal import Decimal as D, _Zero
+from decimal import Decimal as D
 from django.db.models import Avg, Max, Min
 from django.template.defaultfilters import floatformat
 from common.numeric import normalized
@@ -10,8 +10,8 @@ from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from common.numeric import MinValidator
 from common.lib import strmd5sum
-
-
+_Zero=D(0)
+import warrant
 
 # Create your models here.
 
@@ -107,7 +107,7 @@ class PaymentMethod(models.Model):
     @classmethod
     def out(cls):
         return cls.objects.filter(action="-", disable=False)
-    def __unicode__(self):
+    def __str__(self):
         return u"{action} {method} [{commission}%]".format(**{"commission": self.commission, "action": self.get_action_display(), "method": self.method})
     class Meta:
         verbose_name = u'метод оплаты'
@@ -143,7 +143,7 @@ class Valuta(models.Model):
     @property
     def val(self):
         return self.value
-    def __unicode__(self):
+    def __str__(self):
         return self.value.upper()
 
 class TypePair(models.Model):
@@ -178,9 +178,23 @@ class TypePair(models.Model):
             return floatformat(total, -8), floatformat(commission, -8), pos
         return total, commission, pos
     def order_sale(self, user, amount, rate):
-        return self.warrant_orders_related.model.sale.related.model.objects.create(user=user, amount=amount, rate=rate, pair=self)
+        return warrant.models.Sale.objects.create(user=user, amount=amount, rate=rate, pair=self)
     def order_buy(self, user, amount, rate):
-        return self.warrant_orders_related.model.buy.related.model.objects.create(user=user, amount=amount, rate=rate, pair=self)
+        return warrant.models.Buy.objects.create(user=user, amount=amount, rate=rate, pair=self)
+    def test(self):
+        import random
+        from users.models import Profile
+        user= lambda : Profile.objects.all().order_by("?")[0]
+        rate = lambda : D(random.randrange(1700, 2000))
+        amount = lambda : D(random.randrange(1, 50)/1000000)
+        if random.randrange(0,2)>0:
+            total, commission, pos = TypePair.objects.get().calc(amount=amount(), rate=rate(), ttype='sale')
+            valuta = pos.value
+            return self.order_sale(user=user(), amount=amount(), rate=rate()), user().orders_balance(valuta)
+        else:
+            total, commission, pos = TypePair.objects.get().calc(amount=amount(), rate=rate(), ttype='buy')
+            valuta = pos.value
+            return self.order_buy(user=user(), amount=amount(), rate=rate()), user().orders_balance(valuta)
     @classmethod
     def flr(cls):
         return cls.objects.all()
@@ -192,8 +206,8 @@ class TypePair(models.Model):
         return 'lastorder' + str(self.id)
     @property
     def cache_unicode_key(self):
-        return 'typepair__unicode__' + str(self.id)
-    def __unicode__(self):
+        return 'typepair__str__' + str(self.id)
+    def __str__(self):
         key = self.cache_unicode_key
         ret = cache.get(key)
         if ret is None:
@@ -253,10 +267,10 @@ class TypePair(models.Model):
     def actives(self, user):
         return self.warrant_orders_related.model.actives(user=user, pair=self)
     def buy(self):
-        for o in self.warrant_orders_related.model.buy.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("-rate", '-amount').distinct():
+        for o in warrant.models.Buy.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("-rate", '-amount').distinct():
             yield o.rate, o.ret_amount, o.ret_sum
     def sale(self):
-        for o in self.warrant_orders_related.model.sale.related.model.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("rate", '-amount').distinct():
+        for o in warrant.models.Sale.objects.filter(pair=self).exclude(Q(cancel=True) | Q(completed=True)).order_by("rate", '-amount').distinct():
             yield o.rate, o.ret_amount, o.ret_sum
     @property
     def avg_rate(self):

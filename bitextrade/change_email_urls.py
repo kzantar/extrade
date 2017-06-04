@@ -7,7 +7,7 @@ from change_email.views import EmailChangeDeleteView
 from change_email.views import EmailChangeDetailView
 from change_email.views import EmailChangeIndexView
 
-urlpatterns = patterns('',
+urlpatterns = [
                        url(r'^change/$',
                            EmailChangeIndexView.as_view(),
                            name='change_email_index'),
@@ -23,4 +23,4 @@ urlpatterns = patterns('',
                        url(r'^change/(?P<pk>\d+)/$',
                            EmailChangeDetailView.as_view(),
                            name='change_email_detail'),
-                       )
+                       ]

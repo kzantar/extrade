@@ -11,8 +11,11 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.insert(0, os.path.join(BASE_DIR, "fork_packages"))
 
 AUTH_USER_MODEL = 'users.Profile'
 
@@ -20,8 +23,7 @@ AUTH_USER_MODEL = 'users.Profile'
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'mc7=8$!ep*g45qaj^ocm+@+b+8g1-f#!c5eqlg!wbj&(-!i*1h'
-
+SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 GEOIP_PATH = os.path.join(PROJECT_ROOT, 'geoip')
 DEBUG = False
@@ -42,17 +44,20 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'south',
+    #'south',
     'registration',
-    'secureauth',
+    #'secureauth',
+    'account',
     'widget_tweaks',
     'change_email',
+    'django_rq_email_backend',
+    'django_rq',
     'chunks',
     'dajaxice',
     'dajax',
     'compressor',
 
-    'webgui',  # ордера
+    'webgui',  # интерфейс
     'warrant',  # ордера
     'currency', # валюта
     'users',  # пользователи
@@ -74,6 +79,7 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = ('django.contrib.auth.context_processors.auth', 'django.template.context_processors.debug', 'django.template.context_processors.i18n', 'django.template.context_processors.media', 'django.template.context_processors.static', 'django.template.context_processors.tz', 'django.contrib.messages.context_processors.messages')
 
 ROOT_URLCONF = 'bitextrade.urls'
 
@@ -98,7 +104,7 @@ DATABASES = {
         'PASSWORD': 'GhotEgfi',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-        'OPTIONS': { 'init_command': 'SET storage_engine=INNODB;' }
+        #'OPTIONS': { 'init_command': 'SET storage_engine=INNODB;' }
     },
     'innodb': {
         'ENGINE': 'django.db.backends.mysql',
@@ -107,11 +113,14 @@ DATABASES = {
         'PASSWORD': 'GhotEgfi',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-        'OPTIONS': { 'init_command': 'SET storage_engine=INNODB;' }
+        #'OPTIONS': { 'init_command': 'SET storage_engine=INNODB;' }
     }
 }
 
 USE_CACHE = not DEBUG
+#TIMEOUT = None
+
+
 #CACHES = {
 #    'default': {
 #        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
@@ -157,21 +166,35 @@ STATICFILES_DIRS = (
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, "collected_static")
 
+
 #MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 #MEDIA_URL = '/f/'
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+    }
+}
+RQ_SHOW_ADMIN_LINK = True
 
-EMAIL_HOST = 'mx.artela.net'
-EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = 'KfeJG75G49'
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'noreply@bitextrade.com'
-SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_CHANGE_FROM_EMAIL = 'noreply@bitextrade.com'
+EMAIL_BACKEND = 'django_rq_email_backend.backends.RQEmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+#RQ_MAIL_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_PASSWORD = 'bNw-exM-v7C-nxc'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'info@supertaxist.ru'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_CHANGE_FROM_EMAIL = 'info@supertaxist.ru'
 
 
 ACCOUNT_ACTIVATION_DAYS=1
 
 try:
-    from settings_local import *
+    from .settings_local import *
 except ImportError:
     pass
 DEBUG_T=False

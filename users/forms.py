@@ -8,11 +8,11 @@ from django.forms.widgets import HiddenInput, TextInput, Textarea, NumberInput, 
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.conf import settings
-from decimal import Decimal as D, _Zero
+from decimal import Decimal as D
 from common.numeric import normalized
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from users.models import AddressBook
-
+_Zero=D(0)
 
 
 

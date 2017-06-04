@@ -1,0 +1,13 @@
+rq
+django-rq-email-backend
+gunicorn
+mysqlclient
+django-widget-tweaks
+django-dajax-ng
+django-dajaxice-ng
+gunicorn
+django-compressor
+django-change-email
+django-registration-redux
+django-user-accounts
+django<1.9

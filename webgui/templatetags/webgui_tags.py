@@ -5,10 +5,11 @@ from warrant.models import Orders
 from currency.models import TypePair
 from django.template import RequestContext
 from django.template.defaultfilters import floatformat
-from decimal import Decimal as D, _Zero
+from decimal import Decimal as D
 import ctypes
 from users.models import ProfileBalance
 
+_Zero=D(0)
 from django.contrib.auth import login, get_user_model
 
 Profile = get_user_model()
@@ -122,11 +123,11 @@ def information(context):
     sum_amount = pair.sum_amount()
     sum_total = pair.sum_total()
     return {
-        'min': _min,
-        'max': _max,
-        'avg': _avg,
+        'min': _min or 0,
+        'max': _max or 0,
+        'avg': _avg or 0,
         'last_order': pair.last_order.rate if pair.last_order else _Zero,
-        'sum_amount': sum_amount,
-        'sum_total': sum_total,
+        'sum_amount': sum_amount or 0,
+        'sum_total': sum_total or 0,
         'pair': pair,
     }

@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
 
 
-urlpatterns = patterns('',
+urlpatterns = [
 
       url(r'', include('registration.backends.default.urls')),
       #override the default urls
@@ -34,4 +34,4 @@ urlpatterns = patterns('',
                     name='auth_password_reset'),
 
       #and now add the registration urls
-)
+]

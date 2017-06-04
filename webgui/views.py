@@ -218,5 +218,5 @@ class CountersTotalView(LoginRequiredMixin, StaffRequiredMixin, ListView):
             ).annotate(
                 dcount=Sum('value')
             )
-        self.queryset = sorted(chain(b, b1))
+        self.queryset = (chain(b, b1))
         return super(CountersTotalView, self).get_queryset()
