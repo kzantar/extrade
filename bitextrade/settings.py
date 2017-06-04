@@ -182,14 +182,6 @@ EMAIL_BACKEND = 'django_rq_email_backend.backends.RQEmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 #RQ_MAIL_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_PASSWORD = 'bNw-exM-v7C-nxc'
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'info@supertaxist.ru'
-SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_CHANGE_FROM_EMAIL = 'info@supertaxist.ru'
-
 
 ACCOUNT_ACTIVATION_DAYS=1
 

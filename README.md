@@ -16,3 +16,4 @@ python manage.py createsuperuser --email EMAIL
 
 #### Support:
 * [trello management](https://trello.com/b/utuMgq4n/биржа-extrade)
+* [telegram discussion]()
